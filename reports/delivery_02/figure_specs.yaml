@@ -1,0 +1,72 @@
+# Curated figures of delivery 2 (regularisation), redrawn from experiments/ in the experiment style (plot_theme.py),
+# English labels, PNG. Captions (caption_es) in Spanish. Selection fixed here, on validation metrics only.
+
+- id: overfitting_curves
+  type: learning_curves
+  select:
+    runs:
+      - {variant: EXP-010_bs256_sqrt_60ep, label: "delivery 1 (no regularisation)"}
+      - {variant: EXP-021_final, label: "delivery 2 (BN + rotations)"}
+  options: {metric: accuracy, show_train: true, smooth: 1, title: "Train vs validation accuracy per epoch (mean of 3 seeds)"}
+  layout: half
+  caption_es: "Accuracy de train (discontinua) y de validación (continua) por época del modelo de la entrega 1 y del de esta entrega; media de 3 semillas, banda = mínimo y máximo. La de train del modelo regularizado se mide con augmentation."
+  caption_slides_es: "Train (discontinua) y validación (continua), entregas 1 y 2."
+
+- id: dropout_curve
+  type: strength
+  select: {base: EXP-010_bs256_sqrt_60ep, prefix: EXP-013_dropout, param: dropout}
+  options: {xlabel: "dropout rate", title: "Validation curve: accuracy vs dropout rate (mean of 3 seeds)"}
+  layout: half
+  caption_es: "Curva de validación del dropout sobre el modelo de la entrega 1: accuracy de train (discontinua) y de validación (continua), media de 3 semillas."
+  caption_slides_es: "Accuracy de train y de validación según el dropout."
+
+- id: l2_curve
+  type: strength
+  select: {base: EXP-010_bs256_sqrt_60ep, prefix: EXP-013_l2, param: l2}
+  options: {logx: true, xlabel: "L2 factor (log)", title: "Validation curve: accuracy vs L2 factor (mean of 3 seeds)"}
+  layout: half
+  caption_es: "Curva de validación de la penalización L2 sobre el modelo de la entrega 1: accuracy de train (discontinua) y de validación (continua), media de 3 semillas."
+  caption_slides_es: "Accuracy de train y de validación según el factor L2."
+
+- id: batchnorm
+  type: bars
+  select:
+    variants:
+      - {variant: EXP-010_bs256_sqrt_60ep, label: "no BN (delivery 1)", role: baseline}
+      - {variant: EXP-013_bn_before, label: "BN before act."}
+      - {variant: EXP-013_bn_after, label: "BN after act."}
+      - {variant: EXP-013_bn_before_lr3x, label: "BN before, lr x3"}
+      - {variant: EXP-013_bn_after_lr3x, label: "BN after, lr x3"}
+  options: {metric: mean_recall, title: "BatchNorm (3 seeds)"}
+  layout: half
+  caption_es: "BatchNorm antes o después de la activación, con la learning rate de la entrega 1 o triplicada: mean recall de validación (barras, media y desviación típica de 3 semillas) y de train (trazo discontinuo)."
+  caption_slides_es: "Mean recall de validación con y sin BatchNorm (3 semillas)."
+
+- id: augmentation
+  type: bars
+  select:
+    variants:
+      - {variant: EXP-019_none_patience15, label: "no augmentation", role: baseline}
+      - {variant: EXP-019_flip, label: "flips"}
+      - {variant: EXP-019_rot90, label: "90° rotations"}
+      - {variant: EXP-019_d4, label: "D4 (flips + rotations)"}
+      - {variant: EXP-019_color, label: "brightness/contrast"}
+      - {variant: EXP-019_d4_color, label: "D4 + brightness/contrast"}
+  options: {metric: mean_recall, title: "Data augmentation on BN model (3 seeds)"}
+  layout: half
+  caption_es: "Data augmentation sobre el modelo con BatchNorm: mean recall de validación (barras, media y desviación típica de 3 semillas) y de train (trazo discontinuo)."
+  caption_slides_es: "Mean recall de validación por tipo de augmentation (3 semillas)."
+
+- id: progress
+  type: progress
+  options: {title: "Progress: validation metric after each step (mean of 3 seeds)"}
+  layout: full
+  caption_es: "Mean recall y accuracy de validación tras cada paso de la entrega (media de 3 semillas)."
+  caption_slides_es: "Mean recall y accuracy de validación tras cada paso."
+
+- id: per_class_recall
+  type: per_class_recall
+  select: {baseline: EXP-010_bs256_sqrt_60ep, final: EXP-021_final}
+  layout: full
+  caption_es: "Recall de validación por clase: modelo de la entrega 1 frente al de esta entrega (media de 3 semillas en ambos)."
+  caption_slides_es: "Recall de validación por clase: entrega 1 frente a entrega 2."

@@ -1,0 +1,69 @@
+# Delivery 2: regularisation of the delivery-1 ffNN to reduce overfitting (norm penalties, Dropout, BatchNorm, data
+# augmentation; no CNN, no transfer learning). DEC-009. Starting point: the final model of delivery 1.
+# Experiments: phase 6 of the plan (EXP-013, on the delivery-1 model) and EXP-019..EXP-021 (augmentation and
+# combinations without class weights; class imbalance goes to delivery 5).
+number: 2
+title_es: "Regularización de una red neuronal densa para clasificar objetos en imágenes aéreas"
+short_title_es: "Regularización ffNN"
+subtitle_es: "Entrega 2: regularización (ffNN)"
+date: auto
+baseline_experiment: EXP-010_bs256_sqrt_60ep     # final model of delivery 1 (same split, same pipeline)
+final_experiment: EXP-021_final
+previous_delivery: 1
+highlight_phases: [1, 2, 3]
+
+format: {metric: 3, std: 3, pp: 1, seconds: 1, ratio: 1}
+
+# Steps of this delivery (configuration kept after each step).
+phases:
+  - {phase: 0, variant: EXP-010_bs256_sqrt_60ep, key: phase0, label_es: "Modelo de la entrega 1 (EXP-010)"}
+  - {phase: 1, variant: EXP-013_bn_before_lr3x, key: phase1, label_es: "Dropout y L2 descartados; BatchNorm antes de la activación y lr ×3 (EXP-013)"}
+  - {phase: 2, variant: EXP-019_rot90, key: phase2, label_es: "Augmentation: rotaciones de 90° (EXP-019)"}
+  - {phase: 3, variant: EXP-021_final, key: final, label_es: "Modelo final: entrenamiento más largo; sin dropout ni L2 (EXP-020, EXP-021)"}
+
+variants:
+  dropout01: EXP-013_dropout0.1
+  dropout02: EXP-013_dropout0.2
+  dropout05: EXP-013_dropout0.5
+  l2-1e-4: EXP-013_l2_1e-4
+  l2-1e-3: EXP-013_l2_1e-3
+  bn-samelr: EXP-013_bn_before
+  bn-after-lr3x: EXP-013_bn_after_lr3x
+  no-aug: EXP-019_none_patience15
+  flip: EXP-019_flip
+  d4: EXP-019_d4
+  color: EXP-019_color
+  d4-color: EXP-019_d4_color
+  c-dropout01: EXP-020_dropout0.1
+  c-dropout02: EXP-020_dropout0.2
+  c-l2-1e-5: EXP-020_l2_1e-5
+  c-l2-1e-4: EXP-020_l2_1e-4
+  c-no-bn: EXP-020_no_bn
+
+deltas:
+  - {key: gain-bn, a: phase1, b: phase0, metric: mean_recall}
+  - {key: gain-rot90, a: phase2, b: no-aug, metric: mean_recall}
+  - {key: gain-rot90-acc, a: phase2, b: no-aug, metric: val_acc}
+  - {key: gain-longer, a: final, b: phase2, metric: mean_recall}
+  - {key: gain-total, a: final, b: phase0, metric: mean_recall}
+  - {key: gain-total-acc, a: final, b: phase0, metric: val_acc}
+  - {key: drop-train-acc, a: phase0, b: final, metric: train_acc}
+  - {key: loss-dropout05, a: dropout05, b: phase0, metric: mean_recall}
+  - {key: loss-no-bn, a: c-no-bn, b: phase2, metric: mean_recall}
+  - {key: loss-color, a: color, b: no-aug, metric: mean_recall}
+
+ratios: []
+
+# Table "changes on top of BN + rotations" (compared with the phase2 variant).
+ablation_base: phase2
+ablation:
+  - {label: "+ Dropout 0,1", variant: c-dropout01}
+  - {label: "+ Dropout 0,2", variant: c-dropout02}
+  - {label: "+ L2 1e-5", variant: c-l2-1e-5}
+  - {label: "+ L2 1e-4", variant: c-l2-1e-4}
+  - {label: "Sin BatchNorm", variant: c-no-bn}
+  - {label: "Sin augmentation", variant: no-aug}
+
+key_messages_es:
+  - "Dropout y L2 no reducen el sobreajuste sin bajar también la validación."
+  - "BatchNorm y las rotaciones de 90° son lo que funciona; con augmentation conviene entrenar más."

@@ -1,0 +1,10 @@
+% Fuentes: DEC-009, DEC-008, EXP-010; xview_ann_train.json.
+\section{Objetivo y datos}
+El objetivo es reducir el sobreajuste del modelo de la entrega anterior con técnicas de regularización
+(penalizaciones de norma, Dropout, BatchNorm y \emph{data augmentation}), sin redes convolucionales ni
+\emph{transfer learning}. Los datos y la partición son los mismos: \res{n-images} imágenes de
+\res{baseline-res}~$\times$~\res{baseline-res} píxeles reducidas a la entrada de la red, \res{n-classes} clases muy
+desbalanceadas (\res{imbalance-ratio}:1), y un \emph{split} estratificado con semilla fija (\res{n-train} imágenes de
+entrenamiento y \res{n-valid} de validación). La métrica guía sigue siendo el \emph{mean recall} de validación; el
+tratamiento específico del desbalance se deja para una entrega posterior. Todas las cifras son de validación y, salvo
+que se diga otra cosa, medias de \res{final-seeds} semillas.

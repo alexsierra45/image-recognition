@@ -1,0 +1,38 @@
+==== d2_augmentation ====
+EXP-019_none_patience15      no augmentation, patience 15/6 (BN, no c params=400653    ep=24/39 train_acc=0.819 val_acc=0.609 mean_recall=0.602 min_rec=0.348 84s
+EXP-019_flip                 augmentation flip (BN, no class weights) params=400653    ep=39/54 train_acc=0.696 val_acc=0.625 mean_recall=0.616 min_rec=0.199 107s
+EXP-019_rot90                augmentation rot90 (BN, no class weights params=400653    ep=40/55 train_acc=0.667 val_acc=0.626 mean_recall=0.601 min_rec=0.244 116s
+EXP-019_d4                   augmentation d4 (BN, no class weights)   params=400653    ep=55/70 train_acc=0.681 val_acc=0.629 mean_recall=0.609 min_rec=0.235 153s
+EXP-019_color                augmentation color (BN, no class weights params=400653    ep=30/45 train_acc=0.785 val_acc=0.599 mean_recall=0.563 min_rec=0.303 97s
+EXP-019_d4_color             augmentation d4_color (BN, no class weig params=400653    ep=38/53 train_acc=0.632 val_acc=0.615 mean_recall=0.580 min_rec=0.172 126s
+EXP-019_none_patience15_seed2 no augmentation, patience 15/6 (BN, no c params=400653    ep=21/36 train_acc=0.783 val_acc=0.618 mean_recall=0.583 min_rec=0.321 76s
+EXP-019_flip_seed2           augmentation flip (BN, no class weights) params=400653    ep=59/74 train_acc=0.687 val_acc=0.628 mean_recall=0.589 min_rec=0.182 144s
+EXP-019_rot90_seed2          augmentation rot90 (BN, no class weights params=400653    ep=42/57 train_acc=0.696 val_acc=0.636 mean_recall=0.617 min_rec=0.235 122s
+EXP-019_d4_seed2             augmentation d4 (BN, no class weights)   params=400653    ep=41/56 train_acc=0.667 val_acc=0.636 mean_recall=0.611 min_rec=0.267 124s
+EXP-019_color_seed2          augmentation color (BN, no class weights params=400653    ep=43/58 train_acc=0.905 val_acc=0.599 mean_recall=0.570 min_rec=0.335 120s
+EXP-019_d4_color_seed2       augmentation d4_color (BN, no class weig params=400653    ep=63/78 train_acc=0.669 val_acc=0.617 mean_recall=0.601 min_rec=0.167 185s
+EXP-019_none_patience15_seed3 no augmentation, patience 15/6 (BN, no c params=400653    ep=26/41 train_acc=0.849 val_acc=0.617 mean_recall=0.599 min_rec=0.312 87s
+EXP-019_flip_seed3           augmentation flip (BN, no class weights) params=400653    ep=46/61 train_acc=0.700 val_acc=0.634 mean_recall=0.624 min_rec=0.258 124s
+EXP-019_rot90_seed3          augmentation rot90 (BN, no class weights params=400653    ep=48/63 train_acc=0.718 val_acc=0.634 mean_recall=0.632 min_rec=0.253 137s
+EXP-019_d4_seed3             augmentation d4 (BN, no class weights)   params=400653    ep=43/58 train_acc=0.666 val_acc=0.626 mean_recall=0.597 min_rec=0.240 131s
+EXP-019_color_seed3          augmentation color (BN, no class weights params=400653    ep=33/48 train_acc=0.774 val_acc=0.604 mean_recall=0.581 min_rec=0.308 104s
+EXP-019_d4_color_seed3       augmentation d4_color (BN, no class weig params=400653    ep=45/60 train_acc=0.656 val_acc=0.612 mean_recall=0.593 min_rec=0.204 146s
+==== d2_combine ====
+EXP-020_dropout0.1           rot90 + BN + dropout0.1                  params=400653    ep=65/80 train_acc=0.635 val_acc=0.609 mean_recall=0.568 min_rec=0.182 183s
+EXP-020_dropout0.2           rot90 + BN + dropout0.2                  params=400653    ep=39/54 train_acc=0.575 val_acc=0.556 mean_recall=0.505 min_rec=0.091 115s
+EXP-020_l2_1e-5              rot90 + BN + l2_1e-5                     params=400653    ep=71/86 train_acc=0.689 val_acc=0.631 mean_recall=0.610 min_rec=0.276 194s
+EXP-020_l2_1e-4              rot90 + BN + l2_1e-4                     params=400653    ep=45/60 train_acc=0.674 val_acc=0.635 mean_recall=0.614 min_rec=0.244 136s
+EXP-020_no_bn                rot90 without BN (lr 1.2e-3)             params=397581    ep=53/68 train_acc=0.682 val_acc=0.617 mean_recall=0.587 min_rec=0.231 112s
+EXP-020_dropout0.1_seed2     rot90 + BN + dropout0.1                  params=400653    ep=77/92 train_acc=0.661 val_acc=0.627 mean_recall=0.588 min_rec=0.182 247s
+EXP-020_dropout0.2_seed2     rot90 + BN + dropout0.2                  params=400653    ep=78/93 train_acc=0.662 val_acc=0.620 mean_recall=0.579 min_rec=0.182 211s
+EXP-020_l2_1e-5_seed2        rot90 + BN + l2_1e-5                     params=400653    ep=42/57 train_acc=0.681 val_acc=0.630 mean_recall=0.600 min_rec=0.240 128s
+EXP-020_l2_1e-4_seed2        rot90 + BN + l2_1e-4                     params=400653    ep=56/71 train_acc=0.701 val_acc=0.636 mean_recall=0.617 min_rec=0.262 158s
+EXP-020_no_bn_seed2          rot90 without BN (lr 1.2e-3)             params=397581    ep=55/70 train_acc=0.671 val_acc=0.601 mean_recall=0.577 min_rec=0.204 121s
+EXP-020_dropout0.1_seed3     rot90 + BN + dropout0.1                  params=400653    ep=33/48 train_acc=0.640 val_acc=0.614 mean_recall=0.576 min_rec=0.167 97s
+EXP-020_dropout0.2_seed3     rot90 + BN + dropout0.2                  params=400653    ep=41/56 train_acc=0.629 val_acc=0.603 mean_recall=0.564 min_rec=0.182 90s
+EXP-020_l2_1e-5_seed3        rot90 + BN + l2_1e-5                     params=400653    ep=33/48 train_acc=0.662 val_acc=0.629 mean_recall=0.599 min_rec=0.253 76s
+EXP-020_l2_1e-4_seed3        rot90 + BN + l2_1e-4                     params=400653    ep=39/54 train_acc=0.669 val_acc=0.620 mean_recall=0.594 min_rec=0.235 97s
+EXP-020_no_bn_seed3          rot90 without BN (lr 1.2e-3)             params=397581    ep=40/55 train_acc=0.620 val_acc=0.582 mean_recall=0.543 min_rec=0.182 73s
+EXP-021_final                delivery-2 model (BN + rot90), patience  params=400653    ep=82/107 train_acc=0.814 val_acc=0.642 mean_recall=0.660 min_rec=0.294 115s
+EXP-021_final_seed2          delivery-2 model (BN + rot90), patience  params=400653    ep=65/90 train_acc=0.751 val_acc=0.654 mean_recall=0.647 min_rec=0.253 95s
+EXP-021_final_seed3          delivery-2 model (BN + rot90), patience  params=400653    ep=55/80 train_acc=0.727 val_acc=0.632 mean_recall=0.630 min_rec=0.226 82s

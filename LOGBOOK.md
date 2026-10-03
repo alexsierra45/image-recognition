@@ -20,11 +20,12 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 | Etapa del curso | ffNN (red feedforward): **plan de mejora en 9 fases completado** (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
 | Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
+| Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015 |
 | Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrena ahora `ffNN_example.ipynb` (CHG-013) |
 | Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Subir y compilar la entrega 1 en Overleaf. Las fases 6-9 (regularización, desbalance, augmentation) quedan para una entrega posterior; después, la etapa CNN. Pendiente menor: IDEA-010 |
+| Próximo paso | Compilar las entregas 1 y 2 en Overleaf. Entrega 3: CNN propias y arquitecturas conocidas desde cero. El desbalance (fase 7) e IDEA-010 quedan para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -51,6 +52,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-016 | 2026-10-03 | 9 | Ajuste fino y revisión (lr, dropout, anchura, resolución 32, batch 16) | EXP-015_d4 | — | sin mejora | `EXP-016_*` | ejecutado |
 | EXP-017 | 2026-10-03 | 9 | Ablación del modelo combinado; ReLU empata con LeakyReLU | EXP-015_d4 | 0,638 ± 0,002 | 0,652 ± 0,004 | `EXP-017_relu*` | ejecutado |
 | **EXP-018** | 2026-10-03 | 9 | **Modelo final** (ReLU, entrenamiento más largo) | EXP-017_relu | **0,635 ± 0,003** | **0,651 ± 0,009** | `EXP-018_final*`, `EXP-018_20261003-142325` | ejecutado |
+| EXP-019 | 2026-10-03 | E2 | Augmentation sobre BN sin pesos de clase (3 semillas) | EXP-013_bn_before_lr3x | 0,632 ± 0,005 | 0,617 ± 0,015 | `EXP-019_rot90*` | ejecutado |
+| EXP-020 | 2026-10-03 | E2 | Dropout, L2 y ablación de BN sobre BN + rotaciones (3 semillas) | EXP-019_rot90 | — | sin mejora | `EXP-020_*` | ejecutado |
+| **EXP-021** | 2026-10-03 | E2 | **Modelo de la entrega 2**: BN + rotaciones, entrenamiento más largo | EXP-019_rot90 | **0,643 ± 0,011** | **0,646 ± 0,015** | `EXP-021_final*` | ejecutado |
 
 ---
 
@@ -461,6 +465,58 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Conclusión:** entrenar más no cambia nada (EarlyStopping corta hacia la época 70, igual que con paciencia 15): el modelo final rinde lo mismo que `EXP-017_relu`. **Es el mejor modelo de la etapa ffNN.** El límite sigue siendo el sesgo de una red densa sobre píxeles: los vehículos (Truck, Bus, Dump truck) se confunden entre sí, y Truck se queda en 0,28. Las mejoras grandes vinieron de la resolución (fase 2), el desbalance (fase 7) y la invarianza D4 (fase 8). El siguiente salto natural es la etapa CNN, que incorpora por arquitectura la conectividad local y la equivarianza a traslaciones [R8 §9.2].
 - **Siguiente paso:** etapa CNN del curso. Pendiente de la ffNN: IDEA-010 (estandarización con la lr ajustada, prioridad baja).
 
+### EXP-019: Data augmentation como regularización, sin pesos de clase (entrega 2)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN, regularización (entrega 2, DEC-009) · **Base:** `EXP-013_bn_before_lr3x` (BatchNorm antes de la activación, lr = 3,6e-3; sobre el modelo final de la entrega 1) con paciencias 15 / 6 · **Estado:** ejecutado
+- **Por qué:** EXP-015 midió la augmentation sobre el modelo con pesos de clase (EXP-014). El desbalance pasa a la entrega 5, así que para la entrega 2 la augmentation se mide sobre el ganador de la regularización sin pesos de clase.
+- **Hipótesis:** como en EXP-015, D4 debería reducir la brecha train-val y subir la validación; la variación fotométrica, empeorarla.
+- **Cambio:** las mismas variantes que EXP-015 (sin augmentation con paciencia 15/6 como referencia, volteos, rotaciones de 90°, D4, brillo y contraste, D4 + brillo y contraste), 3 semillas.
+- **Fundamento:** IDEA-008 [R8 §7.4].
+- **Resultados** (3 semillas por variante; base de la fase 6 con paciencia 10/4: 0,590 ± 0,009):
+
+| Variante | val mean recall | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|
+| Sin augmentation (referencia, paciencia 15/6) | 0,595 ± 0,010 | 0,615 ± 0,005 | 0,327 | 0,817 | 39 |
+| Volteos | 0,609 ± 0,018 | 0,629 ± 0,005 | 0,213 | 0,694 | 63 |
+| **Rotaciones de 90°** | 0,617 ± 0,015 | 0,632 ± 0,005 | 0,244 | 0,694 | 58 |
+| D4 (volteos + rotaciones) | 0,606 ± 0,008 | 0,630 ± 0,005 | 0,247 | 0,671 | 61 |
+| Brillo y contraste | 0,571 ± 0,009 | 0,601 ± 0,003 | 0,315 | 0,821 | 50 |
+| D4 + brillo y contraste | 0,591 ± 0,011 | 0,615 ± 0,002 | 0,181 | 0,652 | 64 |
+
+  Recall por clase (media de 3 semillas), sin augmentation → rotaciones: Cargo plane 0,740 → 0,839; Motorboat 0,530 → 0,626; Dump truck 0,355 → 0,449; Bus 0,412 → 0,471; Fishing vessel 0,587 → 0,638; Building 0,745 → 0,784; Small car 0,817 → 0,823; Helipad 0,485 → 0,485; Storage tank 0,599 → 0,594; Pylon 0,731 → 0,720; Shipping container 0,708 → 0,691; Excavator 0,696 → 0,654; **Truck 0,327 → 0,244**.
+- **Conclusión:**
+  - **Se confirma que la augmentation geométrica regulariza:** la accuracy de train baja de 0,817 a ~0,67–0,69 y la de validación sube de 0,615 a ~0,63 con muy poca dispersión (σ = 0,005). En mean recall la ganancia es de +1,1 a +2,2 pp, menor que en EXP-015 (+4,1 pp con pesos de clase): parte de aquella ganancia era interacción con el tratamiento del desbalance.
+  - Volteos, rotaciones y D4 empatan dentro del ruido; la variación fotométrica vuelve a empeorar (0,571).
+  - El min recall baja (0,327 → 0,244): Truck pierde recall, como en EXP-015, mientras Cargo plane, Motorboat y Dump truck ganan.
+  - **Se elige rotaciones de 90°** (0,617 ± 0,015 de mean recall, 0,632 de accuracy): la mejor media en las dos métricas y un subconjunto más simple que D4; la diferencia con D4 no es concluyente.
+- **Siguiente paso:** EXP-020 (penalizaciones sobre BN + rotaciones, y ablación de BN).
+
+### EXP-020: Penalizaciones y BatchNorm sobre BN + rotaciones (entrega 2)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-019_rot90` · **Estado:** ejecutado
+- **Hipótesis:** con la augmentation cerrando parte de la brecha, una penalización explícita suave podría sumar; y BatchNorm, que en la fase 6 aportó poco (+1,2 pp), puede pesar más con augmentation (como en la ablación EXP-017).
+- **Cambio:** dropout 0,1 y 0,2; L2 1e-5 y 1e-4; sin BatchNorm (con la lr de la fase 5, 1,2e-3). 3 semillas.
+- **Fundamento:** Dropout [R5], L2 [R8 §7.1], BatchNorm [R6].
+- **Resultados:**
+
+| Variante | val mean recall | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|
+| BN + rotaciones (base, `EXP-019_rot90`) | 0,617 ± 0,015 | 0,632 ± 0,005 | 0,244 | 0,694 | 58 |
+| + dropout 0,1 | 0,577 ± 0,010 | 0,616 ± 0,009 | 0,177 | 0,645 | 73 |
+| + dropout 0,2 | 0,550 ± 0,039 | 0,593 ± 0,033 | 0,151 | 0,622 | 68 |
+| + L2 1e-5 | 0,603 ± 0,006 | 0,630 ± 0,001 | 0,256 | 0,677 | 64 |
+| + L2 1e-4 | 0,608 ± 0,012 | 0,630 ± 0,009 | 0,247 | 0,681 | 62 |
+| Sin BatchNorm (lr 1,2e-3) | 0,569 ± 0,023 | 0,600 ± 0,017 | 0,205 | 0,658 | 64 |
+
+- **Conclusión:** **ninguna penalización mejora.** El dropout vuelve a bajar train y validación a la vez (subajuste); L2 deja la accuracy igual (0,630) y el mean recall algo por debajo, dentro del ruido. **Sin BatchNorm se pierden 4,8 pp**: con augmentation, BatchNorm es el ingrediente de regularización/optimización que más aporta, igual que en la ablación EXP-017. Se mantiene BN + rotaciones, sin dropout ni L2.
+- **Siguiente paso:** EXP-021 (el modelo de la entrega 2 entrenado más tiempo).
+
+### EXP-021: Modelo final de la entrega 2 (BN + rotaciones, entrenamiento más largo)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-019_rot90` · **Estado:** ejecutado
+- **Configuración:** 16×16 `/255` → 4 × [`Dense(256)` → BatchNorm → LeakyReLU(0,3)] → `Dense(13)`; Adam AMSGrad, lr = 3,6e-3, β₁ = 0,95; batch 256; rotaciones aleatorias de 90° en train; sin pesos de clase.
+- **Cambio:** paciencias 25 / 8 (antes 15 / 6) y hasta 300 épocas, como en EXP-018. 3 semillas.
+- **Resultados:** semilla 1: época 82 de 107, mean recall 0,660, val acc 0,642; semilla 2: época 65 de 90, mean recall 0,647, val acc 0,654; semilla 3: época 55 de 80, mean recall 0,630, val acc 0,632. **Media: mean recall 0,646 ± 0,015 · val acc 0,643 ± 0,011 · min recall 0,258** · train acc 0,764.
+- **Conclusión:** a diferencia de EXP-018, **entrenar más sí ayuda aquí** (+2,9 pp sobre `EXP-019_rot90`, con las mejores épocas entre la 55 y la 82): con augmentation la validación sigue subiendo más tarde. Frente al modelo de la entrega 1 (`EXP-010_bs256_sqrt_60ep`: 0,578 ± 0,007 / 0,616 ± 0,006), la regularización suma +6,8 pp de mean recall y +2,7 pp de accuracy. **Es el modelo final de la entrega 2.**
+- **Siguiente paso:** documentos de la entrega 2 (`reports/delivery_02/`).
+
 ---
 
 ## Registro de cambios (CHG)
@@ -561,6 +617,12 @@ A petición del usuario (en Overleaf, el texto de algunas diapositivas no corres
 - `build_figures.py`: opciones `logy`, `show_val` y `criterion` en `learning_curves`.
 - **Frame de parada rehecho** (segunda revisión del usuario: no tenía sentido). La figura de las 3 semillas solo mostraba dónde paraba cada una, no por qué. La nueva `stopping` usa la semilla 1 (el run del notebook): accuracy de train y de validación y mean recall de validación por época, con las bajadas de lr, la mejor época y la parada; sombreado lo posterior a la mejor época. Lectura, con macros `stop-*` sacadas del historial (`stopping_run` en `delivery.yaml`): hasta la época 19 suben juntas; la primera bajada de lr da la mejor época (20); después train pasa de 0,699 a 0,743 y validación se queda en 0,609-0,612 (brecha de 9,0 a 13,1 pp); EarlyStopping para en la 30. El frame deja el esquema hipótesis/evidencia/resultado, que aquí no encajaba, y la sección "Resultado final" del informe usa la misma lectura.
 - **Informe** (tercera revisión del usuario: juntaba figuras sin relación y no todas las fases citaban su figura): se acaban los pares de figuras en un mismo flotante (resolución + capacidad, learning rate + parada). Ahora hay una figura por flotante (`[!htbp]`), colocada justo después del párrafo que la comenta, y cada una se cita en su texto: normalización (fase 1, figura nueva también en el informe), resolución (fase 2), capacidad (fases 3-4), learning rate (fase 5), y parada, progreso y recall por clase (resultado final). 7 figuras; ~5,5 páginas estimadas.
+
+### CHG-015: Documentos de la entrega 2 (2026-10-03)
+`reports/delivery_02/` con la plantilla del usuario: `delivery.yaml` (punto de partida EXP-010, final EXP-021; pasos: BatchNorm → rotaciones → entrenamiento más largo), `figure_specs.yaml` (curvas de train y validación entrega 1 frente a 2, curvas de validación de dropout y L2, BatchNorm, augmentation, progreso y recall por clase, con pies cortos para las slides), informe (~5 páginas estimadas) y slides (10 frames, 10 min), con las reglas de DEC-010 (mismas figuras y en el mismo orden en informe y slides; cada imagen del informe con su pie y su etiqueta). Cuadro de cambios sobre BN + rotaciones (EXP-020) generado como tabla de ablación. `make bundle D=02` sin errores.
+- **Scripts** (compartidos con la entrega 1): `build_results.py` describe el modelo de partida desde su configuración (`describe_model`, `describe_training`), cabeceras genéricas en `baseline_vs_final`, macros por variante `<clave>-gap-acc` (train − val, pp) y `<clave>-l2`; `build_figures.py`, opción `logx` en las curvas de validación (`strength`).
+- **Coordinación:** otra sesión de Claude (`image-recognition-10`) estaba modificando a la vez la entrega 1 y los scripts (pies cortos `\figcaptionshort`, límite de altura de figuras en slides, nueva figura de parada). La entrega 2 adopta esas convenciones; no se tocó `reports/delivery_01/`. Se le avisó de los cambios en los scripts compartidos.
+- El notebook entregable sigue con el modelo de la entrega 1 (pendiente de decidir si se alinea con EXP-021).
 
 ### CHG-016: Informe y slides de la entrega 1 con las mismas figuras y en el mismo orden (2026-10-03)
 Por DEC-010. El informe usaba 7 figuras y las slides 8, en distinto orden: `class_distribution` no estaba en el informe y la parada aparecía en la fase 1 de las slides pero en el resultado final del informe.

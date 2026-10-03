@@ -1,0 +1,15 @@
+% >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
+\begin{tabular}{lp{0.62\linewidth}}
+\toprule
+ & Punto de partida (EXP-010\_bs256\_sqrt\_60ep) \\
+\midrule
+Modelo & Rescaling $\rightarrow$ Flatten $\rightarrow$ 4 $\times$ 256 [Dense $\rightarrow$ LeakyReLU(0,3)] $\rightarrow$ Dense(13) $\rightarrow$ softmax \\
+Entrada & 16 $\times$ 16 $\times$ 3, escalada a [0, 1] \\
+Parámetros & 397\,581 \\
+Entrenamiento & Adam (AMSGrad), lr $1{,}2\cdot 10^{-3}$, batch 256, hasta 60 épocas \\
+Mean recall (val) & 0,578 $\pm$ 0,007 \\
+Accuracy (val) & 0,616 $\pm$ 0,006 \\
+Accuracy (train) & 0,756 $\pm$ 0,033 \\
+Recall mínimo por clase & 0,270 $\pm$ 0,029 \\
+\bottomrule
+\end{tabular}

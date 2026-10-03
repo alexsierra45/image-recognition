@@ -1,0 +1,6414 @@
+{
+ "generated": "2026-10-03T17:55:20",
+ "keys": {
+  "phase0-mean-recall": {
+   "value": "0,578",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "phase0-mean-recall-std": {
+   "value": "0,007",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "phase0-val-acc": {
+   "value": "0,616",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "phase0-val-acc-std": {
+   "value": "0,006",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "phase0-min-recall": {
+   "value": "0,270",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "phase0-min-recall-std": {
+   "value": "0,029",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "phase0-train-acc": {
+   "value": "0,756",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "phase0-train-acc-std": {
+   "value": "0,033",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "phase0-s-per-epoch": {
+   "value": "0,6",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase0-gap-acc": {
+   "value": "14,0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "phase0-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "params"
+  },
+  "phase0-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "phase0-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.res"
+  },
+  "phase0-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "phase0-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "phase0-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase0-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase0-epochs-cap": {
+   "value": "60",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "phase0-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "phase0-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "phase0-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "phase0-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "phase0-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "phase0-best-epoch": {
+   "value": "28",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "phase1-mean-recall": {
+   "value": "0,590",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "phase1-mean-recall-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "phase1-val-acc": {
+   "value": "0,612",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "phase1-val-acc-std": {
+   "value": "0,005",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "phase1-min-recall": {
+   "value": "0,323",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "phase1-min-recall-std": {
+   "value": "0,058",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "phase1-train-acc": {
+   "value": "0,797",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "phase1-train-acc-std": {
+   "value": "0,075",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "phase1-s-per-epoch": {
+   "value": "0,9",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase1-gap-acc": {
+   "value": "18,5",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "phase1-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "params"
+  },
+  "phase1-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "phase1-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.res"
+  },
+  "phase1-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "phase1-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "phase1-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase1-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase1-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "phase1-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "phase1-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "phase1-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "phase1-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "phase1-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "phase1-best-epoch": {
+   "value": "22",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before_lr3x",
+   "runs": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-013_bn_before_lr3x_seed2",
+    "EXP-013_bn_before_lr3x_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "phase2-mean-recall": {
+   "value": "0,617",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "phase2-mean-recall-std": {
+   "value": "0,015",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "phase2-val-acc": {
+   "value": "0,632",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "phase2-val-acc-std": {
+   "value": "0,005",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "phase2-min-recall": {
+   "value": "0,244",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "phase2-min-recall-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "phase2-train-acc": {
+   "value": "0,694",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "phase2-train-acc-std": {
+   "value": "0,026",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "phase2-s-per-epoch": {
+   "value": "2,1",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase2-gap-acc": {
+   "value": "6,2",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "phase2-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "params"
+  },
+  "phase2-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "phase2-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.res"
+  },
+  "phase2-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "phase2-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "phase2-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase2-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "phase2-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "phase2-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "phase2-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "phase2-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "phase2-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "phase2-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "phase2-best-epoch": {
+   "value": "43",
+   "source": "experiments.csv",
+   "variant": "EXP-019_rot90",
+   "runs": [
+    "EXP-019_rot90",
+    "EXP-019_rot90_seed2",
+    "EXP-019_rot90_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "final-mean-recall": {
+   "value": "0,646",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "final-mean-recall-std": {
+   "value": "0,015",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "final-val-acc": {
+   "value": "0,643",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "final-val-acc-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "final-min-recall": {
+   "value": "0,258",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "final-min-recall-std": {
+   "value": "0,034",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "final-train-acc": {
+   "value": "0,764",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "final-train-acc-std": {
+   "value": "0,045",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "final-s-per-epoch": {
+   "value": "1,0",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "final-gap-acc": {
+   "value": "12,1",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "final-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "params"
+  },
+  "final-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "final-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.res"
+  },
+  "final-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "final-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "final-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "final-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "final-epochs-cap": {
+   "value": "300",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "final-es-patience": {
+   "value": "25",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "final-rlr-patience": {
+   "value": "8",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "final-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "final-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "final-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "final-best-epoch": {
+   "value": "67",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "dropout01-mean-recall": {
+   "value": "0,555",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "dropout01-mean-recall-std": {
+   "value": "0,016",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "dropout01-val-acc": {
+   "value": "0,605",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "dropout01-val-acc-std": {
+   "value": "0,012",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "dropout01-min-recall": {
+   "value": "0,206",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "dropout01-min-recall-std": {
+   "value": "0,041",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "dropout01-train-acc": {
+   "value": "0,672",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "dropout01-train-acc-std": {
+   "value": "0,038",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "dropout01-s-per-epoch": {
+   "value": "0,7",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "dropout01-gap-acc": {
+   "value": "6,8",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "dropout01-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "params"
+  },
+  "dropout01-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "dropout01-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.res"
+  },
+  "dropout01-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "dropout01-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "dropout01-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout01-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout01-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "dropout01-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "dropout01-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "dropout01-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "dropout01-dropout": {
+   "value": "0,1",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "dropout01-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "dropout01-best-epoch": {
+   "value": "31",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.1",
+   "runs": [
+    "EXP-013_dropout0.1",
+    "EXP-013_dropout0.1_seed2",
+    "EXP-013_dropout0.1_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "dropout02-mean-recall": {
+   "value": "0,559",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "dropout02-mean-recall-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "dropout02-val-acc": {
+   "value": "0,605",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "dropout02-val-acc-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "dropout02-min-recall": {
+   "value": "0,182",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "dropout02-min-recall-std": {
+   "value": "0,000",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "dropout02-train-acc": {
+   "value": "0,669",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "dropout02-train-acc-std": {
+   "value": "0,015",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "dropout02-s-per-epoch": {
+   "value": "0,7",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "dropout02-gap-acc": {
+   "value": "6,4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "dropout02-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "params"
+  },
+  "dropout02-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "dropout02-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.res"
+  },
+  "dropout02-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "dropout02-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "dropout02-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout02-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout02-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "dropout02-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "dropout02-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "dropout02-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "dropout02-dropout": {
+   "value": "0,2",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "dropout02-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "dropout02-best-epoch": {
+   "value": "47",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.2",
+   "runs": [
+    "EXP-013_dropout0.2",
+    "EXP-013_dropout0.2_seed2",
+    "EXP-013_dropout0.2_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "dropout05-mean-recall": {
+   "value": "0,394",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "dropout05-mean-recall-std": {
+   "value": "0,014",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "dropout05-val-acc": {
+   "value": "0,479",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "dropout05-val-acc-std": {
+   "value": "0,010",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "dropout05-min-recall": {
+   "value": "0,000",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "dropout05-min-recall-std": {
+   "value": "0,000",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "dropout05-train-acc": {
+   "value": "0,489",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "dropout05-train-acc-std": {
+   "value": "0,019",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "dropout05-s-per-epoch": {
+   "value": "0,7",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "dropout05-gap-acc": {
+   "value": "1,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "dropout05-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "params"
+  },
+  "dropout05-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "dropout05-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.res"
+  },
+  "dropout05-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "dropout05-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "dropout05-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout05-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "dropout05-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "dropout05-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "dropout05-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "dropout05-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "dropout05-dropout": {
+   "value": "0,5",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "dropout05-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "dropout05-best-epoch": {
+   "value": "18",
+   "source": "experiments.csv",
+   "variant": "EXP-013_dropout0.5",
+   "runs": [
+    "EXP-013_dropout0.5",
+    "EXP-013_dropout0.5_seed2",
+    "EXP-013_dropout0.5_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "l2-1e-4-mean-recall": {
+   "value": "0,577",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "l2-1e-4-mean-recall-std": {
+   "value": "0,007",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "l2-1e-4-val-acc": {
+   "value": "0,611",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "l2-1e-4-val-acc-std": {
+   "value": "0,006",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "l2-1e-4-min-recall": {
+   "value": "0,278",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "l2-1e-4-min-recall-std": {
+   "value": "0,028",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "l2-1e-4-train-acc": {
+   "value": "0,769",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "l2-1e-4-train-acc-std": {
+   "value": "0,055",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "l2-1e-4-s-per-epoch": {
+   "value": "0,7",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "l2-1e-4-gap-acc": {
+   "value": "15,9",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "l2-1e-4-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "params"
+  },
+  "l2-1e-4-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "l2-1e-4-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.res"
+  },
+  "l2-1e-4-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "l2-1e-4-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "l2-1e-4-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "l2-1e-4-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "l2-1e-4-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "l2-1e-4-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "l2-1e-4-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "l2-1e-4-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "l2-1e-4-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "l2-1e-4-l2": {
+   "value": "$10^{-4}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "l2-1e-4-best-epoch": {
+   "value": "34",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-4",
+   "runs": [
+    "EXP-013_l2_1e-4",
+    "EXP-013_l2_1e-4_seed2",
+    "EXP-013_l2_1e-4_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "l2-1e-3-mean-recall": {
+   "value": "0,469",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "l2-1e-3-mean-recall-std": {
+   "value": "0,012",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "l2-1e-3-val-acc": {
+   "value": "0,550",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "l2-1e-3-val-acc-std": {
+   "value": "0,008",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "l2-1e-3-min-recall": {
+   "value": "0,030",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "l2-1e-3-min-recall-std": {
+   "value": "0,052",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "l2-1e-3-train-acc": {
+   "value": "0,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "l2-1e-3-train-acc-std": {
+   "value": "0,017",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "l2-1e-3-s-per-epoch": {
+   "value": "0,7",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "l2-1e-3-gap-acc": {
+   "value": "3,1",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "l2-1e-3-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "params"
+  },
+  "l2-1e-3-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "l2-1e-3-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.res"
+  },
+  "l2-1e-3-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "l2-1e-3-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "l2-1e-3-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "l2-1e-3-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "l2-1e-3-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "l2-1e-3-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "l2-1e-3-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "l2-1e-3-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "l2-1e-3-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "l2-1e-3-l2": {
+   "value": "$10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "l2-1e-3-best-epoch": {
+   "value": "24",
+   "source": "experiments.csv",
+   "variant": "EXP-013_l2_1e-3",
+   "runs": [
+    "EXP-013_l2_1e-3",
+    "EXP-013_l2_1e-3_seed2",
+    "EXP-013_l2_1e-3_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "bn-samelr-mean-recall": {
+   "value": "0,578",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "bn-samelr-mean-recall-std": {
+   "value": "0,014",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "bn-samelr-val-acc": {
+   "value": "0,608",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "bn-samelr-val-acc-std": {
+   "value": "0,002",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "bn-samelr-min-recall": {
+   "value": "0,281",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "bn-samelr-min-recall-std": {
+   "value": "0,024",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "bn-samelr-train-acc": {
+   "value": "0,836",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "bn-samelr-train-acc-std": {
+   "value": "0,034",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "bn-samelr-s-per-epoch": {
+   "value": "0,9",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "bn-samelr-gap-acc": {
+   "value": "22,8",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "bn-samelr-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "params"
+  },
+  "bn-samelr-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "bn-samelr-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.res"
+  },
+  "bn-samelr-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "bn-samelr-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "bn-samelr-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "bn-samelr-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "bn-samelr-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "bn-samelr-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "bn-samelr-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "bn-samelr-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "bn-samelr-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "bn-samelr-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "bn-samelr-best-epoch": {
+   "value": "22",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_before",
+   "runs": [
+    "EXP-013_bn_before",
+    "EXP-013_bn_before_seed2",
+    "EXP-013_bn_before_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-mean-recall": {
+   "value": "0,569",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-mean-recall-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "bn-after-lr3x-val-acc": {
+   "value": "0,602",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-val-acc-std": {
+   "value": "0,006",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "bn-after-lr3x-min-recall": {
+   "value": "0,243",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-min-recall-std": {
+   "value": "0,053",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "bn-after-lr3x-train-acc": {
+   "value": "0,700",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-train-acc-std": {
+   "value": "0,007",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "bn-after-lr3x-s-per-epoch": {
+   "value": "1,1",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-gap-acc": {
+   "value": "9,8",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "bn-after-lr3x-params": {
+   "value": "401\\,677",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "params"
+  },
+  "bn-after-lr3x-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "bn-after-lr3x-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.res"
+  },
+  "bn-after-lr3x-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "bn-after-lr3x-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "bn-after-lr3x-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "bn-after-lr3x-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "bn-after-lr3x-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "bn-after-lr3x-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "bn-after-lr3x-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "bn-after-lr3x-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "bn-after-lr3x-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "bn-after-lr3x-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "bn-after-lr3x-best-epoch": {
+   "value": "19",
+   "source": "experiments.csv",
+   "variant": "EXP-013_bn_after_lr3x",
+   "runs": [
+    "EXP-013_bn_after_lr3x",
+    "EXP-013_bn_after_lr3x_seed2",
+    "EXP-013_bn_after_lr3x_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "no-aug-mean-recall": {
+   "value": "0,595",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "no-aug-mean-recall-std": {
+   "value": "0,010",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "no-aug-val-acc": {
+   "value": "0,615",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "no-aug-val-acc-std": {
+   "value": "0,005",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "no-aug-min-recall": {
+   "value": "0,327",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "no-aug-min-recall-std": {
+   "value": "0,019",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "no-aug-train-acc": {
+   "value": "0,817",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "no-aug-train-acc-std": {
+   "value": "0,033",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "no-aug-s-per-epoch": {
+   "value": "2,1",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "no-aug-gap-acc": {
+   "value": "20,2",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "no-aug-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "params"
+  },
+  "no-aug-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "no-aug-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.res"
+  },
+  "no-aug-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "no-aug-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "no-aug-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "no-aug-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "no-aug-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "no-aug-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "no-aug-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "no-aug-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "no-aug-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "no-aug-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "no-aug-best-epoch": {
+   "value": "24",
+   "source": "experiments.csv",
+   "variant": "EXP-019_none_patience15",
+   "runs": [
+    "EXP-019_none_patience15",
+    "EXP-019_none_patience15_seed2",
+    "EXP-019_none_patience15_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "flip-mean-recall": {
+   "value": "0,609",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "flip-mean-recall-std": {
+   "value": "0,018",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "flip-val-acc": {
+   "value": "0,629",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "flip-val-acc-std": {
+   "value": "0,005",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "flip-min-recall": {
+   "value": "0,213",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "flip-min-recall-std": {
+   "value": "0,040",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "flip-train-acc": {
+   "value": "0,694",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "flip-train-acc-std": {
+   "value": "0,007",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "flip-s-per-epoch": {
+   "value": "1,9",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "flip-gap-acc": {
+   "value": "6,5",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "flip-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "params"
+  },
+  "flip-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "flip-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.res"
+  },
+  "flip-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "flip-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "flip-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "flip-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "flip-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "flip-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "flip-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "flip-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "flip-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "flip-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "flip-best-epoch": {
+   "value": "48",
+   "source": "experiments.csv",
+   "variant": "EXP-019_flip",
+   "runs": [
+    "EXP-019_flip",
+    "EXP-019_flip_seed2",
+    "EXP-019_flip_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "d4-mean-recall": {
+   "value": "0,606",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "d4-mean-recall-std": {
+   "value": "0,008",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "d4-val-acc": {
+   "value": "0,630",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "d4-val-acc-std": {
+   "value": "0,005",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "d4-min-recall": {
+   "value": "0,247",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "d4-min-recall-std": {
+   "value": "0,017",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "d4-train-acc": {
+   "value": "0,671",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "d4-train-acc-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "d4-s-per-epoch": {
+   "value": "2,2",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "d4-gap-acc": {
+   "value": "4,1",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "d4-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "params"
+  },
+  "d4-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "d4-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.res"
+  },
+  "d4-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "d4-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "d4-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "d4-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "d4-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "d4-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "d4-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "d4-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "d4-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "d4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "d4-best-epoch": {
+   "value": "46",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4",
+   "runs": [
+    "EXP-019_d4",
+    "EXP-019_d4_seed2",
+    "EXP-019_d4_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "color-mean-recall": {
+   "value": "0,571",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "color-mean-recall-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "color-val-acc": {
+   "value": "0,601",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "color-val-acc-std": {
+   "value": "0,003",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "color-min-recall": {
+   "value": "0,315",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "color-min-recall-std": {
+   "value": "0,017",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "color-train-acc": {
+   "value": "0,821",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "color-train-acc-std": {
+   "value": "0,073",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "color-s-per-epoch": {
+   "value": "2,1",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "color-gap-acc": {
+   "value": "22,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "color-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "params"
+  },
+  "color-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "color-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.res"
+  },
+  "color-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "color-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "color-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "color-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "color-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "color-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "color-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "color-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "color-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "color-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "color-best-epoch": {
+   "value": "35",
+   "source": "experiments.csv",
+   "variant": "EXP-019_color",
+   "runs": [
+    "EXP-019_color",
+    "EXP-019_color_seed2",
+    "EXP-019_color_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "d4-color-mean-recall": {
+   "value": "0,591",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "d4-color-mean-recall-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "d4-color-val-acc": {
+   "value": "0,615",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "d4-color-val-acc-std": {
+   "value": "0,002",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "d4-color-min-recall": {
+   "value": "0,181",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "d4-color-min-recall-std": {
+   "value": "0,020",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "d4-color-train-acc": {
+   "value": "0,652",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "d4-color-train-acc-std": {
+   "value": "0,019",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "d4-color-s-per-epoch": {
+   "value": "2,3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "d4-color-gap-acc": {
+   "value": "3,7",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "d4-color-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "params"
+  },
+  "d4-color-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "d4-color-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.res"
+  },
+  "d4-color-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "d4-color-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "d4-color-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "d4-color-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "d4-color-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "d4-color-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "d4-color-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "d4-color-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "d4-color-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "d4-color-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "d4-color-best-epoch": {
+   "value": "49",
+   "source": "experiments.csv",
+   "variant": "EXP-019_d4_color",
+   "runs": [
+    "EXP-019_d4_color",
+    "EXP-019_d4_color_seed2",
+    "EXP-019_d4_color_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "c-dropout01-mean-recall": {
+   "value": "0,577",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "c-dropout01-mean-recall-std": {
+   "value": "0,010",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "c-dropout01-val-acc": {
+   "value": "0,616",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "c-dropout01-val-acc-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "c-dropout01-min-recall": {
+   "value": "0,177",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "c-dropout01-min-recall-std": {
+   "value": "0,008",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "c-dropout01-train-acc": {
+   "value": "0,645",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "c-dropout01-train-acc-std": {
+   "value": "0,014",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "c-dropout01-s-per-epoch": {
+   "value": "2,3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "c-dropout01-gap-acc": {
+   "value": "2,9",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "c-dropout01-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "params"
+  },
+  "c-dropout01-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "c-dropout01-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.res"
+  },
+  "c-dropout01-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "c-dropout01-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "c-dropout01-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-dropout01-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-dropout01-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "c-dropout01-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "c-dropout01-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "c-dropout01-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "c-dropout01-dropout": {
+   "value": "0,1",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "c-dropout01-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "c-dropout01-best-epoch": {
+   "value": "58",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.1",
+   "runs": [
+    "EXP-020_dropout0.1",
+    "EXP-020_dropout0.1_seed2",
+    "EXP-020_dropout0.1_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "c-dropout02-mean-recall": {
+   "value": "0,550",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "c-dropout02-mean-recall-std": {
+   "value": "0,039",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "c-dropout02-val-acc": {
+   "value": "0,593",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "c-dropout02-val-acc-std": {
+   "value": "0,033",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "c-dropout02-min-recall": {
+   "value": "0,151",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "c-dropout02-min-recall-std": {
+   "value": "0,052",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "c-dropout02-train-acc": {
+   "value": "0,622",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "c-dropout02-train-acc-std": {
+   "value": "0,044",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "c-dropout02-s-per-epoch": {
+   "value": "2,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "c-dropout02-gap-acc": {
+   "value": "2,9",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "c-dropout02-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "params"
+  },
+  "c-dropout02-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "c-dropout02-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.res"
+  },
+  "c-dropout02-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "c-dropout02-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "c-dropout02-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-dropout02-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-dropout02-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "c-dropout02-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "c-dropout02-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "c-dropout02-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "c-dropout02-dropout": {
+   "value": "0,2",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "c-dropout02-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "c-dropout02-best-epoch": {
+   "value": "53",
+   "source": "experiments.csv",
+   "variant": "EXP-020_dropout0.2",
+   "runs": [
+    "EXP-020_dropout0.2",
+    "EXP-020_dropout0.2_seed2",
+    "EXP-020_dropout0.2_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-mean-recall": {
+   "value": "0,603",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-mean-recall-std": {
+   "value": "0,006",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "c-l2-1e-5-val-acc": {
+   "value": "0,630",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-val-acc-std": {
+   "value": "0,001",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "c-l2-1e-5-min-recall": {
+   "value": "0,256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-min-recall-std": {
+   "value": "0,018",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "c-l2-1e-5-train-acc": {
+   "value": "0,677",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-train-acc-std": {
+   "value": "0,014",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "c-l2-1e-5-s-per-epoch": {
+   "value": "2,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-gap-acc": {
+   "value": "4,7",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "c-l2-1e-5-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "params"
+  },
+  "c-l2-1e-5-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "c-l2-1e-5-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.res"
+  },
+  "c-l2-1e-5-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "c-l2-1e-5-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "c-l2-1e-5-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-l2-1e-5-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-l2-1e-5-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "c-l2-1e-5-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "c-l2-1e-5-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "c-l2-1e-5-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "c-l2-1e-5-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "c-l2-1e-5-l2": {
+   "value": "$10^{-5}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "c-l2-1e-5-best-epoch": {
+   "value": "49",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-5",
+   "runs": [
+    "EXP-020_l2_1e-5",
+    "EXP-020_l2_1e-5_seed2",
+    "EXP-020_l2_1e-5_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-mean-recall": {
+   "value": "0,608",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-mean-recall-std": {
+   "value": "0,012",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "c-l2-1e-4-val-acc": {
+   "value": "0,630",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-val-acc-std": {
+   "value": "0,009",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "c-l2-1e-4-min-recall": {
+   "value": "0,247",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-min-recall-std": {
+   "value": "0,014",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "c-l2-1e-4-train-acc": {
+   "value": "0,681",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-train-acc-std": {
+   "value": "0,017",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "c-l2-1e-4-s-per-epoch": {
+   "value": "2,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-gap-acc": {
+   "value": "5,1",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "c-l2-1e-4-params": {
+   "value": "400\\,653",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "params"
+  },
+  "c-l2-1e-4-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "c-l2-1e-4-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.res"
+  },
+  "c-l2-1e-4-lr": {
+   "value": "$3{,}6\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "c-l2-1e-4-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "c-l2-1e-4-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-l2-1e-4-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-l2-1e-4-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "c-l2-1e-4-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "c-l2-1e-4-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "c-l2-1e-4-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "c-l2-1e-4-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "c-l2-1e-4-l2": {
+   "value": "$10^{-4}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "c-l2-1e-4-best-epoch": {
+   "value": "47",
+   "source": "experiments.csv",
+   "variant": "EXP-020_l2_1e-4",
+   "runs": [
+    "EXP-020_l2_1e-4",
+    "EXP-020_l2_1e-4_seed2",
+    "EXP-020_l2_1e-4_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "c-no-bn-mean-recall": {
+   "value": "0,569",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "c-no-bn-mean-recall-std": {
+   "value": "0,023",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "c-no-bn-val-acc": {
+   "value": "0,600",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "c-no-bn-val-acc-std": {
+   "value": "0,017",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "c-no-bn-min-recall": {
+   "value": "0,205",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "c-no-bn-min-recall-std": {
+   "value": "0,025",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "c-no-bn-train-acc": {
+   "value": "0,658",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "c-no-bn-train-acc-std": {
+   "value": "0,033",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "c-no-bn-s-per-epoch": {
+   "value": "1,5",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "c-no-bn-gap-acc": {
+   "value": "5,8",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "c-no-bn-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "params"
+  },
+  "c-no-bn-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "c-no-bn-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.res"
+  },
+  "c-no-bn-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "c-no-bn-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "c-no-bn-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-no-bn-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "c-no-bn-epochs-cap": {
+   "value": "150",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "c-no-bn-es-patience": {
+   "value": "15",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "c-no-bn-rlr-patience": {
+   "value": "6",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "c-no-bn-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "c-no-bn-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "c-no-bn-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "c-no-bn-best-epoch": {
+   "value": "49",
+   "source": "experiments.csv",
+   "variant": "EXP-020_no_bn",
+   "runs": [
+    "EXP-020_no_bn",
+    "EXP-020_no_bn_seed2",
+    "EXP-020_no_bn_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "baseline-mean-recall": {
+   "value": "0,578",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean"
+  },
+  "baseline-mean-recall-std": {
+   "value": "0,007",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std"
+  },
+  "baseline-val-acc": {
+   "value": "0,616",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean"
+  },
+  "baseline-val-acc-std": {
+   "value": "0,006",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std"
+  },
+  "baseline-min-recall": {
+   "value": "0,270",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "mean"
+  },
+  "baseline-min-recall-std": {
+   "value": "0,029",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "min_recall",
+   "stat": "std"
+  },
+  "baseline-train-acc": {
+   "value": "0,756",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "mean"
+  },
+  "baseline-train-acc-std": {
+   "value": "0,033",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "train_acc",
+   "stat": "std"
+  },
+  "baseline-s-per-epoch": {
+   "value": "0,6",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "baseline-gap-acc": {
+   "value": "14,0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
+   "stat": "mean"
+  },
+  "baseline-params": {
+   "value": "397\\,581",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "params"
+  },
+  "baseline-seeds": {
+   "value": "3",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "id",
+   "stat": "count"
+  },
+  "baseline-res": {
+   "value": "16",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.res"
+  },
+  "baseline-lr": {
+   "value": "$1{,}2\\cdot 10^{-3}$",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.optimizer.lr"
+  },
+  "baseline-batch": {
+   "value": "256",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.batch_size"
+  },
+  "baseline-hidden": {
+   "value": "4 $\\times$ 256",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "baseline-n-hidden": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.hidden"
+  },
+  "baseline-epochs-cap": {
+   "value": "60",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.epochs"
+  },
+  "baseline-es-patience": {
+   "value": "10",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.es_patience"
+  },
+  "baseline-rlr-patience": {
+   "value": "4",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.rlr_patience"
+  },
+  "baseline-beta1": {
+   "value": "0,95",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.optimizer.beta_1"
+  },
+  "baseline-dropout": {
+   "value": "0,0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.dropout"
+  },
+  "baseline-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.l2"
+  },
+  "baseline-best-epoch": {
+   "value": "28",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "best_epoch",
+   "stat": "mean"
+  },
+  "gain-bn": {
+   "value": "1,3",
+   "source": "experiments.csv",
+   "formula": "100*(phase1-phase0)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-013_bn_before_lr3x",
+    "EXP-010_bs256_sqrt_60ep"
+   ]
+  },
+  "gain-rot90": {
+   "value": "2,2",
+   "source": "experiments.csv",
+   "formula": "100*(phase2-no-aug)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-019_rot90",
+    "EXP-019_none_patience15"
+   ]
+  },
+  "gain-rot90-acc": {
+   "value": "1,8",
+   "source": "experiments.csv",
+   "formula": "100*(phase2-no-aug)",
+   "column": "val_acc",
+   "variants": [
+    "EXP-019_rot90",
+    "EXP-019_none_patience15"
+   ]
+  },
+  "gain-longer": {
+   "value": "2,9",
+   "source": "experiments.csv",
+   "formula": "100*(final-phase2)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-021_final",
+    "EXP-019_rot90"
+   ]
+  },
+  "gain-total": {
+   "value": "6,8",
+   "source": "experiments.csv",
+   "formula": "100*(final-phase0)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-021_final",
+    "EXP-010_bs256_sqrt_60ep"
+   ]
+  },
+  "gain-total-acc": {
+   "value": "2,7",
+   "source": "experiments.csv",
+   "formula": "100*(final-phase0)",
+   "column": "val_acc",
+   "variants": [
+    "EXP-021_final",
+    "EXP-010_bs256_sqrt_60ep"
+   ]
+  },
+  "drop-train-acc": {
+   "value": "$-$0,8",
+   "source": "experiments.csv",
+   "formula": "100*(phase0-final)",
+   "column": "train_acc",
+   "variants": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-021_final"
+   ]
+  },
+  "loss-dropout05": {
+   "value": "$-$18,4",
+   "source": "experiments.csv",
+   "formula": "100*(dropout05-phase0)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-013_dropout0.5",
+    "EXP-010_bs256_sqrt_60ep"
+   ]
+  },
+  "loss-no-bn": {
+   "value": "$-$4,8",
+   "source": "experiments.csv",
+   "formula": "100*(c-no-bn-phase2)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-020_no_bn",
+    "EXP-019_rot90"
+   ]
+  },
+  "loss-color": {
+   "value": "$-$2,3",
+   "source": "experiments.csv",
+   "formula": "100*(color-no-aug)",
+   "column": "mean_recall",
+   "variants": [
+    "EXP-019_color",
+    "EXP-019_none_patience15"
+   ]
+  },
+  "seed-noise-pp": {
+   "value": "1,5",
+   "source": "experiments.csv",
+   "stat": "pooled std of mean_recall",
+   "n_variants": 54
+  },
+  "n-runs": {
+   "value": "236",
+   "source": "experiments.csv",
+   "stat": "row count"
+  },
+  "n-variants-3seeds": {
+   "value": "54",
+   "source": "experiments.csv",
+   "stat": "variants with >= 3 seeds"
+  },
+  "n-images": {
+   "value": "18\\,746",
+   "source": "xview_ann_train.json"
+  },
+  "n-classes": {
+   "value": "13",
+   "source": "xview_ann_train.json"
+  },
+  "n-valid": {
+   "value": "1\\,875",
+   "source": "confusion matrix of the baseline"
+  },
+  "n-train": {
+   "value": "16\\,871",
+   "source": "images - validation"
+  },
+  "class-max-name": {
+   "value": "Building",
+   "source": "xview_ann_train.json"
+  },
+  "class-max-count": {
+   "value": "3\\,594",
+   "source": "xview_ann_train.json"
+  },
+  "class-min-name": {
+   "value": "Helipad",
+   "source": "xview_ann_train.json"
+  },
+  "class-min-count": {
+   "value": "111",
+   "source": "xview_ann_train.json"
+  },
+  "imbalance-ratio": {
+   "value": "32",
+   "source": "xview_ann_train.json"
+  },
+  "chance-mean-recall": {
+   "value": "0,077",
+   "source": "1 / number of classes"
+  },
+  "majority-acc": {
+   "value": "0,192",
+   "source": "largest class share"
+  },
+  "valid-share": {
+   "value": "10",
+   "source": "validation / images, %"
+  },
+  "n-test": {
+   "value": "2\\,365",
+   "source": "xview_recognition/xview_test (*.tif)"
+  },
+  "baseline-train-loss": {
+   "value": "0",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.loss",
+   "stat": "median over epochs, rounded to 100"
+  },
+  "chance-loss": {
+   "value": "2,6",
+   "source": "ln(number of classes)"
+  },
+  "final-recall-cargo-plane": {
+   "value": "0,849",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Cargo plane"
+  },
+  "final-recall-small-car": {
+   "value": "0,812",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Small car"
+  },
+  "final-recall-bus": {
+   "value": "0,443",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Bus"
+  },
+  "final-recall-truck": {
+   "value": "0,258",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Truck"
+  },
+  "final-recall-motorboat": {
+   "value": "0,632",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Motorboat"
+  },
+  "final-recall-fishing-vessel": {
+   "value": "0,648",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Fishing vessel"
+  },
+  "final-recall-dump-truck": {
+   "value": "0,478",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Dump truck"
+  },
+  "final-recall-excavator": {
+   "value": "0,700",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Excavator"
+  },
+  "final-recall-building": {
+   "value": "0,783",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Building"
+  },
+  "final-recall-helipad": {
+   "value": "0,697",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Helipad"
+  },
+  "final-recall-storage-tank": {
+   "value": "0,660",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Storage tank"
+  },
+  "final-recall-shipping-container": {
+   "value": "0,724",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Shipping container"
+  },
+  "final-recall-pylon": {
+   "value": "0,710",
+   "source": "history/*.json",
+   "variant": "EXP-021_final",
+   "field": "val.recall",
+   "class": "Pylon"
+  },
+  "final-worst-class": {
+   "value": "Truck",
+   "source": "history/*.json",
+   "variant": "EXP-021_final"
+  },
+  "final-worst-recall": {
+   "value": "0,258",
+   "source": "history/*.json",
+   "variant": "EXP-021_final"
+  },
+  "best-mean-recall": {
+   "value": "0,646",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "mean",
+   "alias_of": "final-mean-recall"
+  },
+  "best-mean-recall-std": {
+   "value": "0,015",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "mean_recall",
+   "stat": "std",
+   "alias_of": "final-mean-recall-std"
+  },
+  "best-val-acc": {
+   "value": "0,643",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "mean",
+   "alias_of": "final-val-acc"
+  },
+  "best-val-acc-std": {
+   "value": "0,011",
+   "source": "experiments.csv",
+   "variant": "EXP-021_final",
+   "runs": [
+    "EXP-021_final",
+    "EXP-021_final_seed2",
+    "EXP-021_final_seed3"
+   ],
+   "column": "val_acc",
+   "stat": "std",
+   "alias_of": "final-val-acc-std"
+  },
+  "n-experiments": {
+   "value": "236",
+   "source": "experiments.csv",
+   "stat": "row count",
+   "alias_of": "n-runs"
+  }
+ }
+}

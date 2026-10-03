@@ -353,6 +353,52 @@ def phase9_final():
         run(seeded('EXP-018_final', seed), 'EXP-018', 9, 'final model (ReLU), patience 25/8', dict(FINAL, seed=seed))
 
 
+
+# ---------------------------------------------------------------- delivery 2: regularisation (DEC-009)
+# Base: winner of phase 6 (EXP-013_bn_before_lr3x: BatchNorm before the activation, lr 3.6e-3), WITHOUT class weights
+# (class imbalance moves to delivery 5). Augmentation needs more epochs: patience 15 / 6 for every run, including the
+# reference without augmentation, so that only the augmentation changes.
+D2_BASE = dict(PHASE7_BASE, es_patience=15, rlr_patience=6)
+
+
+def d2_augmentation():
+    for seed in SEEDS:
+        run(seeded('EXP-019_none_patience15', seed), 'EXP-019', 'd2', 'no augmentation, patience 15/6 (BN, no class weights)',
+            dict(D2_BASE, seed=seed))
+        for tag, ops in PHASE8_VARIANTS:
+            run(seeded('EXP-019_%s' % tag, seed), 'EXP-019', 'd2', 'augmentation %s (BN, no class weights)' % tag,
+                dict(D2_BASE, seed=seed, augment=ops))
+
+
+
+# EXP-019 (3 seeds): geometric augmentation regularises (train acc 0.82 -> ~0.69, val acc 0.615 -> ~0.63); rot90 has the
+# best mean recall (0.617 +- 0.015), tied with D4 (0.606 +- 0.008) and flips (0.609); photometric jitter hurts. rot90 kept.
+D2_AUG = dict(D2_BASE, augment=['rot90'])
+
+
+def d2_combine():
+    # Explicit penalties on top of BN + rot90 (does any help now that augmentation closed part of the gap?) and the
+    # contribution of BatchNorm in this setting (without BN the lr goes back to the phase-5 value, 1.2e-3).
+    variants = [('dropout0.1', dict(D2_AUG, dropout=0.1)), ('dropout0.2', dict(D2_AUG, dropout=0.2)),
+                ('l2_1e-5', dict(D2_AUG, l2=1e-5)), ('l2_1e-4', dict(D2_AUG, l2=1e-4)),
+                ('no_bn', merge_cfg(dict(D2_AUG, bn=None), optimizer={'lr': D2_AUG['optimizer']['lr'] / 3}))]
+    for seed in SEEDS:
+        for tag, cfg in variants:
+            run(seeded('EXP-020_%s' % tag, seed), 'EXP-020', 'd2', 'rot90 + BN + %s' % tag if tag != 'no_bn' else 'rot90 without BN (lr 1.2e-3)',
+                dict(cfg, seed=seed))
+
+
+
+# EXP-020 (3 seeds): no penalty helps on top of BN + rot90 (dropout 0.1/0.2: 0.577/0.550; L2 1e-5/1e-4: 0.603/0.608 vs
+# 0.617 +- 0.015); without BN 0.569 (-4.8 pp). Delivery-2 model = BN + rot90, trained longer as in EXP-018.
+D2_FINAL = dict(D2_AUG, es_patience=25, rlr_patience=8, epochs=300)
+
+
+def d2_final():
+    for seed in SEEDS:
+        run(seeded('EXP-021_final', seed), 'EXP-021', 'd2', 'delivery-2 model (BN + rot90), patience 25/8', dict(D2_FINAL, seed=seed))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)

@@ -1,0 +1,18 @@
+% ============================================================
+%  Estilo del informe (mismo aspecto que las diapositivas)
+% ============================================================
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,linkcolor=deckblue,urlcolor=deckblue,citecolor=deckblue]{hyperref}
+
+\titleformat{\section}{\Large\bfseries\color{deckblue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{deckblue}}{\thesubsection}{0.6em}{}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+% Bloque de decisión (hipótesis -> evidencia -> resultado -> decisión)
+% Uso: \decisionpoint{Hipótesis}{Evidencia}{Resultado}{Decisión}
+\newcommand{\decisionpoint}[4]{%
+  \textbf{Hipótesis.} #1 \textbf{Evidencia.} #2 \textbf{Resultado.} #3 \textbf{Decisión.} #4\par}

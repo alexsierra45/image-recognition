@@ -1,0 +1,20 @@
+% Resultado final (~1 min). Fuentes: EXP-021.
+\begin{frame}{Resultado final}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.35\textwidth}
+      \begin{itemize}
+        \item Mean recall: \textbf{\res{best-mean-recall}} $\pm$ \res{best-mean-recall-std} (+\res{gain-total}~pp)
+        \item Accuracy: \res{best-val-acc} (+\res{gain-total-acc}~pp)
+        \item Brecha: de \res{phase0-gap-acc} a \res{final-gap-acc}~pp; la peor clase sigue siendo \res{final-worst-class}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/per_class_recall.png}{Recall por clase}
+        \caption{\footnotesize \figcaptionshort{per_class_recall}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Con el mismo presupuesto la brecha bajaba a \res{phase2-gap-acc}~pp; entrenar más recupera parte a cambio de mejor validación.}
+\end{frame}

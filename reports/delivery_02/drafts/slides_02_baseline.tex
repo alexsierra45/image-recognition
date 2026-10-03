@@ -1,0 +1,11 @@
+% Punto de partida (~1 min). Fuentes: EXP-010, EXP-006 (capacidad).
+\begin{frame}{Punto de partida: el modelo de la entrega 1}
+  \begin{itemize}
+    \item \res{phase0-hidden} con LeakyReLU sobre imágenes de \res{phase0-res}~$\times$~\res{phase0-res}, Adam, batch \res{phase0-batch}
+    \item Mean recall en validación: \textbf{\res{baseline-mean-recall}} (accuracy \res{phase0-val-acc})
+    \item Brecha train-val de \res{phase0-gap-acc}~pp; más capacidad solo aumentaba la memorización
+  \end{itemize}
+  \vspace{0.3cm}
+  \keymessage{Una técnica cada vez, \res{final-seeds} semillas por variante (ruido entre semillas: \res{seed-noise-pp}~pp).}
+  \speakernote{1}{Recordar de dónde venimos y cómo se mide.}
+\end{frame}
