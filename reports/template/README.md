@@ -61,10 +61,16 @@ las secciones que escribe Claude; `make sections D=NN` los instala en `sections/
    decisión). Objetivo: 8 a 10 frames de contenido en total; cada frame con `\speakernote{1}{...}`
    (los tiempos deben sumar ~10 min).
 6. **Informe**: usar `\decisionpoint{hip}{evid}{res}{dec}` para cada decisión. 4 a 6 páginas.
-7. **Pies de figura**: indicar cuántos experimentos se muestran y el criterio de selección.
+7. **Pies de figura**: indicar cuántos experimentos se muestran y el criterio de selección. En las slides, pie corto
+   `\figcaptionshort{<id>}` (`caption_slides_es`, máx. ~2 líneas: `check_bundle.py` da error si no cabe) y figura con
+   `height=0.62\textheight,keepaspectratio`. **Las viñetas de un frame solo afirman lo que muestra su figura**; lo demás,
+   en `\speakernote`.
 8. `generated/` y `figures/` se sobrescriben; `sections/` solo según las reglas de regeneración del plan
    (hash en `.build_state.json`; si el usuario editó un archivo, escribir `*.proposed.tex`).
-9. Nombres de archivo en inglés; texto en español (acentos con utf8, igual que la original).
+9. **Misma historia en informe y slides** (DEC-010): las mismas figuras y en el mismo orden (el informe es el guion de
+   la presentación). En el informe, como mucho 2 figuras por fila y solo si están relacionadas, cada una con su
+   `\caption` y `\label` (dos `minipage` en un `figure`); toda figura se cita con `\ref`. `check_bundle.py` lo comprueba.
+10. Nombres de archivo en inglés; texto en español (acentos con utf8, igual que la original).
 
 ## Qué debe rellenar Claude Code al crear una entrega
 

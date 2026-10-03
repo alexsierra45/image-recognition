@@ -2,7 +2,9 @@
 % DECISIONES (~1 min cada una; 3 o 4 en total).
 % Duplicar el frame de abajo por cada decisión relevante.
 % Estructura fija: hipótesis -> evidencia -> resultado -> decisión.
-% La figura debe ser una de las figuras CURADAS (figures/<id>.png).
+% La figura debe ser una de las figuras CURADAS (figures/<id>.png), con altura máxima (height=0.62\textheight,
+% keepaspectratio) y pie corto \figcaptionshort{<id>} (caption_slides_es en figure_specs.yaml).
+% Las viñetas solo afirman lo que se ve en la figura; el resto va a \speakernote.
 % ============================================================
 
 % ---------- Decisión (patrón con figura a la derecha) ----------
@@ -20,7 +22,7 @@
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth]{figures/capacity_curve.png}{Curva de capacidad}
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/capacity_curve.png}{Curva de capacidad}
         \caption{\footnotesize \todoslot{pie; indicar cuántos experimentos se muestran y el criterio}}
       \end{figure}
     \end{column}

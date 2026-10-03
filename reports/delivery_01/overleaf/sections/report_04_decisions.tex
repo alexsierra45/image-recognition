@@ -16,9 +16,10 @@ consideran concluyentes~\cite{bouthillier}. El Cuadro~\ref{tab:phases} resume lo
 \subsection{Normalización y punto de parada (fase 1)}
 \decisionpoint{con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura~\cite{lecun}; y unos callbacks
 que no actúan dejan sin usar la información de validación.}
-{la pérdida del baseline, del orden de \res{baseline-train-loss}, y una \emph{learning rate} que no cambia en todo el
-entrenamiento.}
-{escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} sube el \emph{mean recall} \res{gain-normalisation}~pp.
+{la pérdida de entrenamiento del baseline se queda en torno a \res{baseline-train-loss} durante todo el entrenamiento
+(Figura~\ref{fig:normalisation}), y la \emph{learning rate} no cambia nunca.}
+{escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} baja la pérdida dos órdenes de magnitud
+(Figura~\ref{fig:normalisation}) y sube el \emph{mean recall} \res{gain-normalisation}~pp.
 Con paciencias acordes a la duración del entrenamiento, \emph{ReduceLROnPlateau} reduce la \emph{learning rate} al
 estancarse la validación, desaparecen las oscilaciones y ninguna clase queda sin predecir (recall mínimo
 \res{phase1-min-recall}). Vigilar el \emph{mean recall} dio el mejor resultado (\res{phase1-mean-recall}, frente a
@@ -27,32 +28,44 @@ una sola semilla, diferencia pequeña), y es además la métrica de decisión.}
 {\texttt{Rescaling} dentro del modelo; \emph{EarlyStopping} y \emph{ReduceLROnPlateau} sobre el \emph{mean recall}
 de validación, y se conserva la mejor época.}
 
+\textbf{Punto de parada.} En el modelo final (Figura~\ref{fig:stopping}, semilla~1) se ve cómo decide la validación: hasta la época
+\res{stop-last-joint-epoch} train y validación suben juntas; al estancarse la validación, \emph{ReduceLROnPlateau}
+divide la \emph{learning rate} por 10 y llega la mejor época (\res{stop-best-epoch}); después solo mejora train
+(\emph{accuracy} \res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}, con validación en
+\res{stop-val-acc-best} $\rightarrow$ \res{stop-val-acc-end}), así que \emph{EarlyStopping} (paciencia
+\res{final-es-patience}) para en la época \res{stop-epoch} y se conserva la \res{stop-best-epoch}.
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}[t]{0.485\linewidth}
+    \centering
+    \safegraphics[width=\linewidth]{figures/normalisation.png}{Pérdida con y sin escalado}
+    \caption{\figcaption{normalisation}}
+    \label{fig:normalisation}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.485\linewidth}
+    \centering
+    \safegraphics[width=\linewidth]{figures/stopping.png}{Punto de parada}
+    \caption{\figcaption{stopping}}
+    \label{fig:stopping}
+  \end{minipage}
+\end{figure}
+
 \subsection{Resolución de entrada (fase 2)}
 \decisionpoint{a \res{res224-res}~$\times$~\res{res224-res}, una capa oculta (\res{res224-hidden}) tiene
 \res{res224-params} parámetros para \res{n-train} imágenes: demasiada varianza.}
-{al subir la resolución baja también la \emph{accuracy} de train (\res{res224-train-acc} a \res{res224-res} píxeles):
+{al subir la resolución baja también el \emph{mean recall} de train (Figura~\ref{fig:resolution}) y la \emph{accuracy}
+de train (\res{res224-train-acc} a \res{res224-res} píxeles):
 es un problema de optimización, porque la mayoría de las ReLU queda inactiva.}
 {el máximo está en \res{phase2-res}~$\times$~\res{phase2-res}, con un \emph{mean recall} de \res{phase2-mean-recall}
 (+\res{gain-resolution}~pp sobre la fase~1), y se mantiene aunque cada resolución use su mejor \emph{learning rate}
 (\res{res32-lr3e-4-mean-recall} a \res{res32-lr3e-4-res} y \res{res64-lr1e-4-mean-recall} a \res{res64-lr1e-4-res};
-Figura~\ref{fig:arch}, izquierda).}
+Figura~\ref{fig:resolution}).}
 {entrada de \res{phase2-res}~$\times$~\res{phase2-res}, el mayor salto individual.}
-
-\begin{figure}[t]
-  \centering
-  \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/resolution_sweep.png}{Barrido de resolución}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/capacity.png}{Curva de capacidad}
-  \end{minipage}
-  \caption{Izquierda: \figcaption{resolution_sweep} Derecha: \figcaption{capacity}}
-  \label{fig:arch}
-\end{figure}
 
 \subsection{Arquitectura y activación (fases 3 y 4)}
 \decisionpoint{más capacidad (más anchura o más capas) debería mejorar la validación mientras no haya sobreajuste.}
-{con más parámetros la validación se estanca y train sigue subiendo (Figura~\ref{fig:arch}, derecha): la red de
+{con más parámetros la validación se estanca y train sigue subiendo (Figura~\ref{fig:capacity}): la red de
 \res{big3layer-n-hidden} capas (\res{big3layer-hidden}) llega a una \emph{accuracy} de train de
 \res{big3layer-train-acc} con el mismo \emph{mean recall} (\res{big3layer-mean-recall}) que \res{phase3-hidden}.}
 {\res{phase3-hidden} (\res{phase3-mean-recall}, +\res{gain-depth}~pp sobre una sola capa) empata con la red mayor con
@@ -61,12 +74,28 @@ sola capa ancha (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}). Leaky
 \res{phase4-mean-recall}.}
 {\res{phase3-hidden} con LeakyReLU e inicialización de He.}
 
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}[t]{0.485\linewidth}
+    \centering
+    \safegraphics[width=\linewidth]{figures/resolution_sweep.png}{Barrido de resolución}
+    \caption{\figcaption{resolution_sweep}}
+    \label{fig:resolution}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.485\linewidth}
+    \centering
+    \safegraphics[width=\linewidth]{figures/capacity.png}{Curva de capacidad}
+    \caption{\figcaption{capacity}}
+    \label{fig:capacity}
+  \end{minipage}
+\end{figure}
+
 \subsection{Algoritmo de optimización y parámetros de entrenamiento (fase 5)}
 \decisionpoint{la \emph{learning rate} es el hiperparámetro más influyente, y el optimizador y el batch fijan el coste
 de cada experimento.}
 {con hasta \res{adam-lr3e-4-epochs-cap} épocas, Adam es casi insensible a la \emph{learning rate}
 (mejor \res{adam-lr3e-4-mean-recall}) y SGD con momentum tiene un óptimo marcado (\res{sgd-m09-mean-recall} a
-\res{sgd-m09-lr}; Figura~\ref{fig:train}, izquierda). Repetidos con \res{final-seeds} semillas, los dos finalistas
+\res{sgd-m09-lr}; Figura~\ref{fig:lr}). Repetidos con \res{final-seeds} semillas, los dos finalistas
 empatan dentro del ruido.}
 {Adam con $\beta_1$ = \res{final-beta1} y un batch de \res{final-batch} (\emph{learning rate} \res{final-lr}, escalada
 con la raíz del batch) hace cada época \res{speedup-batch256} veces más rápida que con batch \res{phase4-batch}, a
@@ -75,14 +104,10 @@ cambio de unos \res{cost-batch256}~pp. Ningún \emph{schedule} ni otro ajuste de
 {Adam con AMSGrad, $\beta_1$ = \res{final-beta1}, batch \res{final-batch}: la menor varianza entre semillas y la
 rapidez permiten decidir con varias semillas.}
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
   \centering
-  \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/lr_sweep.png}{Barrido de learning rate}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/stopping.png}{Punto de parada}
-  \end{minipage}
-  \caption{Izquierda: \figcaption{lr_sweep} Derecha: \figcaption{stopping}}
-  \label{fig:train}
+  \safegraphics[width=0.5\linewidth]{figures/lr_sweep.png}{Barrido de learning rate}
+  \caption{\figcaption{lr_sweep}}
+  \label{fig:lr}
 \end{figure}
+

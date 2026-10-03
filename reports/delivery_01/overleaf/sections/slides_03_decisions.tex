@@ -1,90 +1,114 @@
 % DECISIONES (~1 min cada una). Hipótesis -> evidencia -> resultado -> decisión.
-% Fuentes: EXP-002, EXP-003, EXP-005, EXP-006, EXP-007, EXP-008..EXP-010 (LOGBOOK.md).
+% Regla: las viñetas solo afirman lo que se ve en la figura de la diapositiva; el resto va a la nota del orador.
+% Figuras con altura máxima y pie corto (\figcaptionshort) para que figura + pie quepan en el frame.
+% Fuentes: EXP-001..EXP-003, EXP-005, EXP-006, EXP-008..EXP-010 (LOGBOOK.md).
 
-\begin{frame}{Normalizar la entrada y parar con la validación}
+\begin{frame}{Normalizar la entrada}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.42\textwidth}
       \begin{itemize}
-        \item \textbf{Hipótesis}: píxeles en $[0, 255]$ saturan la softmax
-        \item \textbf{Evidencia}: \texttt{Rescaling(1/255)}: +\res{gain-normalisation}~pp
-        \item \textbf{Resultado}: callbacks sobre el mean recall: la lr baja al estancarse y se para a tiempo
+        \item \textbf{Hipótesis}: con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura
+        \item \textbf{Evidencia}: con píxeles crudos la pérdida de train no baja de $\sim$\res{baseline-train-loss}
+        \item \textbf{Resultado}: con \texttt{Rescaling(1/255)} es dos órdenes de magnitud menor y baja al reducir la lr
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{EarlyStopping (paciencia \res{final-es-patience}) y se conserva la mejor época.}
+      \decisionblock{\texttt{Rescaling(1/255)} dentro del modelo: +\res{gain-normalisation}~pp de mean recall.}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth]{figures/stopping.png}{Punto de parada}
-        \caption{\footnotesize \figcaption{stopping}}
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/normalisation.png}{Pérdida con y sin escalado}
+        \caption{\footnotesize \figcaptionshort{normalisation}}
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Vigilar el mean recall dio algo más que vigilar la pérdida o la accuracy, y es la métrica de decisión. La figura es del modelo final: cada semilla para \res{final-es-patience} épocas después de su mejor época.}
+  \speakernote{1}{Lo razonable sería $\ln 13 \approx$ \res{chance-loss}. Al estar dentro del modelo, train, validación y test reciben el mismo preprocesado. La caída final de la curva naranja es ReduceLROnPlateau actuando.}
+\end{frame}
+
+\begin{frame}{Cuándo parar: lo decide la validación}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.42\textwidth}
+      \begin{itemize}
+        \item Hasta la época \res{stop-last-joint-epoch}, train y validación suben juntas
+        \item Al estancarse la validación, la lr baja $\times$0,1: último salto, mejor época (\res{stop-best-epoch})
+        \item Después solo mejora train (\res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}); validación, plana: memoriza
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{EarlyStopping (paciencia \res{final-es-patience}) sobre el mean recall: para en la época \res{stop-epoch} y recupera la \res{stop-best-epoch}.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/stopping.png}{Punto de parada}
+        \caption{\footnotesize \figcaptionshort{stopping}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{La brecha train-val pasa de \res{stop-gap-best}~pp en la mejor época a \res{stop-gap-end}~pp al parar. Las dos bajadas de lr posteriores ya no cambian nada. En el baseline los callbacks no podían actuar (paciencias \res{baseline-es-patience} y \res{baseline-rlr-patience} con \res{baseline-epochs-cap} épocas). Se vigila el mean recall porque es la métrica de decisión; vigilar la pérdida o la accuracy dio algo menos (una semilla). Las semillas 2 y 3 siguen el mismo patrón.}
 \end{frame}
 
 \begin{frame}{Reducir la resolución de entrada}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.42\textwidth}
       \begin{itemize}
-        \item \textbf{Hipótesis}: con tantas entradas, sobra varianza
-        \item \textbf{Evidencia}: a \res{res224-res} píxeles también cae train: casi todas las ReLU mueren
-        \item \textbf{Resultado}: \res{phase2-res}~$\times$~\res{phase2-res}: +\res{gain-resolution}~pp, aun con la mejor lr de cada tamaño
+        \item \textbf{Hipótesis}: a \res{res224-res}~$\times$~\res{res224-res} sobran parámetros y varianza
+        \item \textbf{Evidencia}: al subir la resolución cae también train: no es sobreajuste
+        \item \textbf{Resultado}: máximo en \res{phase2-res}~$\times$~\res{phase2-res}, también con la mejor lr de cada tamaño (rombos)
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{Entrada de \res{phase2-res}~$\times$~\res{phase2-res}: el mayor salto.}
+      \decisionblock{Entrada de \res{phase2-res}~$\times$~\res{phase2-res}: +\res{gain-resolution}~pp, el mayor salto.}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth]{figures/resolution_sweep.png}{Barrido de resolución}
-        \caption{\footnotesize \figcaption{resolution_sweep}}
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/resolution_sweep.png}{Barrido de resolución}
+        \caption{\footnotesize \figcaptionshort{resolution_sweep}}
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{La caída con la resolución es de optimización, no de sobreajuste.}
+  \speakernote{1}{La caída es de optimización: a \res{res224-res} píxeles casi todas las ReLU de la capa oculta quedan inactivas (medido con los modelos guardados). Todas las curvas con una capa oculta de 256.}
 \end{frame}
 
-\begin{frame}{Arquitectura: profundidad antes que anchura}
+\begin{frame}{Arquitectura: más capacidad no generaliza más}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.42\textwidth}
       \begin{itemize}
         \item \textbf{Hipótesis}: más capacidad, mejor validación
-        \item \textbf{Evidencia}: train sube hasta \res{big3layer-train-acc}; validación se estanca
-        \item \textbf{Resultado}: \res{phase3-hidden} empata con la red mayor (\res{phase3-mean-recall}); LeakyReLU evita ReLU muertas
+        \item \textbf{Evidencia}: train sube hasta \res{big3layer-train-acc}; validación se queda en $\sim$\res{phase3-val-acc}
+        \item \textbf{Resultado}: por encima de $\sim 2\cdot 10^5$ parámetros la validación ya no mejora
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{\res{phase3-hidden} con LeakyReLU (\res{phase3-params} parámetros).}
+      \decisionblock{\res{phase3-hidden} (\res{phase3-params} parámetros), con LeakyReLU.}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth]{figures/capacity.png}{Curva de capacidad}
-        \caption{\footnotesize \figcaption{capacity}}
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/capacity.png}{Curva de capacidad}
+        \caption{\footnotesize \figcaptionshort{capacity}}
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Leer la curva de capacidad: la separación entre train y validación crece con los parámetros.}
+  \speakernote{1}{En mean recall, \res{phase3-hidden} da \res{phase3-mean-recall}, lo mismo que la red mayor (\res{big3layer-hidden}) con muchos menos parámetros, y más que una sola capa de 512 (\res{onelayer512-mean-recall}). La fase 4 cambió la activación a LeakyReLU, que evita las ReLU muertas (\res{phase4-mean-recall}).}
 \end{frame}
 
-\begin{frame}{Optimizador y parámetros de entrenamiento}
+\begin{frame}{Optimizador y learning rate}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.42\textwidth}
       \begin{itemize}
         \item \textbf{Hipótesis}: la learning rate es el hiperparámetro clave
-        \item \textbf{Evidencia}: Adam casi insensible a la lr; SGD + momentum con un óptimo marcado
-        \item \textbf{Resultado}: empatan dentro del ruido (\res{seed-noise-pp}~pp entre semillas)
+        \item \textbf{Evidencia}: Adam apenas cambia entre $10^{-4}$ y $10^{-2}$
+        \item \textbf{Resultado}: SGD + momentum tiene un óptimo marcado en \res{sgd-m09-lr}
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{Adam, $\beta_1$ = \res{final-beta1}, batch \res{final-batch}: épocas \res{speedup-batch256} veces más rápidas.}
+      \decisionblock{Adam (robusto a la lr), $\beta_1$ = \res{final-beta1}, batch \res{final-batch}.}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth]{figures/lr_sweep.png}{Barrido de learning rate}
-        \caption{\footnotesize \figcaption{lr_sweep}}
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/lr_sweep.png}{Barrido de learning rate}
+        \caption{\footnotesize \figcaptionshort{lr_sweep}}
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{El batch grande cuesta unos \res{cost-batch256}~pp frente a batch \res{phase4-batch}, pero permite decidir con \res{final-seeds} semillas. Ningún schedule mejoró a ReduceLROnPlateau.}
+  \speakernote{1}{Con una semilla SGD parece mejor, pero repetidos con \res{final-seeds} semillas Adam y SGD empatan (ruido de \res{seed-noise-pp}~pp); Adam tiene menos varianza. El batch \res{final-batch} hace las épocas \res{speedup-batch256} veces más rápidas a cambio de unos \res{cost-batch256}~pp frente a batch \res{phase4-batch}.}
 \end{frame}

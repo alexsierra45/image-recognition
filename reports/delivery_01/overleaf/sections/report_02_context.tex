@@ -5,10 +5,17 @@ clases de objetos con una red \emph{feedforward}, eligiendo su arquitectura, el 
 parámetros de entrenamiento, y usando un conjunto de validación para ajustar los hiperparámetros y decidir cuándo
 parar. Hay \res{n-images} imágenes etiquetadas, muy desbalanceadas: la clase más frecuente (\res{class-max-name},
 \res{class-max-count}) tiene \res{imbalance-ratio} veces más ejemplos que la menos frecuente (\res{class-min-name},
-\res{class-min-count}). Se separa un \res{valid-share}\,\% para validación con un \emph{split} estratificado y
+\res{class-min-count}; Figura~\ref{fig:classes}). Se separa un \res{valid-share}\,\% para validación con un \emph{split} estratificado y
 semilla fija (\res{n-train} imágenes de entrenamiento y \res{n-valid} de validación), de modo que cada clase conserva
 su proporción. El conjunto de test (\res{n-test} imágenes) no tiene etiquetas locales y no se usa para decidir nada.
 
 Por el desbalance, la métrica guía es el \emph{mean recall} (recall medio por clase), cuyo valor por azar es
 \res{chance-mean-recall}; predecir siempre la clase mayoritaria da una \emph{accuracy} de \res{majority-acc}. Todas
 las cifras de este informe son de validación.
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=0.5\linewidth]{figures/class_distribution.png}{Distribución de clases}
+  \caption{\figcaption{class_distribution}}
+  \label{fig:classes}
+\end{figure}

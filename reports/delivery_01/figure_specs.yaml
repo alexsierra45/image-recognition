@@ -7,6 +7,21 @@
   type: class_distribution
   layout: half
   caption_es: "Imágenes por clase en el conjunto de entrenamiento."
+  caption_slides_es: "Imágenes por clase (train)."
+
+- id: normalisation
+  type: learning_curves
+  select:
+    runs:
+      - {variant: EXP-001, label: "raw pixels [0, 255]"}
+      - {variant: EXP-002, label: "Rescaling(1/255)"}
+  # Training loss only: the validation loss of experiment_utils.EpochMetrics clips probabilities at 1e-7 (max ~16),
+  # so with a saturated softmax it is not comparable with the training loss computed by Keras (ISS-007).
+  options: {metric: loss, show_train: true, show_val: false, logy: true, title: "Phase 1: training loss, raw vs rescaled pixels",
+            criterion: "baseline vs the same model with Rescaling (1 seed each, the runs of EXP-001 and EXP-002)"}
+  layout: half
+  caption_es: "Pérdida de train por época del baseline con píxeles crudos y escalados a [0, 1] (escala logarítmica)."
+  caption_slides_es: "Pérdida de train por época: píxeles crudos frente a escalados."
 
 - id: resolution_sweep
   type: sweep
@@ -17,13 +32,15 @@
     best_lr_per_x: true                 # plus, per size, its best lr from the joint grid
   options: {logx: true, show_train: true, xlabel: "input resolution (side, log)", title: "Phase 2: mean recall vs input resolution"}
   layout: half
-  caption_es: "Mean recall de validación (continua) y de train (discontinua) según la resolución de entrada, con una capa oculta de 256."
+  caption_es: "Mean recall de validación (continua) y train (discontinua) según la resolución, con una capa de 256."
+  caption_slides_es: "Mean recall según la resolución de entrada (10 de 16 runs)."
 
 - id: capacity
   type: capacity
   select: {exp_id: EXP-006}
   layout: half
-  caption_es: "Accuracy de train (discontinua) y de validación (continua) de las 12 arquitecturas probadas según su número de parámetros, una línea por número de capas ocultas."
+  caption_es: "Accuracy de train (discontinua) y validación (continua) de 12 arquitecturas según sus parámetros."
+  caption_slides_es: "Accuracy según los parámetros (12 arquitecturas)."
 
 - id: lr_sweep
   type: group_sweep
@@ -35,22 +52,26 @@
   options: {logx: true, xlabel: "learning rate (log)", title: "Phase 5: mean recall vs learning rate (<= 20 epochs)"}
   layout: half
   caption_es: "Mean recall de validación (continua) y de train (discontinua) según la learning rate, para Adam y SGD con momentum (los 8 runs de la fase 5.1, entrenamientos de hasta 20 épocas)."
+  caption_slides_es: "Mean recall según la learning rate (8 runs, hasta 20 épocas)."
 
 - id: stopping
   type: stopping
-  select: {variant: EXP-010_bs256_sqrt_60ep}
-  options: {metric: mean_recall, title: "Final model: validation mean recall per epoch (3 seeds)"}
+  select: {run: EXP-010_bs256_sqrt_60ep}   # seed 1 = the run reproduced by the notebook
+  options: {title: "Final model (seed 1): when to stop"}
   layout: half
-  caption_es: "Punto de parada del modelo final: mean recall de validación por época para cada semilla. La estrella marca la mejor época (la que se conserva) y la cruz, la época en que se detiene EarlyStopping."
+  caption_es: "Modelo final (semilla 1): accuracy de train y validación y mean recall de validación por época. Punteado: bajadas de la lr; estrella: época conservada; cruz: parada."
+  caption_slides_es: "Semilla 1. Sombreado: tras la mejor época solo mejora train."
 
 - id: progress
   type: progress
   options: {title: "Progress: validation metric after each phase (phases 4-5: mean of 3 seeds)"}
   layout: full
   caption_es: "Mean recall y accuracy de validación tras cada fase (fases 4 y 5: media de 3 semillas)."
+  caption_slides_es: "Mean recall y accuracy de validación tras cada fase."
 
 - id: per_class_recall
   type: per_class_recall
   select: {baseline: EXP-001, final: EXP-010_bs256_sqrt_60ep}
   layout: full
   caption_es: "Recall de validación por clase: baseline frente al modelo final (media de 3 semillas)."
+  caption_slides_es: "Recall de validación por clase: baseline frente a final."

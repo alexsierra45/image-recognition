@@ -55,6 +55,38 @@ def hidden_tex(h):
     return '--'.join(map(str, h))
 
 
+def describe_model(c, n_classes):
+    """Spanish one-line description of a ffNN config (pdfLaTeX-safe)."""
+    act = {'relu': 'ReLU', 'leaky_relu': 'LeakyReLU(%s)' % num(c.get('leaky_alpha', 0.1), 1), 'elu': 'ELU', 'gelu': 'GELU',
+           'selu': 'SELU', 'tanh': 'tanh'}[c['activation']]
+    parts = ['Rescaling'] if c['norm'] == 'scale' else []
+    parts.append('Flatten')
+    if c.get('input_relu'):
+        parts.append('ReLU')
+    if c['hidden']:
+        block = 'Dense' + (' $\\rightarrow$ BatchNorm' if c['bn'] == 'before' else '') + ' $\\rightarrow$ ' + act + \
+                (' $\\rightarrow$ BatchNorm' if c['bn'] == 'after' else '') + \
+                (' $\\rightarrow$ Dropout(%s)' % num(c['dropout'], 1) if c['dropout'] else '')
+        parts.append('%s [%s]' % (hidden_tex(c['hidden']), block))
+    parts.append('Dense(%d) $\\rightarrow$ softmax' % n_classes)
+    return ' $\\rightarrow$ '.join(parts)
+
+
+def describe_training(c):
+    o = c['optimizer']
+    name = {'adam': 'Adam' + (' (AMSGrad)' if o.get('amsgrad') else ''), 'adamw': 'AdamW', 'sgd': 'SGD', 'rmsprop': 'RMSprop'}[o['name']]
+    extra = []
+    if c.get('augment'):
+        extra.append('augmentation: ' + ', '.join({'flip': 'volteos', 'rot90': 'rotaciones de 90$^\\circ$', 'color': 'brillo y contraste'}[a]
+                                                  for a in c['augment']))
+    if c.get('l2'):
+        extra.append('L2 %s' % sci(c['l2']))
+    if c.get('class_weight'):
+        extra.append('pesos de clase (%s)' % c['class_weight'])
+    return '%s, lr %s, batch %d, hasta %d épocas' % (name, sci(o['lr']), c['batch_size'], c['epochs']) + \
+        ''.join('; ' + e for e in extra)
+
+
 def thousands(n):
     return '{:,}'.format(int(n)).replace(',', '\\,')
 
@@ -158,6 +190,9 @@ def main(delivery_dir):
             M.add('%s-%s' % (key, name), num(m, d), dict(src, column=col, stat='mean'))
             if n > 1 and col != 's_per_epoch':
                 M.add('%s-%s-std' % (key, name), num(s, fmt['std']), dict(src, column=col, stat='std'))
+        tr_m, _, _ = data.stat(var, 'train_acc')
+        va_m, _, _ = data.stat(var, 'val_acc')
+        M.add('%s-gap-acc' % key, num(100 * (tr_m - va_m), fmt['pp']), dict(src, formula='100*(train_acc-val_acc)', stat='mean'))
         m, _, n = data.stat(var, 'params')
         M.add('%s-params' % key, thousands(m), dict(src, column='params'))
         M.add('%s-seeds' % key, str(n), dict(src, column='id', stat='count'))
@@ -171,6 +206,7 @@ def main(delivery_dir):
             M.add('%s-%s' % (key, name), str(c[ck]), dict(src, column='config.' + ck))
         M.add('%s-beta1' % key, num(c['optimizer']['beta_1'], 2), dict(src, column='config.optimizer.beta_1'))
         M.add('%s-dropout' % key, num(c['dropout'], 1), dict(src, column='config.dropout'))
+        M.add('%s-l2' % key, sci(c['l2']) if c['l2'] else '0', dict(src, column='config.l2'))
         m, _, _ = data.stat(var, 'best_epoch')
         M.add('%s-best-epoch' % key, num(m, 0), dict(src, column='best_epoch', stat='mean'))
 
@@ -248,7 +284,8 @@ def main(delivery_dir):
         rows.append([label, pm(data, cfg['baseline_experiment'], col, fmt['metric'], fmt['std']),
                      pm(data, variants['final'], col, fmt['metric'], fmt['std'])])
     rows.append(['Parámetros', thousands(data.stat(cfg['baseline_experiment'], 'params')[0]), thousands(data.stat(variants['final'], 'params')[0])])
-    table(os.path.join(out, 'tables', 'baseline_vs_final.tex'), ['', 'Baseline (EXP-001)', 'Modelo final (EXP-018)'], rows, 'lcc')
+    table(os.path.join(out, 'tables', 'baseline_vs_final.tex'),
+          ['', 'Punto de partida (%s)' % tex(cfg['baseline_experiment']), 'Modelo final (%s)' % tex(variants['final'])], rows, 'lcc')
     order = sorted(range(len(names)), key=lambda k: rec_f[k] - rec_b[k], reverse=True)
     rows = [[names[k], str(support[k]), num(rec_b[k], fmt['metric']), num(rec_f[k], fmt['metric']),
              ('+' if rec_f[k] >= rec_b[k] else '') + num(rec_f[k] - rec_b[k], fmt['metric'])] for k in order]
@@ -262,17 +299,19 @@ def main(delivery_dir):
                  ('best-val-acc', 'final-val-acc'), ('best-val-acc-std', 'final-val-acc-std'), ('n-experiments', 'n-runs')]:
         M.add(a, M.defs[b], dict(M.index[b], alias_of=b))
 
-    # Baseline summary table (template: report_03_baseline.tex)
+    # Baseline summary table (template: report_03_baseline.tex), described from the run config
     b = cfg['baseline_experiment']
     bc = json.loads(data.rows[data.runs(b)[0]]['config'])
-    rows = [['Modelo', tex('Flatten → ReLU → Dense(%d) → softmax' % len(names))],
-            ['Entrada', '%d $\\times$ %d $\\times$ 3, píxeles en [0, 255]' % (bc['res'], bc['res'])],
+    rows = [['Modelo', describe_model(bc, len(names))],
+            ['Entrada', '%d $\\times$ %d $\\times$ 3, %s' % (bc['res'], bc['res'],
+                        'píxeles en [0, 255]' if bc['norm'] == 'raw' else 'escalada a [0, 1]')],
             ['Parámetros', thousands(data.stat(b, 'params')[0])],
-            ['Optimizador', 'Adam (AMSGrad), lr %s, batch %d, %d épocas' % (sci(bc['optimizer']['lr']), bc['batch_size'], bc['epochs'])],
-            ['Mean recall (val)', num(data.stat(b, 'mean_recall')[0], fmt['metric'])],
-            ['Accuracy (val)', num(data.stat(b, 'val_acc')[0], fmt['metric'])],
-            ['Recall mínimo por clase', num(data.stat(b, 'min_recall')[0], fmt['metric'])]]
-    table(os.path.join(out, 'tables', 'baseline_summary.tex'), ['', 'Baseline (%s)' % tex(b)], rows, 'll')
+            ['Entrenamiento', describe_training(bc)],
+            ['Mean recall (val)', pm(data, b, 'mean_recall', fmt['metric'], fmt['std'])],
+            ['Accuracy (val)', pm(data, b, 'val_acc', fmt['metric'], fmt['std'])],
+            ['Accuracy (train)', pm(data, b, 'train_acc', fmt['metric'], fmt['std'])],
+            ['Recall mínimo por clase', pm(data, b, 'min_recall', fmt['metric'], fmt['std'])]]
+    table(os.path.join(out, 'tables', 'baseline_summary.tex'), ['', 'Punto de partida (%s)' % tex(b)], rows, 'lp{0.62\\linewidth}')
 
     # Meta (macro names of the template: generated/meta.tex)
     date = cfg.get('date', 'auto')
@@ -283,6 +322,24 @@ def main(delivery_dir):
         ofs.write('\\newcommand{\\DeliveryShortTitle}{%s}\n' % tex(cfg.get('short_title_es', cfg['title_es'])))
         ofs.write('\\newcommand{\\DeliverySubtitle}{%s}\n' % tex(cfg.get('subtitle_es', 'Entrega \\DeliveryNumber')).replace('\\textbackslash{}', '\\'))
         ofs.write('\\newcommand{\\DeliveryDate}{%s}\n' % ('\\today' if date == 'auto' else tex(date)))
+    # Stopping point of one run (delivery.yaml: stopping_run), for the stopping figure
+    if cfg.get('stopping_run'):
+        r = cfg['stopping_run']
+        h = data.history(r)
+        H = h['history']
+        b = int(h['best_epoch'])
+        src = {'source': 'history/%s.json' % r}
+        drops = [k + 1 for k in range(1, len(H['learning_rate'])) if H['learning_rate'][k] < 0.5 * H['learning_rate'][k - 1]]
+        M.add('stop-best-epoch', str(b), dict(src, field='best_epoch'))
+        M.add('stop-epoch', str(len(H['accuracy'])), dict(src, field='len(history)'))
+        M.add('stop-last-joint-epoch', str(drops[0] - 1), dict(src, field='last epoch before the first lr reduction'))
+        M.add('stop-first-lr-drop', str(drops[0]), dict(src, field='first epoch with the reduced lr'))
+        for name, i in [('best', b - 1), ('end', len(H['accuracy']) - 1)]:
+            M.add('stop-train-acc-%s' % name, num(H['accuracy'][i], fmt['metric']), dict(src, field='history.accuracy[%d]' % i))
+            M.add('stop-val-acc-%s' % name, num(H['val_accuracy'][i], fmt['metric']), dict(src, field='history.val_accuracy[%d]' % i))
+            M.add('stop-gap-%s' % name, num(100 * (H['accuracy'][i] - H['val_accuracy'][i]), fmt['pp']),
+                  dict(src, field='train - val accuracy at epoch %d, pp' % (i + 1)))
+        M.add('stop-val-recall-best', num(H['val_mean_recall'][b - 1], fmt['metric']), dict(src, field='history.val_mean_recall'))
     M.write(os.path.join(out, 'results_macros.tex'))
     with open(os.path.join(delivery_dir, 'results_index.json'), 'w', encoding='utf-8') as ofs:
         json.dump({'generated': datetime.datetime.now().isoformat(timespec='seconds'), 'keys': M.index}, ofs, indent=1, ensure_ascii=False)

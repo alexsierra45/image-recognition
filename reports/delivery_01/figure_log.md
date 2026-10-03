@@ -5,6 +5,11 @@
 - Included: all 13 classes (annotations file)
 - Omitted: none
 
+## normalisation (learning_curves)
+- Criterion: baseline vs the same model with Rescaling (1 seed each, the runs of EXP-001 and EXP-002)
+- Included: EXP-001, EXP-002
+- Omitted: none
+
 ## resolution_sweep (sweep)
 - Criterion: main sweep at lr 1e-3; per size, the lr with the best validation mean recall
 - Included: EXP-005_r8, EXP-005_r16, EXP-005_r24, EXP-005_r32, EXP-005_r48, EXP-005_r64, EXP-005_r112, EXP-005_r224, EXP-005_r32_lr3e-4, EXP-005_r64_lr1e-4
@@ -21,9 +26,9 @@
 - Omitted: seed repetitions
 
 ## stopping (stopping)
-- Criterion: every seed of EXP-010_bs256_sqrt_60ep; star = checkpoint kept, x = EarlyStopping
-- Included: EXP-010_bs256_sqrt_60ep, EXP-010_bs256_sqrt_60ep_seed2, EXP-010_bs256_sqrt_60ep_seed3
-- Omitted: none
+- Criterion: seed 1 of the final model = the run reproduced by ffNN_example.ipynb
+- Included: EXP-010_bs256_sqrt_60ep
+- Omitted: seeds 2 and 3 (best epochs 31 and 32; same pattern)
 
 ## progress (progress)
 - Criterion: winner of each phase (delivery.yaml)

@@ -10,6 +10,7 @@ subtitle_es: "Entrega 1: red feedforward (ffNN)"
 date: auto                       # or a fixed date, e.g. "3 de octubre de 2026"
 baseline_experiment: EXP-001     # EXP-000 used another (non-stratified) split: not mixed in tables or figures
 final_experiment: EXP-010_bs256_sqrt_60ep
+stopping_run: EXP-010_bs256_sqrt_60ep   # seed 1, the run reproduced by the notebook
 previous_delivery: null
 highlight_phases: [1, 2, 3, 5]
 

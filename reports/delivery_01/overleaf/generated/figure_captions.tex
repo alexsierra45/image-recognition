@@ -1,9 +1,20 @@
 % >>> ARCHIVO GENERADO por scripts/build_figures.py. Se sobrescribe siempre (se carga desde results_macros.tex). <<<
 \renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}
+% \figcaptionshort{id}: short caption for the slides (caption_slides_es; falls back to the long one)
+\providecommand{\figcaptionshort}[1]{\ifcsname figcapshort@#1\endcsname\csname figcapshort@#1\endcsname\else\figcaption{#1}\fi}
 \expandafter\def\csname figcap@class_distribution\endcsname{Imágenes por clase en el conjunto de entrenamiento.}
-\expandafter\def\csname figcap@resolution_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la resolución de entrada, con una capa oculta de 256. Se muestran 10 de 16 runs: todas las resoluciones con lr = 1e-3 y, en las resoluciones con varias lr probadas, la de mejor mean recall de validación.}
-\expandafter\def\csname figcap@capacity\endcsname{Accuracy de train (discontinua) y de validación (continua) de las 12 arquitecturas probadas según su número de parámetros, una línea por número de capas ocultas.}
+\expandafter\def\csname figcapshort@class_distribution\endcsname{Imágenes por clase (train).}
+\expandafter\def\csname figcap@normalisation\endcsname{Pérdida de train por época del baseline con píxeles crudos y escalados a [0, 1] (escala logarítmica).}
+\expandafter\def\csname figcapshort@normalisation\endcsname{Pérdida de train por época: píxeles crudos frente a escalados.}
+\expandafter\def\csname figcap@resolution_sweep\endcsname{Mean recall de validación (continua) y train (discontinua) según la resolución, con una capa de 256. Se muestran 10 de 16 runs: todas las resoluciones con lr = 1e-3 y, en las resoluciones con varias lr probadas, la de mejor mean recall de validación.}
+\expandafter\def\csname figcapshort@resolution_sweep\endcsname{Mean recall según la resolución de entrada (10 de 16 runs).}
+\expandafter\def\csname figcap@capacity\endcsname{Accuracy de train (discontinua) y validación (continua) de 12 arquitecturas según sus parámetros.}
+\expandafter\def\csname figcapshort@capacity\endcsname{Accuracy según los parámetros (12 arquitecturas).}
 \expandafter\def\csname figcap@lr_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la learning rate, para Adam y SGD con momentum (los 8 runs de la fase 5.1, entrenamientos de hasta 20 épocas).}
-\expandafter\def\csname figcap@stopping\endcsname{Punto de parada del modelo final: mean recall de validación por época para cada semilla. La estrella marca la mejor época (la que se conserva) y la cruz, la época en que se detiene EarlyStopping.}
+\expandafter\def\csname figcapshort@lr_sweep\endcsname{Mean recall según la learning rate (8 runs, hasta 20 épocas).}
+\expandafter\def\csname figcap@stopping\endcsname{Modelo final (semilla 1): accuracy de train y validación y mean recall de validación por época. Punteado: bajadas de la lr; estrella: época conservada; cruz: parada.}
+\expandafter\def\csname figcapshort@stopping\endcsname{Semilla 1. Sombreado: tras la mejor época solo mejora train.}
 \expandafter\def\csname figcap@progress\endcsname{Mean recall y accuracy de validación tras cada fase (fases 4 y 5: media de 3 semillas).}
+\expandafter\def\csname figcapshort@progress\endcsname{Mean recall y accuracy de validación tras cada fase.}
 \expandafter\def\csname figcap@per_class_recall\endcsname{Recall de validación por clase: baseline frente al modelo final (media de 3 semillas).}
+\expandafter\def\csname figcapshort@per_class_recall\endcsname{Recall de validación por clase: baseline frente a final.}

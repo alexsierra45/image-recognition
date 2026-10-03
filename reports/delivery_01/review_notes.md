@@ -13,7 +13,7 @@ Text in Spanish is in `overleaf/sections/`; numbers come from `generated/results
 
 - **Compilation.** No LaTeX locally: `check_bundle.py` checks references, macros, `\safegraphics`/`\safetable`
   targets, environments, packages, pdfLaTeX-unsafe characters, pending `\todoslot` (none) and speaker-note minutes
-  (9 frames, 9 min). First real compilation in Overleaf (pdfLaTeX); check the report length there (~5 pages
+  (10 frames, 10 min). First real compilation in Overleaf (pdfLaTeX); check the report length there (~5 pages
   estimated; the template's `\parskip` may add some).
 - **Template additions** (outside the template's own files): `generated/results_macros.tex` loads
   `generated/figure_captions.tex` (`\figcaption{id}`); figures are `figures/<id>.png` (DEC-007). Tables are labelled
@@ -54,7 +54,10 @@ goes through `\res{}`.
 
 - Same style as the experiment plots (`plot_theme.py`), English labels, PNG at 200 dpi (DEC-007). Captions in
   Spanish. Class names as in the dataset. Selection criteria in `figure_log.md`.
-- `class_distribution` is used only in the slides.
+- `class_distribution` and `normalisation` are used only in the slides. `normalisation` shows the training loss only:
+  the validation loss of `EpochMetrics` is capped at ~16 (ISS-007).
+- Slide captions are the short `caption_slides_es`; `check_bundle.py` estimates that each fits in 2 lines, but only the
+  Overleaf compilation confirms it. Check every slide once there.
 
 ## Other
 

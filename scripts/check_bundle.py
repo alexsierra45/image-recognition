@@ -138,7 +138,33 @@ def check_text(root, path, rep, res_keys, fig_keys, labels, refs):
     return text
 
 
-def check_slides(files_text, rep):
+CAPTION_CHARS = {'column': 80, 'full': 150}   # ~2 lines of \\footnotesize in a 0.55 column / in the full text width
+
+
+def slide_captions(root, frame):
+    """Plain-text length of each \\caption in a frame, with \\figcaptionshort / \\figcaption / \\res resolved."""
+    defs = {}
+    for name in ('generated/figure_captions.tex', 'generated/results_macros.tex'):
+        path = os.path.join(root, name)
+        if os.path.exists(path):
+            for m in re.finditer(r'\\csname (figcapshort|figcap|res)@([^\\]+)\\endcsname\{(.*)\}\s*$', read(path), flags=re.M):
+                defs[(m.group(1), m.group(2))] = m.group(3)
+    out = []
+    for m in re.finditer(r'\\caption\{', frame):
+        i, depth = m.end(), 1
+        while i < len(frame) and depth:
+            depth += {'{': 1, '}': -1}.get(frame[i], 0)
+            i += 1
+        cap = frame[m.end():i - 1]
+        cap = re.sub(r'\\figcaptionshort\{([^}]*)\}', lambda k: defs.get(('figcapshort', k.group(1)), defs.get(('figcap', k.group(1)), '')), cap)
+        cap = re.sub(r'\\figcaption\{([^}]*)\}', lambda k: defs.get(('figcap', k.group(1)), ''), cap)
+        cap = re.sub(r'\\res\{([^}]*)\}', lambda k: defs.get(('res', k.group(1)), 'xxxxx'), cap)
+        cap = re.sub(r'\\[a-zA-Z]+|[{}$]', '', cap)
+        out.append(len('Figura 1: ' + ' '.join(cap.split())))
+    return out
+
+
+def check_slides(files_text, rep, root=None):
     frames = re.findall(r'\\begin\{frame\}(.*?)\\end\{frame\}', files_text, flags=re.S)
     content = [f for f in frames if '\\titlepage' not in f and 'Referencias' not in f[:200]]
     if not FRAME_MIN <= len(content) <= FRAME_MAX:
@@ -149,6 +175,14 @@ def check_slides(files_text, rep):
         name = title.group(1) if title else '#%d' % i
         m = re.search(r'\\speakernote\{(\d+(?:[.,]\d+)?)\}', f) or \
             re.search(r'\\note\{[^}]*?(\d+(?:[.,]\d+)?)\s*min', f, flags=re.S)
+        if root:
+            limit = CAPTION_CHARS['column' if '\\begin{column}' in f else 'full']
+            for n in slide_captions(root, f):
+                if n > limit:
+                    rep.err('slides: frame "%s": caption of ~%d characters, more than ~%d fit in 2 lines; use a shorter '
+                            'caption_slides_es' % (name, n, limit))
+            if re.search(r'\\(safegraphics|includegraphics)\[[^\]]*\]', f) and not re.search(r'height=[^,\]]*\\textheight', f):
+                rep.warn('slides: frame "%s": figure without a height limit (height=...\\textheight, keepaspectratio)' % name)
         if not m:
             rep.err('slides: frame "%s" has no \\speakernote{minutes}{...}' % name)
         else:
@@ -171,6 +205,52 @@ def check_report_length(files_text, rep):
     return msg
 
 
+FIG_RE = re.compile(r'\\(?:safegraphics|includegraphics)(?:\[[^\]]*\])?\{figures/([^}.]+)')
+
+
+def figure_sequence(root, main_file):
+    """Figure ids in reading order (sections in \\input order), first appearance only."""
+    seq = []
+    for path in collect(root, main_file, Report()):
+        if os.sep + 'sections' + os.sep in path:
+            for m in FIG_RE.finditer(strip_comments(read(path))):
+                if m.group(1) not in seq:
+                    seq.append(m.group(1))
+    return seq
+
+
+def check_parity(root, rep):
+    """Report and slides tell the same story: the same figures, in the same order (DEC-010)."""
+    rpt, sld = figure_sequence(root, 'report.tex'), figure_sequence(root, 'slides.tex')
+    for f in sld:
+        if f not in rpt:
+            rep.err('figure "%s" is in the slides but not in the report' % f)
+    for f in rpt:
+        if f not in sld:
+            rep.err('figure "%s" is in the report but not in the slides' % f)
+    common_r = [f for f in rpt if f in sld]
+    common_s = [f for f in sld if f in rpt]
+    if common_r != common_s:
+        rep.err('report and slides show the figures in a different order:\n    report: %s\n    slides: %s'
+                % (', '.join(common_r), ', '.join(common_s)))
+    return 'figures (same order in both): %s' % ', '.join(common_s)
+
+
+def check_report_figures(root, rep):
+    """Report: every figure float holds at most 2 images (one row) and every figure label is cited with \\ref."""
+    text = '\n'.join(strip_comments(read(p)) for p in collect(root, 'report.tex', Report()))
+    for fl in re.findall(r'\\begin\{figure\}.*?\\end\{figure\}', text, flags=re.S):
+        n = len(FIG_RE.findall(fl))
+        if n > 2:
+            rep.err('report: a figure float holds %d images (max. 2 per row)' % n)
+        if n == 2 and len(re.findall(r'\\caption\{', fl)) < 2:
+            rep.warn('report: two images share one caption; give each its own \\caption and \\label')
+    labels = set(re.findall(r'\\label\{(fig:[^}]+)\}', text))
+    refs = set(re.findall(r'\\ref\{(fig:[^}]+)\}', text))
+    for l in sorted(labels - refs):
+        rep.err('report: figure \\label{%s} is never cited with \\ref in the text' % l)
+
+
 def main(delivery_dir):
     root = os.path.join(delivery_dir, 'overleaf')
     rep = Report()
@@ -191,10 +271,13 @@ def main(delivery_dir):
         body_text = '\n'.join(t for p, t in zip(collect(root, main_file, Report()), texts)
                               if os.sep + 'sections' + os.sep in p)
         if kind == 'slides':
-            n, total = check_slides(allt, rep)
+            n, total = check_slides(allt, rep, root)
             summary.append('slides: %d content frames, speaker notes %.1f min' % (n, total))
         else:
             summary.append(check_report_length(body_text, rep))
+    if os.path.exists(os.path.join(root, 'report.tex')) and os.path.exists(os.path.join(root, 'slides.tex')):
+        summary.append(check_parity(root, rep))
+        check_report_figures(root, rep)
     for tool in ['tectonic', 'latexmk']:
         if shutil.which(tool):
             for main_file in ['report.tex', 'slides.tex']:

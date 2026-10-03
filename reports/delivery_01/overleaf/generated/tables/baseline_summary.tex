@@ -1,14 +1,15 @@
 % >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
-\begin{tabular}{ll}
+\begin{tabular}{lp{0.62\linewidth}}
 \toprule
- & Baseline (EXP-001) \\
+ & Punto de partida (EXP-001) \\
 \midrule
 Modelo & Flatten $\rightarrow$ ReLU $\rightarrow$ Dense(13) $\rightarrow$ softmax \\
 Entrada & 224 $\times$ 224 $\times$ 3, píxeles en [0, 255] \\
 Parámetros & 1\,956\,877 \\
-Optimizador & Adam (AMSGrad), lr $10^{-3}$, batch 16, 20 épocas \\
+Entrenamiento & Adam (AMSGrad), lr $10^{-3}$, batch 16, hasta 20 épocas \\
 Mean recall (val) & 0,282 \\
 Accuracy (val) & 0,389 \\
+Accuracy (train) & 0,438 \\
 Recall mínimo por clase & 0,000 \\
 \bottomrule
 \end{tabular}

@@ -161,6 +161,16 @@ def fig_strength(data, spec):
     fig, ax = ps.new_figure(spec['layout'])
     ax.plot(xs, val, marker='o', color=ps.PALETTE[0], label='val')
     ax.plot(xs, tr, marker='o', mfc='white', ls='--', lw=1.1, color=ps.PALETTE[0], label='train')
+    if opt.get('logx'):  # 0 (no penalty) is drawn one decade below the smallest value and labelled "none"
+        x0 = xs[1] / 10
+        labels = ['none'] + ['%g' % x for x in xs[1:]]
+        xs = np.where(xs == 0, x0, xs)
+        ax.lines[0].set_xdata(xs)
+        ax.lines[1].set_xdata(xs)
+        ax.set_xscale('log')
+        ax.set_xticks(xs)
+        ax.set_xticklabels(labels)
+        ax.minorticks_off()
     ax.set_xlabel(opt.get('xlabel', sel['param']))
     ax.set_ylabel('accuracy')
     ax.set_title(opt.get('title', 'Validation curve: accuracy vs %s (mean of 3 seeds)' % sel['param']))
@@ -188,17 +198,22 @@ def fig_learning_curves(data, spec):
         col = ps.PALETTE[i]
         mean, lo, hi = seeds_curve(data, it['variant'], 'val_' + m)
         ep = np.arange(1, len(mean) + 1)
-        ax.fill_between(ep, lo, hi, color=col, alpha=0.15, lw=0)
-        ax.plot(ep, smooth(mean, opt.get('smooth', 1)), color=col, label=it['label'] + ' (val)')
+        if opt.get('show_val', True):
+            ax.fill_between(ep, lo, hi, color=col, alpha=0.15, lw=0)
+            ax.plot(ep, smooth(mean, opt.get('smooth', 1)), color=col, label=it['label'] + ' (val)')
         if opt.get('show_train'):
             tm, _, _ = seeds_curve(data, it['variant'], m)
-            ax.plot(ep, smooth(tm, opt.get('smooth', 1)), color=col, ls='--', lw=1.1, label=it['label'] + ' (train)')
+            ax.plot(ep, smooth(tm, opt.get('smooth', 1)), color=col, ls='--' if opt.get('show_val', True) else '-',
+                    lw=1.1 if opt.get('show_val', True) else 1.6, label=it['label'] + ' (train)')
+    ax.xaxis.get_major_locator().set_params(integer=True)
     ax.set_xlabel('epoch')
     ax.set_ylabel(m)
+    if opt.get('logy'):
+        ax.set_yscale('log')
     ax.set_title(opt.get('title', 'Learning curves: %s (mean of 3 seeds)' % m))
     ax.legend(fontsize=7)
     return fig, {'included': [r for it in spec['select']['runs'] for r in data.runs(it['variant'])], 'omitted': [],
-                 'criterion': 'reference without augmentation vs D4, 3 seeds each', 'note': ''}
+                 'criterion': opt.get('criterion', 'the runs listed in the spec, all their seeds'), 'note': ''}
 
 
 def fig_progress(data, spec, cfg):
@@ -309,27 +324,35 @@ def fig_group_sweep(data, spec):
 
 
 def fig_stopping(data, spec):
-    """Validation metric per epoch for each seed of a variant: star = best epoch (restored checkpoint),
-    end of the line = epoch where EarlyStopping stopped."""
+    """Why the stopping point: train vs validation accuracy (and validation mean recall) per epoch of one run, with the
+    learning-rate reductions (dotted lines), the best epoch kept by the checkpoint (star) and the EarlyStopping epoch (x).
+    The epochs after the best one are shaded: there only the training metric improves."""
     sel, opt = spec['select'], spec.get('options', {})
-    key = 'val_' + opt.get('metric', 'mean_recall')
+    r = sel['run']
+    h = data.history(r)
+    H = h['history']
+    ep = np.arange(1, len(H['accuracy']) + 1)
+    b = int(h['best_epoch'])
     fig, ax = ps.new_figure(spec['layout'])
-    runs = data.runs(sel['variant'])
-    for i, r in enumerate(runs):
-        h = data.history(r)
-        y = h['history'][key]
-        ep = np.arange(1, len(y) + 1)
-        b = int(h['best_epoch']) - 1
-        seed = cfg_of(data, r)['seed']
-        ax.plot(ep, y, color=ps.PALETTE[i], lw=1.3, label='seed %d (best epoch %d, stop %d)' % (seed, b + 1, len(y)))
-        ax.plot(ep[b], y[b], marker='*', markersize=11, color=ps.PALETTE[i], zorder=4)
-        ax.plot(ep[-1], y[-1], marker='x', markersize=7, color=ps.PALETTE[i], zorder=4)
+    ax.axvspan(b, ep[-1], color=C['other'], alpha=0.35, lw=0, label='after the best epoch')
+    lr = H['learning_rate']
+    for k in range(1, len(lr)):
+        if lr[k] < lr[k - 1] * 0.5:
+            ax.axvline(ep[k] - 0.5, color=ps.INK2, ls=':', lw=1.0, label='lr / 10' if k == next(
+                j for j in range(1, len(lr)) if lr[j] < lr[j - 1] * 0.5) else None)
+    ax.plot(ep, H['accuracy'], color=ps.PALETTE[0], ls='--', lw=1.1, label='train accuracy')
+    ax.plot(ep, H['val_accuracy'], color=ps.PALETTE[0], label='val accuracy')
+    ax.plot(ep, H['val_mean_recall'], color=ps.PALETTE[1], label='val mean recall (monitored)')
+    ax.plot(b, H['val_mean_recall'][b - 1], marker='*', markersize=12, color=ps.PALETTE[1], zorder=4, ls='none',
+            label='best epoch (kept)')
+    ax.plot(ep[-1], H['val_mean_recall'][-1], marker='x', markersize=8, color=ps.INK, zorder=4, ls='none',
+            label='EarlyStopping')
     ax.set_xlabel('epoch')
-    ax.set_ylabel(key.replace('_', ' '))
-    ax.set_title(opt.get('title', 'Stopping point: %s per epoch' % key.replace('_', ' ')))
-    ax.legend(fontsize=7, loc='lower right')
-    return fig, {'included': runs, 'omitted': [], 'criterion': 'every seed of %s; star = checkpoint kept, x = EarlyStopping' % sel['variant'],
-                 'note': ''}
+    ax.set_ylabel('validation / train metric')
+    ax.set_title(opt.get('title', 'Stopping point: %s' % r))
+    ax.legend(fontsize=6.5, loc='lower right')
+    return fig, {'included': [r], 'omitted': ['seeds 2 and 3 (best epochs 31 and 32; same pattern)'],
+                 'criterion': 'seed 1 of the final model = the run reproduced by ffNN_example.ipynb', 'note': ''}
 
 
 TYPES = {'class_distribution': fig_class_distribution, 'sweep': fig_sweep, 'capacity': fig_capacity, 'strength': fig_strength,
@@ -350,7 +373,9 @@ def main(delivery_dir):
     ps.apply()
     log = ['# Figure log (generated by scripts/build_figures.py)', '']
     captions = ['% >>> ARCHIVO GENERADO por scripts/build_figures.py. Se sobrescribe siempre (se carga desde results_macros.tex). <<<',
-                r'\renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}']
+                r'\renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}',
+                '% \\figcaptionshort{id}: short caption for the slides (caption_slides_es; falls back to the long one)',
+                r'\providecommand{\figcaptionshort}[1]{\ifcsname figcapshort@#1\endcsname\csname figcapshort@#1\endcsname\else\figcaption{#1}\fi}']
     for spec in specs:
         fn = NEEDS_CFG.get(spec['type'])
         fig, info = fn(data, spec, cfg) if fn else TYPES[spec['type']](data, spec)
@@ -358,6 +383,8 @@ def main(delivery_dir):
         ps.plt.close(fig)
         cap = tex(spec['caption_es']) + ((' ' + tex(info['note'])) if info.get('note') else '')
         captions.append(r'\expandafter\def\csname figcap@%s\endcsname{%s}' % (spec['id'], cap))
+        if spec.get('caption_slides_es'):
+            captions.append(r'\expandafter\def\csname figcapshort@%s\endcsname{%s}' % (spec['id'], tex(spec['caption_slides_es'])))
         log += ['## %s (%s)' % (spec['id'], spec['type']),
                 '- Criterion: %s' % info.get('criterion', '-'),
                 '- Included: %s' % (', '.join(info['included']) if isinstance(info['included'], list) else info['included']),

@@ -553,6 +553,21 @@ Por DEC-008. Antes de recortar, el estado completo (entrega 1 con las fases 0-9 
 - **Entrega 1** (`reports/delivery_01/`): `delivery.yaml` con las fases 0-5 y final EXP-010; figuras nuevas `lr_sweep` (fase 5.1) y `stopping` (mean recall de validación por época de cada semilla del modelo final, con la mejor época y la parada); se quitan las de regularización, desbalance, augmentation y ablación. Texto reescrito para el alcance; 9 frames, ~5 páginas estimadas, `make bundle` sin errores.
 - **Scripts:** `build_figures.py` con los tipos `group_sweep` y `stopping`; la tabla de ablación es opcional en `build_results.py`; `generated/tables/` y `figures/` se vacían antes de regenerarse.
 
+### CHG-014: Diapositivas de la entrega 1 coherentes con sus figuras y pies que caben (2026-10-03)
+A petición del usuario (en Overleaf, el texto de algunas diapositivas no correspondía a su figura y el pie se salía del frame).
+- **Regla nueva** (también en la plantilla): las viñetas de cada frame solo afirman lo que se ve en su figura; lo demás va a la nota del orador.
+- "Normalizar la entrada" tenía la figura de parada del modelo final: ahora usa una figura nueva, `normalisation` (pérdida de train por época de EXP-001 y EXP-002, escala log; solo train por ISS-007). La parada temprana pasa a su propio frame con la figura `stopping`. "Arquitectura" deja de dar mean recall y LeakyReLU (la figura es de accuracy) y "Resolución", las ReLU muertas (no se ven en la figura): van a las notas. 10 frames, 10 min.
+- **Pies cortos para slides:** `caption_slides_es` en `figure_specs.yaml` → `\figcaptionshort{id}`; figuras con `height=0.62\textheight,keepaspectratio`. `check_bundle.py` estima la longitud de cada pie (con macros resueltas) y da error si pasa de ~2 líneas (80 caracteres en columna, 150 a todo el ancho), y aviso si una figura no tiene límite de altura. Probado en negativo con el pie largo anterior. Es una estimación: la comprobación real es compilar en Overleaf.
+- `build_figures.py`: opciones `logy`, `show_val` y `criterion` en `learning_curves`.
+- **Frame de parada rehecho** (segunda revisión del usuario: no tenía sentido). La figura de las 3 semillas solo mostraba dónde paraba cada una, no por qué. La nueva `stopping` usa la semilla 1 (el run del notebook): accuracy de train y de validación y mean recall de validación por época, con las bajadas de lr, la mejor época y la parada; sombreado lo posterior a la mejor época. Lectura, con macros `stop-*` sacadas del historial (`stopping_run` en `delivery.yaml`): hasta la época 19 suben juntas; la primera bajada de lr da la mejor época (20); después train pasa de 0,699 a 0,743 y validación se queda en 0,609-0,612 (brecha de 9,0 a 13,1 pp); EarlyStopping para en la 30. El frame deja el esquema hipótesis/evidencia/resultado, que aquí no encajaba, y la sección "Resultado final" del informe usa la misma lectura.
+- **Informe** (tercera revisión del usuario: juntaba figuras sin relación y no todas las fases citaban su figura): se acaban los pares de figuras en un mismo flotante (resolución + capacidad, learning rate + parada). Ahora hay una figura por flotante (`[!htbp]`), colocada justo después del párrafo que la comenta, y cada una se cita en su texto: normalización (fase 1, figura nueva también en el informe), resolución (fase 2), capacidad (fases 3-4), learning rate (fase 5), y parada, progreso y recall por clase (resultado final). 7 figuras; ~5,5 páginas estimadas.
+
+### CHG-016: Informe y slides de la entrega 1 con las mismas figuras y en el mismo orden (2026-10-03)
+Por DEC-010. El informe usaba 7 figuras y las slides 8, en distinto orden: `class_distribution` no estaba en el informe y la parada aparecía en la fase 1 de las slides pero en el resultado final del informe.
+- **Informe:** `class_distribution` en "Objetivo y datos"; el análisis del punto de parada pasa del resultado final a la fase 1, como en las slides. Figuras relacionadas en la misma fila, cada una con su pie y su número (dos `minipage` con `\caption` y `\label` en un mismo flotante): normalización + parada (fase 1) y resolución + capacidad (fases 2-4). Las demás, solas. Pies del informe más cortos para esas cuatro. Orden común: class_distribution, normalisation, stopping, resolution_sweep, capacity, lr_sweep, progress, per_class_recall. ~5,6 páginas estimadas.
+- **`check_bundle.py`** (funciones nuevas, sin cambiar las existentes): error si una figura está en un documento y no en el otro, o si el orden difiere; en el informe, error si un flotante tiene más de 2 imágenes o una figura no se cita con `\ref`, y aviso si dos imágenes comparten pie.
+- Plantilla (`reports/template/README.md`): reglas añadidas.
+
 ---
 
 ## Incidencias (ISS)
@@ -574,6 +589,11 @@ El generador abre con rasterio cada TIF de 224×224 en cada batch y en cada épo
 
 ### ISS-006: Archivos `:Zone.Identifier` en la copia del dataset · resuelta (→ CHG-007)
 Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<nombre>.tif:Zone.Identifier` (el flujo alternativo "Mark of the Web" de NTFS convertido en archivo): 21 112 archivos de más. La celda de test del notebook recorre `xview_test/` con `os.walk` sin filtrar la extensión, así que habría contado 4 730 imágenes de test y fallado al abrir los `Zone.Identifier` con rasterio. **Resolución:** el usuario pidió borrarlos (`find xview_recognition -name '*:Zone.Identifier' -delete`; quedan 18 746 + 2 365 TIF y el JSON) y, además, `xview_data.list_test_files()` filtra por `*.tif`. El mismo filtro se aplica en la celda de test del notebook desde CHG-010.
+
+---
+
+### ISS-007: La `val_loss` de `EpochMetrics` no es comparable con la pérdida de train cuando la softmax se satura · abierta (menor)
+`experiment_utils.classification_metrics` recorta las probabilidades a 1e-7 antes del logaritmo, así que la `val_loss` de cada época no puede superar −ln(1e-7) ≈ 16,1. La pérdida de train la calcula Keras sin ese tope (desde los logits). En EXP-001 la pérdida de train es ~3 300 y la de validación ~10: la diferencia es del cálculo, no del modelo. Con la softmax no saturada (desde EXP-002) el efecto es pequeño, y ninguna decisión usó `val_loss` salvo EXP-003_val_loss (vigilar la pérdida), cuyo efecto no se puede separar. **Detectado** al dibujar la figura de normalización de la entrega 1, que por eso muestra solo la pérdida de train. **Resolución propuesta:** calcular la `val_loss` con `keras.losses.categorical_crossentropy` sobre las mismas predicciones (afecta solo a runs futuros).
 
 ---
 
@@ -689,6 +709,9 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 **Reparto del plan de 9 fases (DEC-006):** fases 0-5 → entrega 1 (DEC-008); fase 6 (dropout, L2, BatchNorm) y fase 8 (augmentation) → entrega 2, con la ablación de la fase 9 como apoyo; fase 7 (desbalance de clases) e IDEA-010 → entrega 5.
 **Entrega 2 (decidido por el usuario siguiendo la recomendación):** EXP-015 (augmentation) se midió sobre el modelo con pesos de clase (EXP-014); para presentar la augmentation solo como regularización se repite sobre el ganador de la fase 6 (EXP-013, sin pesos de clase): EXP-019 en adelante. **El desbalance de clases (fase 7) pasa a la entrega 5.**
 **Consecuencia para la entrega 3:** la entrada de 16×16 (EXP-005) es una decisión propia de la ffNN; las CNN eligen su resolución de nuevo (la caché de 224×224 ya existe).
+
+### DEC-010: El informe y las slides cuentan la misma historia (2026-10-03)
+**Decisión del usuario.** Las slides se presentan guiándose por el informe: los dos documentos usan **las mismas figuras, en el mismo orden**. En el informe, para optimizar el espacio, dos figuras **relacionadas** pueden compartir fila (máximo 2, cada una con su pie y su número); figuras sin relación nunca van juntas. Cada figura se cita en el texto. `check_bundle.py` lo comprueba (CHG-016).
 
 ---
 

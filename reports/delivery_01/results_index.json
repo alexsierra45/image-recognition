@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03T16:09:46",
+ "generated": "2026-10-03T17:54:00",
  "keys": {
   "phase0-mean-recall": {
    "value": "0,282",
@@ -49,6 +49,16 @@
     "EXP-001"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase0-gap-acc": {
+   "value": "4,9",
+   "source": "experiments.csv",
+   "variant": "EXP-001",
+   "runs": [
+    "EXP-001"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "phase0-params": {
@@ -160,6 +170,15 @@
    ],
    "column": "config.dropout"
   },
+  "phase0-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-001",
+   "runs": [
+    "EXP-001"
+   ],
+   "column": "config.l2"
+  },
   "phase0-best-epoch": {
    "value": "12",
    "source": "experiments.csv",
@@ -218,6 +237,16 @@
     "EXP-003_val_mean_recall"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase1-gap-acc": {
+   "value": "14,7",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_mean_recall",
+   "runs": [
+    "EXP-003_val_mean_recall"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "phase1-params": {
@@ -329,6 +358,15 @@
    ],
    "column": "config.dropout"
   },
+  "phase1-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_mean_recall",
+   "runs": [
+    "EXP-003_val_mean_recall"
+   ],
+   "column": "config.l2"
+  },
   "phase1-best-epoch": {
    "value": "24",
    "source": "experiments.csv",
@@ -387,6 +425,16 @@
     "EXP-005_r16"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase2-gap-acc": {
+   "value": "6,1",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r16",
+   "runs": [
+    "EXP-005_r16"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "phase2-params": {
@@ -498,6 +546,15 @@
    ],
    "column": "config.dropout"
   },
+  "phase2-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r16",
+   "runs": [
+    "EXP-005_r16"
+   ],
+   "column": "config.l2"
+  },
   "phase2-best-epoch": {
    "value": "26",
    "source": "experiments.csv",
@@ -556,6 +613,16 @@
     "EXP-006_h256-256-256-256"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase3-gap-acc": {
+   "value": "19,2",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h256-256-256-256",
+   "runs": [
+    "EXP-006_h256-256-256-256"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "phase3-params": {
@@ -666,6 +733,15 @@
     "EXP-006_h256-256-256-256"
    ],
    "column": "config.dropout"
+  },
+  "phase3-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h256-256-256-256",
+   "runs": [
+    "EXP-006_h256-256-256-256"
+   ],
+   "column": "config.l2"
   },
   "phase3-best-epoch": {
    "value": "21",
@@ -783,6 +859,18 @@
     "EXP-007_leaky0.3_seed3"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "phase4-gap-acc": {
+   "value": "17,2",
+   "source": "experiments.csv",
+   "variant": "EXP-007_leaky0.3",
+   "runs": [
+    "EXP-007_leaky0.3",
+    "EXP-007_leaky0.3_seed2",
+    "EXP-007_leaky0.3_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "phase4-params": {
@@ -918,6 +1006,17 @@
    ],
    "column": "config.dropout"
   },
+  "phase4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-007_leaky0.3",
+   "runs": [
+    "EXP-007_leaky0.3",
+    "EXP-007_leaky0.3_seed2",
+    "EXP-007_leaky0.3_seed3"
+   ],
+   "column": "config.l2"
+  },
   "phase4-best-epoch": {
    "value": "30",
    "source": "experiments.csv",
@@ -1036,6 +1135,18 @@
     "EXP-010_bs256_sqrt_60ep_seed3"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "final-gap-acc": {
+   "value": "14,0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "final-params": {
@@ -1171,6 +1282,17 @@
    ],
    "column": "config.dropout"
   },
+  "final-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-010_bs256_sqrt_60ep",
+   "runs": [
+    "EXP-010_bs256_sqrt_60ep",
+    "EXP-010_bs256_sqrt_60ep_seed2",
+    "EXP-010_bs256_sqrt_60ep_seed3"
+   ],
+   "column": "config.l2"
+  },
   "final-best-epoch": {
    "value": "28",
    "source": "experiments.csv",
@@ -1231,6 +1353,16 @@
     "EXP-002"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "normalisation-gap-acc": {
+   "value": "13,2",
+   "source": "experiments.csv",
+   "variant": "EXP-002",
+   "runs": [
+    "EXP-002"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "normalisation-params": {
@@ -1342,6 +1474,15 @@
    ],
    "column": "config.dropout"
   },
+  "normalisation-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-002",
+   "runs": [
+    "EXP-002"
+   ],
+   "column": "config.l2"
+  },
   "normalisation-best-epoch": {
    "value": "20",
    "source": "experiments.csv",
@@ -1400,6 +1541,16 @@
     "EXP-003_val_loss"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "monitor-loss-gap-acc": {
+   "value": "16,6",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_loss",
+   "runs": [
+    "EXP-003_val_loss"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "monitor-loss-params": {
@@ -1511,6 +1662,15 @@
    ],
    "column": "config.dropout"
   },
+  "monitor-loss-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_loss",
+   "runs": [
+    "EXP-003_val_loss"
+   ],
+   "column": "config.l2"
+  },
   "monitor-loss-best-epoch": {
    "value": "50",
    "source": "experiments.csv",
@@ -1569,6 +1729,16 @@
     "EXP-003_val_accuracy"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "monitor-acc-gap-acc": {
+   "value": "9,6",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_accuracy",
+   "runs": [
+    "EXP-003_val_accuracy"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "monitor-acc-params": {
@@ -1680,6 +1850,15 @@
    ],
    "column": "config.dropout"
   },
+  "monitor-acc-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-003_val_accuracy",
+   "runs": [
+    "EXP-003_val_accuracy"
+   ],
+   "column": "config.l2"
+  },
   "monitor-acc-best-epoch": {
    "value": "10",
    "source": "experiments.csv",
@@ -1738,6 +1917,16 @@
     "EXP-005_r224"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "res224-gap-acc": {
+   "value": "0,8",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r224",
+   "runs": [
+    "EXP-005_r224"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "res224-params": {
@@ -1849,6 +2038,15 @@
    ],
    "column": "config.dropout"
   },
+  "res224-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r224",
+   "runs": [
+    "EXP-005_r224"
+   ],
+   "column": "config.l2"
+  },
   "res224-best-epoch": {
    "value": "28",
    "source": "experiments.csv",
@@ -1907,6 +2105,16 @@
     "EXP-005_r32_lr3e-4"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "res32-lr3e-4-gap-acc": {
+   "value": "6,6",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r32_lr3e-4",
+   "runs": [
+    "EXP-005_r32_lr3e-4"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "res32-lr3e-4-params": {
@@ -2018,6 +2226,15 @@
    ],
    "column": "config.dropout"
   },
+  "res32-lr3e-4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r32_lr3e-4",
+   "runs": [
+    "EXP-005_r32_lr3e-4"
+   ],
+   "column": "config.l2"
+  },
   "res32-lr3e-4-best-epoch": {
    "value": "20",
    "source": "experiments.csv",
@@ -2076,6 +2293,16 @@
     "EXP-005_r64_lr1e-4"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "res64-lr1e-4-gap-acc": {
+   "value": "6,4",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r64_lr1e-4",
+   "runs": [
+    "EXP-005_r64_lr1e-4"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "res64-lr1e-4-params": {
@@ -2187,6 +2414,15 @@
    ],
    "column": "config.dropout"
   },
+  "res64-lr1e-4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-005_r64_lr1e-4",
+   "runs": [
+    "EXP-005_r64_lr1e-4"
+   ],
+   "column": "config.l2"
+  },
   "res64-lr1e-4-best-epoch": {
    "value": "20",
    "source": "experiments.csv",
@@ -2245,6 +2481,16 @@
     "EXP-006_h512"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "onelayer512-gap-acc": {
+   "value": "7,6",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h512",
+   "runs": [
+    "EXP-006_h512"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "onelayer512-params": {
@@ -2356,6 +2602,15 @@
    ],
    "column": "config.dropout"
   },
+  "onelayer512-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h512",
+   "runs": [
+    "EXP-006_h512"
+   ],
+   "column": "config.l2"
+  },
   "onelayer512-best-epoch": {
    "value": "20",
    "source": "experiments.csv",
@@ -2414,6 +2669,16 @@
     "EXP-006_h1024-512-256"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "big3layer-gap-acc": {
+   "value": "38,0",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h1024-512-256",
+   "runs": [
+    "EXP-006_h1024-512-256"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "big3layer-params": {
@@ -2525,6 +2790,15 @@
    ],
    "column": "config.dropout"
   },
+  "big3layer-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-006_h1024-512-256",
+   "runs": [
+    "EXP-006_h1024-512-256"
+   ],
+   "column": "config.l2"
+  },
   "big3layer-best-epoch": {
    "value": "41",
    "source": "experiments.csv",
@@ -2583,6 +2857,16 @@
     "EXP-008_sgdm_lr1e-2"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "sgd-m09-gap-acc": {
+   "value": "16,4",
+   "source": "experiments.csv",
+   "variant": "EXP-008_sgdm_lr1e-2",
+   "runs": [
+    "EXP-008_sgdm_lr1e-2"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "sgd-m09-params": {
@@ -2694,6 +2978,15 @@
    ],
    "column": "config.dropout"
   },
+  "sgd-m09-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-008_sgdm_lr1e-2",
+   "runs": [
+    "EXP-008_sgdm_lr1e-2"
+   ],
+   "column": "config.l2"
+  },
   "sgd-m09-best-epoch": {
    "value": "20",
    "source": "experiments.csv",
@@ -2752,6 +3045,16 @@
     "EXP-008_adam_lr3e-4"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "adam-lr3e-4-gap-acc": {
+   "value": "11,7",
+   "source": "experiments.csv",
+   "variant": "EXP-008_adam_lr3e-4",
+   "runs": [
+    "EXP-008_adam_lr3e-4"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "adam-lr3e-4-params": {
@@ -2862,6 +3165,15 @@
     "EXP-008_adam_lr3e-4"
    ],
    "column": "config.dropout"
+  },
+  "adam-lr3e-4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-008_adam_lr3e-4",
+   "runs": [
+    "EXP-008_adam_lr3e-4"
+   ],
+   "column": "config.l2"
   },
   "adam-lr3e-4-best-epoch": {
    "value": "16",
@@ -2979,6 +3291,18 @@
     "EXP-009_adam_b1_0.95_seed3"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "adam-b1-gap-acc": {
+   "value": "12,7",
+   "source": "experiments.csv",
+   "variant": "EXP-009_adam_b1_0.95",
+   "runs": [
+    "EXP-009_adam_b1_0.95",
+    "EXP-009_adam_b1_0.95_seed2",
+    "EXP-009_adam_b1_0.95_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "adam-b1-params": {
@@ -3114,6 +3438,17 @@
    ],
    "column": "config.dropout"
   },
+  "adam-b1-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-009_adam_b1_0.95",
+   "runs": [
+    "EXP-009_adam_b1_0.95",
+    "EXP-009_adam_b1_0.95_seed2",
+    "EXP-009_adam_b1_0.95_seed3"
+   ],
+   "column": "config.l2"
+  },
   "adam-b1-best-epoch": {
    "value": "19",
    "source": "experiments.csv",
@@ -3232,6 +3567,18 @@
     "EXP-007_leaky0.3_seed3"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "batch16-phase4-gap-acc": {
+   "value": "17,2",
+   "source": "experiments.csv",
+   "variant": "EXP-007_leaky0.3",
+   "runs": [
+    "EXP-007_leaky0.3",
+    "EXP-007_leaky0.3_seed2",
+    "EXP-007_leaky0.3_seed3"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "batch16-phase4-params": {
@@ -3367,6 +3714,17 @@
    ],
    "column": "config.dropout"
   },
+  "batch16-phase4-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-007_leaky0.3",
+   "runs": [
+    "EXP-007_leaky0.3",
+    "EXP-007_leaky0.3_seed2",
+    "EXP-007_leaky0.3_seed3"
+   ],
+   "column": "config.l2"
+  },
   "batch16-phase4-best-epoch": {
    "value": "30",
    "source": "experiments.csv",
@@ -3427,6 +3785,16 @@
     "EXP-001"
    ],
    "column": "s_per_epoch",
+   "stat": "mean"
+  },
+  "baseline-gap-acc": {
+   "value": "4,9",
+   "source": "experiments.csv",
+   "variant": "EXP-001",
+   "runs": [
+    "EXP-001"
+   ],
+   "formula": "100*(train_acc-val_acc)",
    "stat": "mean"
   },
   "baseline-params": {
@@ -3538,6 +3906,15 @@
    ],
    "column": "config.dropout"
   },
+  "baseline-l2": {
+   "value": "0",
+   "source": "experiments.csv",
+   "variant": "EXP-001",
+   "runs": [
+    "EXP-001"
+   ],
+   "column": "config.l2"
+  },
   "baseline-best-epoch": {
    "value": "12",
    "source": "experiments.csv",
@@ -3629,18 +4006,18 @@
    ]
   },
   "seed-noise-pp": {
-   "value": "1,4",
+   "value": "1,5",
    "source": "experiments.csv",
    "stat": "pooled std of mean_recall",
-   "n_variants": 42
+   "n_variants": 54
   },
   "n-runs": {
-   "value": "200",
+   "value": "236",
    "source": "experiments.csv",
    "stat": "row count"
   },
   "n-variants-3seeds": {
-   "value": "42",
+   "value": "54",
    "source": "experiments.csv",
    "stat": "variants with >= 3 seeds"
   },
@@ -3860,10 +4237,65 @@
    "alias_of": "final-val-acc-std"
   },
   "n-experiments": {
-   "value": "200",
+   "value": "236",
    "source": "experiments.csv",
    "stat": "row count",
    "alias_of": "n-runs"
+  },
+  "stop-best-epoch": {
+   "value": "20",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "best_epoch"
+  },
+  "stop-epoch": {
+   "value": "30",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "len(history)"
+  },
+  "stop-last-joint-epoch": {
+   "value": "19",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "last epoch before the first lr reduction"
+  },
+  "stop-first-lr-drop": {
+   "value": "20",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "first epoch with the reduced lr"
+  },
+  "stop-train-acc-best": {
+   "value": "0,699",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.accuracy[19]"
+  },
+  "stop-val-acc-best": {
+   "value": "0,609",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.val_accuracy[19]"
+  },
+  "stop-gap-best": {
+   "value": "9,0",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "train - val accuracy at epoch 20, pp"
+  },
+  "stop-train-acc-end": {
+   "value": "0,743",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.accuracy[29]"
+  },
+  "stop-val-acc-end": {
+   "value": "0,612",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.val_accuracy[29]"
+  },
+  "stop-gap-end": {
+   "value": "13,1",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "train - val accuracy at epoch 30, pp"
+  },
+  "stop-val-recall-best": {
+   "value": "0,574",
+   "source": "history/EXP-010_bs256_sqrt_60ep.json",
+   "field": "history.val_mean_recall"
   }
  }
 }
