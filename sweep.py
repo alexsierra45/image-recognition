@@ -340,6 +340,19 @@ def phase9_ablation():
             run(seeded('EXP-017_%s' % tag, seed), 'EXP-017', 9, 'ablation: %s' % tag, dict(cfg, seed=seed))
 
 
+
+# EXP-016: nothing improves on the combined model (lr x0.5/x2 equal; dropout, 512x4, 32x32, batch 16 worse).
+# EXP-017 ablation: depth -8.0 pp, BN -5.3, class weights -5.0, D4 -4.1, beta_1 -1.5; ReLU instead of LeakyReLU ties
+# (0.652 +- 0.004 vs 0.656 +- 0.006) with better accuracy and min recall -> the final model uses ReLU.
+FINAL = dict(FINAL_BASE, activation='relu', es_patience=25, rlr_patience=8, epochs=300)
+
+
+def phase9_final():
+    # Final model trained longer (patience 25 / 8, up to 300 epochs), 3 seeds. Seed 1 is the one rebuilt in ffNN_example.ipynb.
+    for seed in SEEDS:
+        run(seeded('EXP-018_final', seed), 'EXP-018', 9, 'final model (ReLU), patience 25/8', dict(FINAL, seed=seed))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)

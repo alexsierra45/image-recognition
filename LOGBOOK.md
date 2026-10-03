@@ -17,14 +17,13 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 
 | | |
 |---|---|
-| Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
+| Etapa del curso | ffNN (red feedforward): **plan de mejora en 9 fases completado** (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 9: combinación, ajuste fino y modelo final |
-| Mejor experimento | `EXP-015_d4`: 16×16 `/255` → 4 × [`Dense(256)` → BN → LeakyReLU(0,3)] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 |
-| Mejor val accuracy / mean recall | 0,625 ± 0,003 / 0,656 ± 0,006 (3 semillas; split estratificado, no comparable con EXP-000) |
+| Mejor experimento | **EXP-018** (modelo final, en `ffNN_example.ipynb`): 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 |
+| Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). La regularización clásica no ayuda (EXP-013); la invarianza D4 sí (+4,1 pp, EXP-015). Truck es la clase más difícil (recall ≈ 0,19) |
-| Próximo paso | Fases 2 → 9 del plan (DEC-006) |
+| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
+| Próximo paso | Etapa CNN del curso. Pendiente menor de la ffNN: IDEA-010 |
 
 ## Índice de experimentos
 
@@ -48,8 +47,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-013 | 2026-10-03 | 6 | Regularización: dropout, L2, BatchNorm (3 semillas); gana BN con lr ×3 | EXP-010_bs256_sqrt_60ep | 0,612 ± 0,005 | 0,590 ± 0,009 | `EXP-013_bn_before_lr3x*` | ejecutado |
 | EXP-014 | 2026-10-03 | 7 | Desbalance: class weights y sobremuestreo (3 semillas) | EXP-013_bn_before_lr3x | 0,614 ± 0,011 | 0,622 ± 0,005 | `EXP-014_cw_sqrt*` | ejecutado |
 | EXP-015 | 2026-10-03 | 8 | Data augmentation D4 y fotométrica (3 semillas) | EXP-014_cw_sqrt | 0,625 ± 0,003 | 0,656 ± 0,006 | `EXP-015_d4*` | ejecutado |
-| EXP-016 | 2026-10-03 | 9 | Ajuste fino y revisión (lr, dropout, anchura, resolución 32, batch 16) | EXP-015_d4 | | | `EXP-016_*` | en ejecución |
-| EXP-017 | 2026-10-03 | 9 | Ablación del modelo combinado | EXP-015_d4 | | | `EXP-017_*` | en ejecución |
+| EXP-016 | 2026-10-03 | 9 | Ajuste fino y revisión (lr, dropout, anchura, resolución 32, batch 16) | EXP-015_d4 | — | sin mejora | `EXP-016_*` | ejecutado |
+| EXP-017 | 2026-10-03 | 9 | Ablación del modelo combinado; ReLU empata con LeakyReLU | EXP-015_d4 | 0,638 ± 0,002 | 0,652 ± 0,004 | `EXP-017_relu*` | ejecutado |
+| **EXP-018** | 2026-10-03 | 9 | **Modelo final** (ReLU, entrenamiento más largo) | EXP-017_relu | **0,635 ± 0,003** | **0,651 ± 0,009** | `EXP-018_final*`, `EXP-018_20261003-142325` | ejecutado |
 
 ---
 
@@ -407,17 +407,58 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Siguiente paso:** fase 9, combinación, ajuste fino, ablación y modelo final (EXP-016 en adelante).
 
 ### EXP-016: Ajuste fino y revisión de decisiones con el modelo combinado (fase 9)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` (= combinación de todas las fases; 3 semillas: 0,656 ± 0,006) · **Estado:** en ejecución
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` (= combinación de todas las fases; 3 semillas: 0,656 ± 0,006) · **Estado:** ejecutado
 - **Por qué:** el plan se ejecutó de forma acumulativa (cada fase parte de la ganadora de la anterior), así que la combinación ya es `EXP-015_d4` y no empeora nada. Pero la augmentation cambia el régimen (menos sobreajuste), y algunas decisiones tomadas antes pueden cambiar de signo: una red más ancha o una resolución mayor (más detalle para Truck, la clase más difícil) podrían aprovecharse ahora; algo de dropout también.
 - **Cambio** (cada uno por separado, 3 semillas): lr ×0,5 y ×2 (ajuste fino); dropout 0,1; capas 512×4; resolución 32×32 (Truck, segundo candidato de EXP-005); batch 16 con lr = 3,6e-3·√(16/256) = 9e-4 (IDEA-011).
 - **Fundamento:** [R26 §3.1.1] (ajustar la lr alrededor del óptimo); interacción entre regularización implícita y explícita [R8 §7.4, §7.12]; IDEA-011 [R30].
-- **Resultados:** *pendiente*.
+- **Resultados** (3 semillas por variante):
+
+| Variante | val mean recall | Δ frente a `EXP-015_d4` | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|---|
+| Modelo combinado (`EXP-015_d4`) | 0,656 ± 0,006 | — | 0,625 ± 0,003 | 0,186 | 0,694 | 66 |
+| lr ×0,5 (1,8e-3) | 0,656 ± 0,014 | 0,0 pp | 0,625 ± 0,010 | 0,190 | 0,693 | 68 |
+| lr ×2 (7,2e-3) | 0,656 ± 0,010 | 0,0 pp | 0,623 ± 0,007 | 0,184 | 0,678 | 73 |
+| Dropout 0,1 | 0,617 ± 0,019 | -3,9 pp | 0,598 ± 0,018 | 0,151 | 0,624 | 61 |
+| Capas 512×4 | 0,647 ± 0,003 | -0,9 pp | 0,619 ± 0,003 | 0,175 | 0,668 | 60 |
+| Resolución 32×32 | 0,634 ± 0,008 | -2,2 pp | 0,615 ± 0,008 | 0,170 | 0,651 | 53 |
+| Batch 16, lr 9e-4 (15,9 s/época frente a 1,0) | 0,619 ± 0,008 | -3,7 pp | 0,592 ± 0,010 | 0,093 | 0,624 | 75 |
+
+- **Conclusión:** **nada mejora el modelo combinado.** Con BatchNorm la lr deja de ser crítica (×0,5 y ×2 dan lo mismo). El dropout vuelve a empeorar (−3,9 pp), una red más ancha no aporta (−0,9 pp) y 32×32 tampoco (−2,2 pp; Truck no mejora: min recall 0,170). **IDEA-011 queda refutada:** con augmentation, el batch 16 es peor (−3,7 pp, min recall 0,093) y 16 veces más lento; la ventaja del batch pequeño en la fase 5 desaparece cuando ya hay otra fuente de regularización.
+- **Siguiente paso:** EXP-017 (ablación).
 
 ### EXP-017: Ablación del modelo combinado (fase 9)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` · **Estado:** en ejecución
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` · **Estado:** ejecutado
 - **Por qué:** cuantificar cuánto aporta cada ingrediente dentro del modelo final, porque las ganancias medidas en cada fase pueden no sumarse.
 - **Cambio** (quitando uno cada vez, 3 semillas): sin D4 (`EXP-015_none_patience15`, ya ejecutado); sin `class_weight`; sin BN (y lr de vuelta a 1,2e-3, la de antes de BN); ReLU en lugar de LeakyReLU(0,3); una sola capa de 256; Adam con β₁ = 0,9.
-- **Resultados:** *pendiente*.
+- **Resultados** (3 semillas por variante; ordenadas por pérdida):
+
+| Variante | val mean recall | Δ frente a `EXP-015_d4` | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|---|
+| Modelo combinado (`EXP-015_d4`) | 0,656 ± 0,006 | — | 0,625 ± 0,003 | 0,186 | 0,694 | 66 |
+| Sin profundidad (una capa de 256) | 0,576 ± 0,032 | -8,0 pp | 0,554 ± 0,017 | 0,116 | 0,572 | 74 |
+| Sin BatchNorm (lr 1,2e-3) | 0,603 ± 0,031 | -5,3 pp | 0,592 ± 0,016 | 0,167 | 0,636 | 62 |
+| Sin `class_weight` | 0,606 ± 0,008 | -5,0 pp | 0,630 ± 0,005 | 0,247 | 0,671 | 61 |
+| Sin D4 (`EXP-015_none_patience15`) | 0,615 ± 0,007 | -4,1 pp | 0,606 ± 0,011 | 0,288 | 0,837 | 44 |
+| Adam β₁ = 0,9 | 0,641 ± 0,021 | -1,5 pp | 0,611 ± 0,017 | 0,163 | 0,674 | 58 |
+| ReLU en lugar de LeakyReLU(0,3) | 0,652 ± 0,004 | -0,4 pp | 0,638 ± 0,002 | 0,264 | 0,790 | 59 |
+
+- **Conclusión:**
+  - Por orden de aportación dentro del modelo final: **profundidad** (−8,0 pp), **BatchNorm** (−5,3 pp), **pesos de clase** (−5,0 pp de mean recall, aunque la accuracy sube un poco sin ellos, como se espera), **augmentation D4** (−4,1 pp) y β₁ = 0,95 (−1,5 pp, ~1 σ).
+  - **BatchNorm pesa mucho más aquí que en la fase 6** (+1,2 pp entonces): interactúa con la augmentation. Sin BN, la varianza entre semillas se dispara (σ = 0,031).
+  - **ReLU empata con LeakyReLU(0,3)** en mean recall (0,652 ± 0,004 frente a 0,656 ± 0,006, dentro del ruido) y es mejor en accuracy (0,638 frente a 0,625) y en min recall (0,264 frente a 0,186). Con BN antes de la activación, las preactivaciones están centradas y el problema de las ReLU muertas de la fase 4 desaparece [R6]. **El modelo final usa ReLU**: es más simple y gana en las métricas secundarias.
+- **Siguiente paso:** EXP-018 (modelo final).
+
+### EXP-018: Modelo final (fase 9)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-017_relu` · **Estado:** ejecutado
+- **Configuración:** 16×16 (caché con promedio por área) → `Rescaling(1/255)` → `Flatten` → 4 × [`Dense(256, he_normal, sin sesgo)` → `BatchNormalization` → ReLU] → `Dense(13, softmax)` (400 653 parámetros). Adam con AMSGrad, lr = 3,6e-3, β₁ = 0,95, clipnorm = 1; batch 256; `class_weight` con raíz; augmentation D4 en train; ReduceLROnPlateau (×0,1) y EarlyStopping sobre `val_mean_recall`.
+- **Cambio:** entrenar más tiempo, como pide el plan: paciencias 25 / 8 (antes 15 / 6) y hasta 300 épocas. 3 semillas.
+- **Resultados** (ids `EXP-018_final[_seed2|_seed3]`):
+  - Semilla 1: mejor época 47 de 72 · val acc 0,637 · **mean recall 0,644** · min recall 0,294. Semilla 2: 0,636 / 0,661. Semilla 3: 0,632 / 0,648.
+  - **Media de 3 semillas: mean recall 0,651 ± 0,009 · val acc 0,635 ± 0,003 · min recall 0,276.** Frente a la base EXP-001 (0,282 / 0,389): ×2,3 el mean recall y +24,6 pp de accuracy.
+  - Recall por clase (media de 3 semillas): Cargo plane 0,885 · Small car 0,777 · Pylon 0,731 · Building 0,728 · Shipping container 0,711 · Helipad 0,697 · Fishing vessel 0,685 · Excavator 0,671 · Motorboat 0,660 · Storage tank 0,655 · Dump truck 0,535 · Bus 0,454 · **Truck 0,276**.
+  - **Reproducción en el notebook entregable** (CHG-010): run `EXP-018_20261003-142325` en `experiments/runs.csv`, idéntico al run `EXP-018_final` del barrido (época 47 de 72, mean recall 0,6443, val acc 0,6373, min recall 0,2941). Entrenamiento de 79 s; el notebook completo tarda ~1,5 min (EXP-000 tardaba ~75 min). `model.keras` y `prediction.json` (2 365 imágenes de test) salen de este run. La `train_accuracy` de `runs.csv` (0,828) es la media durante la época con augmentation; el `train_acc` de `experiments.csv` (0,851) se evalúa en inferencia sobre todo train.
+- **Conclusión:** entrenar más no cambia nada (EarlyStopping corta hacia la época 70, igual que con paciencia 15): el modelo final rinde lo mismo que `EXP-017_relu`. **Es el mejor modelo de la etapa ffNN.** El límite sigue siendo el sesgo de una red densa sobre píxeles: los vehículos (Truck, Bus, Dump truck) se confunden entre sí, y Truck se queda en 0,28. Las mejoras grandes vinieron de la resolución (fase 2), el desbalance (fase 7) y la invarianza D4 (fase 8). El siguiente salto natural es la etapa CNN, que incorpora por arquitectura la conectividad local y la equivarianza a traslaciones [R8 §9.2].
+- **Siguiente paso:** etapa CNN del curso. Pendiente de la ffNN: IDEA-010 (estandarización con la lr ajustada, prioridad baja).
 
 ---
 
@@ -481,6 +522,19 @@ Desde la fase 1, los modelos empiezan con `keras.Input(shape=(res, res, 3))`, lo
 ### CHG-009: Fracción de unidades inactivas en cada run (2026-10-03)
 `experiment_utils.inactive_units`: fracción de unidades de la primera capa oculta cuya preactivación es ≤ 0 para todas las imágenes de validación (con ReLU, unidades muertas, que no reciben gradiente [R8 §6.3.1]). `run_experiment` la guarda en `history/<id>.json` (`val.inactive_units`) desde la fase 4; no se añade al CSV para no cambiar sus columnas con la fase 3 escribiendo en él. Comprobado con `EXP-005_r16`: 0,281, igual que la medida manual de EXP-005. Las medidas de EXP-005 y EXP-006 se calculan aparte, con los modelos guardados.
 
+### CHG-010: El notebook entregable pasa al modelo final (2026-10-03)
+`ffNN_example.ipynb` mantiene su estructura (mismas secciones y celdas, en el mismo orden) y cambia lo necesario para entrenar el modelo de EXP-018, con una celda markdown breve antes de cada bloque modificado:
+- Celda 1: semilla fija y `enable_op_determinism` (EXP-001). Split estratificado (EXP-001). Sin el comentario de "resampling" (ISS-004).
+- Nueva celda con la caché a 16×16 (`xview_data.load_cache`, CHG-007).
+- Modelo funcional `Input → Rescaling → Flatten → 4 × [Dense → BN → ReLU] → Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95.
+- Callbacks sobre `val_mean_recall` (`EpochMetrics` de `experiment_utils`, que también calcula `val_loss` y `val_accuracy` en una sola pasada).
+- El generador pasa a `CachedSequence` (caché + D4 + pesos de clase con raíz).
+- Validación y test predichos por lotes (`predict_probs`); el test lee `cache/test_16.npy` y la lista de test filtra `*.tif` (ISS-006).
+- Nueva tabla resumen del progreso por fase (sacada de `experiments.csv`).
+- `EXP_ID = 'EXP-018'`.
+- **Ejecutado** de arriba abajo sin interfaz (`tools/run_notebook.py`): reproduce exactamente el run `EXP-018_final` (ver EXP-018).
+- `experiment_utils.py`: `set_memory_growth` se omite si TF ya está inicializado (el notebook importa el módulo después de usar la GPU; antes lanzaba `RuntimeError`).
+
 ---
 
 ## Incidencias (ISS)
@@ -494,14 +548,14 @@ Desde la fase 1, los modelos empiezan con `keras.Input(shape=(res, res, 3))`, lo
 ### ISS-003: No hay GPU · resuelta (→ CHG-006: WSL2 + TF 2.21 con CUDA)
 `tf.config.list_physical_devices('GPU')` devuelve `[]`. TensorFlow 2.10 fue la última versión con soporte de GPU en Windows nativo [R13], y el kernel usa TF 2.20, así que todo se entrena en CPU aunque CUDA 12.5 esté instalado. Esto condiciona el coste de cada experimento. **Opciones:** Google Colab (el notebook viene de Colab según sus metadatos), WSL2 con `tensorflow[and-cuda]`, o reducir el coste por época (IDEA-006). **Resolución:** Keras 3 sobre PyTorch con CUDA (CHG-003, DEC-004). El `torch 2.3.1+cu118` del Python global sí veía la GPU, pero falla al importar con su `numpy 2.2.6` ("A module that was compiled using NumPy 1.x cannot be run in NumPy 2.2.6"), por eso se usa un entorno aparte. **Reabierta** porque CHG-004 restaura la celda 1 original, que ya no activa el backend torch. Para volver a la GPU hay que fijar `os.environ['KERAS_BACKEND'] = 'torch'` antes del primer `import keras` y usar el kernel del `.venv`.
 
-### ISS-004: Comentario engañoso sobre "resampling" · abierta (menor)
+### ISS-004: Comentario engañoso sobre "resampling" · resuelta (→ CHG-010)
 En la celda que construye `anns` aparece `# Resampling strategy to reduce training time`, pero no hay ningún remuestreo implementado. Hay que eliminarlo o implementar lo que promete (relacionado con IDEA-005).
 
 ### ISS-005: La carga de imágenes domina el tiempo de entrenamiento · resuelta (→ CHG-007)
 El generador abre con rasterio cada TIF de 224×224 en cada batch y en cada época, en el mismo hilo que el entrenamiento. Medido (CHG-003): 63 ms por batch de 16 con la caché de disco caliente y 232 ms en frío, frente a 13,8 ms del paso de entrenamiento en GPU. Por la ley de Amdahl [R16], acelerar solo el cálculo da como mucho (63 + 26,4) / (63 + 13,8) ≈ ×1,16 por paso con la caché caliente, aunque la GPU haga el cálculo ×1,9 más rápido. En la prueba de CHG-003, con lecturas en frío, el paso completo fue de unos 240 ms. Mientras no se resuelva, la GPU apenas acorta las épocas de esta ffNN. Con modelos más pesados (un MLP grande o una CNN) el cálculo pesará más y la GPU se notará más, pero la carga seguirá costando unos 63 ms por paso. **Medido en EXP-000** (CPU, TF 2.20, 1,5 GB de RAM libre): de 105 a 422 ms por paso según la época, y 70 min en total. Las épocas varían mucho (111–446 s) sin ningún cambio en el cálculo, lo que delata que el tiempo lo marca la E/S y la caché de disco. **Resolución:** IDEA-009.
 
 ### ISS-006: Archivos `:Zone.Identifier` en la copia del dataset · resuelta (→ CHG-007)
-Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<nombre>.tif:Zone.Identifier` (el flujo alternativo "Mark of the Web" de NTFS convertido en archivo): 21 112 archivos de más. La celda de test del notebook recorre `xview_test/` con `os.walk` sin filtrar la extensión, así que habría contado 4 730 imágenes de test y fallado al abrir los `Zone.Identifier` con rasterio. **Resolución:** el usuario pidió borrarlos (`find xview_recognition -name '*:Zone.Identifier' -delete`; quedan 18 746 + 2 365 TIF y el JSON) y, además, `xview_data.list_test_files()` filtra por `*.tif`. Pendiente aplicar el mismo filtro en la celda de test del notebook (fase 9).
+Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<nombre>.tif:Zone.Identifier` (el flujo alternativo "Mark of the Web" de NTFS convertido en archivo): 21 112 archivos de más. La celda de test del notebook recorre `xview_test/` con `os.walk` sin filtrar la extensión, así que habría contado 4 730 imágenes de test y fallado al abrir los `Zone.Identifier` con rasterio. **Resolución:** el usuario pidió borrarlos (`find xview_recognition -name '*:Zone.Identifier' -delete`; quedan 18 746 + 2 365 TIF y el JSON) y, además, `xview_data.list_test_files()` filtra por `*.tif`. El mismo filtro se aplica en la celda de test del notebook desde CHG-010.
 
 ---
 
@@ -556,7 +610,7 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Por qué:** EXP-004 empeoró porque, con Adam a lr = 1e-3, una entrada de mayor magnitud satura antes la softmax. No se probó la ventaja de centrar en cero [R1 §4.3] en igualdad de condiciones. Con capas ocultas y BatchNorm el efecto puede ser distinto.
 - **Coste:** un run. **Éxito:** mean recall ≥ el de `/255` con la misma configuración.
 
-### IDEA-011: Entrenar el modelo final con batch pequeño · prioridad media (fase 9)
+### IDEA-011: Entrenar el modelo final con batch pequeño · probada → EXP-016 (refutada)
 - **Qué:** reentrenar la configuración final con batch 16 (lr reescalada por la regla de la raíz) y 3 semillas, y compararla con batch 256.
 - **Por qué:** EXP-007 con batch 16 da 0,587 ± 0,004 frente a 0,578 ± 0,007 con batch 256 (EXP-012). Puede ser el efecto regularizador del ruido de los batches pequeños [R30]. Con regularización explícita (fase 6) o augmentation (fase 8) la diferencia podría desaparecer.
 - **Coste:** ~8 min por run con batch 16. **Éxito:** > 1 pp por encima del batch 256 con 3 semillas.

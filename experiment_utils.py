@@ -21,7 +21,10 @@ from keras import layers, regularizers
 from xview_data import CLASS_NAMES, NUM_CLASSES, ROOT, load_cache, load_train_annotations, split_indices
 
 for _gpu in tf.config.list_physical_devices('GPU'):
-    tf.config.experimental.set_memory_growth(_gpu, True)
+    try:
+        tf.config.experimental.set_memory_growth(_gpu, True)
+    except RuntimeError:  # TF already initialised (e.g. imported from a notebook after using the GPU): keep its setting
+        pass
 tf.config.experimental.enable_op_determinism()  # same seed -> same run, also on GPU (EXP-001)
 
 EXP_DIR = os.path.join(ROOT, 'experiments')
