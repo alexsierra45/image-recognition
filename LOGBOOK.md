@@ -19,9 +19,9 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 4: activaciones (EXP-007) |
-| Mejor experimento | `EXP-006_h256-256-256-256`: 16×16 `/255` → 4 × `Dense(256, relu, he_normal)` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
-| Mejor val accuracy / mean recall | 0,604 / 0,572 (min recall 0,294; split estratificado, no comparable con EXP-000) |
+| Fase en curso | Fase 5: optimizador (EXP-008 en adelante) |
+| Mejor experimento | `EXP-007_leaky0.3`: 16×16 `/255` → 4 × `Dense(256)` + LeakyReLU(0,3), `he_normal` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
+| Mejor val accuracy / mean recall | 0,635 / 0,591 (min recall 0,273; split estratificado, no comparable con EXP-000) |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | La validación se estanca en ~0,57 mientras train sube con la capacidad (sobreajuste por encima de ~200 k parámetros; brecha de 20 pp en el modelo elegido). La lr óptima depende del número de entradas (EXP-005) |
 | Próximo paso | Fases 2 → 9 del plan (DEC-006) |
@@ -39,7 +39,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-004 | 2026-10-03 | 1 | Estandarización por canal en lugar de `/255` | EXP-003 | 0,367 | 0,344 | `EXP-004` | ejecutado (descartado) |
 | EXP-005 | 2026-10-03 | 2 | Resolución de entrada (8–224) con `Dense(256)`, y rejilla resolución × lr | EXP-003 | 0,600 | 0,549 | `EXP-005_r16` | ejecutado |
 | EXP-006 | 2026-10-03 | 3 | Profundidad y anchura de las capas ocultas (16×16) | EXP-005_r16 | 0,604 | 0,572 | `EXP-006_h256-256-256-256` | ejecutado |
-| EXP-007 | 2026-10-03 | 4 | Activación de las capas ocultas | EXP-006_h256-256-256-256 | | | `EXP-007_*` | en ejecución |
+| EXP-007 | 2026-10-03 | 4 | Activación de las capas ocultas | EXP-006_h256-256-256-256 | 0,635 | 0,591 | `EXP-007_leaky0.3` | ejecutado |
+| EXP-008 | 2026-10-03 | 5.1 | Learning rate (Adam y SGD con momentum), runs de ≤ 20 épocas | EXP-007_leaky0.3 | | | `EXP-008_*` | en ejecución |
 
 ---
 
@@ -168,11 +169,28 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Siguiente paso:** fase 4, las activaciones (EXP-007).
 
 ### EXP-007: Función de activación de las capas ocultas (fase 4)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-006_h256-256-256-256` (ReLU + He) · **Estado:** en ejecución
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-006_h256-256-256-256` (ReLU + He) · **Estado:** ejecutado
 - **Hipótesis:** con un 34 % de ReLU muertas en la primera capa, las activaciones que dejan pasar gradiente para entradas negativas (LeakyReLU, ELU, GELU, SELU) deberían aprovechar mejor la red. tanh, con saturación en los dos lados, se espera peor.
 - **Cambio:** solo la activación de las capas ocultas, cada una con su inicializador recomendado: LeakyReLU (α = 0,1 y 0,3), ELU y GELU con `he_normal`; SELU con `lecun_normal`; tanh con `glorot_uniform`.
 - **Fundamento:** LeakyReLU [R21], ELU [R22], GELU [R23], SELU con `lecun_normal` (red autonormalizante) [R24], Glorot para activaciones simétricas [R25], He para la familia ReLU [R2]. ReLU muertas [R8 §6.3.1].
-- **Resultados:** *pendiente*.
+- **Resultados** (ids `EXP-007_<activación>`; la fila de ReLU es la base):
+
+| Activación | Mejor época / épocas | train acc | val acc | train mean recall | **val mean recall** | min recall | Inactivas |
+|---|---|---|---|---|---|---|---|
+| ReLU (base) | 21 / 31 | 0,796 | 0,604 | 0,777 | 0,572 | 0,294 | 33,6 % |
+| LeakyReLU α = 0,1 | 19 / 29 | 0,717 | 0,596 | 0,676 | 0,544 | 0,182 | 0,4 % |
+| **LeakyReLU α = 0,3** | 30 / 40 | 0,819 | 0,635 | 0,813 | 0,591 | 0,273 | 0,0 % |
+| ELU | 27 / 37 | 0,969 | 0,595 | 0,967 | 0,561 | 0,344 | 0,0 % |
+| GELU | 32 / 42 | 0,999 | 0,601 | 0,999 | 0,583 | 0,344 | 5,9 % |
+| SELU (`lecun_normal`) | 28 / 38 | 0,923 | 0,601 | 0,923 | 0,569 | 0,273 | 0,0 % |
+| tanh (`glorot_uniform`) | 20 / 30 | 0,764 | 0,574 | 0,726 | 0,526 | 0,182 | 1,2 % |
+
+- **Conclusión:**
+  - **Se confirma en parte.** Todas las alternativas eliminan las unidades muertas (34 % con ReLU → ≈ 0 %; GELU 5,9 %), y ninguna muestra una pérdida que no baje al principio. **LeakyReLU con α = 0,3 es la mejor** en mean recall (0,591, +1,9 pp) y en accuracy (0,635, +3,1 pp).
+  - Pero quitar las neuronas muertas no basta: LeakyReLU con α = 0,1 queda *por debajo* de ReLU (0,544), así que parte de estas diferencias de 1–3 pp es ruido de una sola semilla [R9]. No hay que sobreinterpretar la ventaja de α = 0,3.
+  - GELU, ELU y SELU llegan a una train acc de 0,92–1,00 y su pérdida de validación **sube** desde la época ~12: memorizan más fácilmente sin generalizar mejor. tanh es la peor, como se esperaba de una activación que satura por los dos lados [R25].
+  - **Se elige LeakyReLU con α = 0,3** (`he_normal`).
+- **Siguiente paso:** fase 5.1, la learning rate (EXP-008).
 
 ---
 

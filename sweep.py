@@ -16,7 +16,7 @@ def merge_cfg(base, **changes):
     """dict(base, **changes), but 'optimizer' is merged into the default optimizer instead of replacing it."""
     cfg = dict(base, **changes)
     if 'optimizer' in changes:
-        cfg['optimizer'] = dict(DEFAULT_CFG['optimizer'], **base.get('optimizer', {}), **changes['optimizer'])
+        cfg['optimizer'] = {**DEFAULT_CFG['optimizer'], **base.get('optimizer', {}), **changes['optimizer']}
     return cfg
 
 # Phase 0 (EXP-001): the assignment's model, raw pixels, original callbacks (ReduceLROnPlateau patience 10,
@@ -109,6 +109,28 @@ def phase4():
     # Only the hidden activation changes; the ReLU point is the phase-3 winner itself (same config, same seed).
     for tag, change in PHASE4_ACTS:
         run('EXP-007_%s' % tag, 'EXP-007', 4, 'activation %s' % tag, dict(PHASE4_BASE, **change))
+
+
+# EXP-007: LeakyReLU(0.3) best on mean recall (0.591) and accuracy (0.635). Phase 5 explores with short runs (<= 20 epochs).
+PHASE5_BASE = dict(PHASE4_BASE, activation='leaky_relu', leaky_alpha=0.3, epochs=20)
+
+
+def lr_tag(lr):
+    return ('%.0e' % lr).replace('e-0', 'e-')
+
+
+def opt_run(run_id, exp_id, change, base, optimizer=None, **cfg):
+    """Phase 5 helper: optimizer dict merged on top of the base optimizer."""
+    run(run_id, exp_id, 5, change, merge_cfg(base, optimizer=optimizer or {}, **cfg))
+
+
+def phase5_1():
+    # Learning rate. Short exploration runs (max 20 epochs, as the plan asks); the lr 1e-3 Adam point is the reference.
+    for lr in [1e-4, 3e-4, 1e-3, 3e-3, 1e-2]:
+        opt_run('EXP-008_adam_lr%s' % lr_tag(lr), 'EXP-008', 'Adam lr %s' % lr_tag(lr), PHASE5_BASE, {'lr': lr})
+    for lr in [1e-3, 1e-2, 1e-1]:
+        opt_run('EXP-008_sgdm_lr%s' % lr_tag(lr), 'EXP-008', 'SGD momentum 0.9 lr %s' % lr_tag(lr), PHASE5_BASE,
+                {'name': 'sgd', 'lr': lr, 'momentum': 0.9})
 
 
 if __name__ == '__main__':
