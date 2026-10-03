@@ -1,0 +1,12 @@
+#!/bin/sh
+# Blocks commits that touch code/notebooks without updating LOGBOOK.md.
+# Bypass only on purpose (e.g. a typo fix): git commit --no-verify
+staged=$(git diff --cached --name-only --diff-filter=ACMRD)
+code=$(printf '%s\n' "$staged" | grep -E '\.(ipynb|py)$')
+if [ -n "$code" ] && ! printf '%s\n' "$staged" | grep -qx 'LOGBOOK.md'; then
+    echo "pre-commit: hay cambios en código/notebooks sin actualizar LOGBOOK.md:" >&2
+    printf '%s\n' "$code" | sed 's/^/  - /' >&2
+    echo "Registra el cambio en LOGBOOK.md (o usa /log-experiment en Claude Code) y añádelo al commit." >&2
+    exit 1
+fi
+exit 0

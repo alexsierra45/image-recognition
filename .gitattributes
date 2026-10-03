@@ -1,0 +1,6 @@
+# git diff de notebooks muestra solo el código de las celdas (ver tools/nb_textconv.py)
+*.ipynb diff=ipynb
+
+# Scripts de shell siempre con LF: con CRLF (autocrlf en Windows) bash falla al ejecutarlos
+*.sh text eol=lf
+.githooks/* text eol=lf

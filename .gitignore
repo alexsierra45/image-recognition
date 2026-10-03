@@ -1,0 +1,18 @@
+# Dataset (se descarga del enlace del enunciado)
+xview_recognition/
+
+# Pesos y predicciones: pesados y regenerables
+*.keras
+*.h5
+prediction.json
+
+# Documentación con copyright: se queda en local (Claude la lee igual)
+references/*.pdf
+
+# Python / Jupyter
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Claude Code: ajustes personales
+.claude/settings.local.json
