@@ -19,11 +19,11 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 6: regularización (EXP-013) |
-| Mejor experimento | `EXP-007_leaky0.3` (batch 16) por mean recall; la base de trabajo desde la fase 5 es `EXP-010_bs256_sqrt_60ep`: igual red, Adam lr = 1,2e-3, β₁ = 0,95, batch 256 (15 veces más rápida) |
-| Mejor val accuracy / mean recall | EXP-007, 3 semillas: 0,626 ± 0,008 / 0,587 ± 0,004 · base de la fase 5: 0,616 ± 0,006 / 0,578 ± 0,007 (split estratificado, no comparable con EXP-000) |
+| Fase en curso | Fase 9: combinación, ajuste fino y modelo final |
+| Mejor experimento | `EXP-015_d4`: 16×16 `/255` → 4 × [`Dense(256)` → BN → LeakyReLU(0,3)] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 |
+| Mejor val accuracy / mean recall | 0,625 ± 0,003 / 0,656 ± 0,006 (3 semillas; split estratificado, no comparable con EXP-000) |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp de mean recall (EXP-009): las diferencias < 3 pp con una semilla no son concluyentes. Brecha train-val de ~14 pp de accuracy: sobreajuste moderado |
+| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). La regularización clásica no ayuda (EXP-013); la invarianza D4 sí (+4,1 pp, EXP-015). Truck es la clase más difícil (recall ≈ 0,19) |
 | Próximo paso | Fases 2 → 9 del plan (DEC-006) |
 
 ## Índice de experimentos
@@ -45,7 +45,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-010 | 2026-10-03 | 5.3 | Tamaño de batch con lr reescalada; batch 256 con 60 épocas, 3 semillas | EXP-009_adam_b1_0.95 | 0,616 ± 0,006 | 0,578 ± 0,007 | `EXP-010_bs256_sqrt_60ep*` | ejecutado |
 | EXP-011 | 2026-10-03 | 5.4 | Schedule de la lr (3 semillas en los finalistas) | EXP-010_bs256_sqrt_60ep | — | sin mejora | `EXP-011_*` | ejecutado |
 | EXP-012 | 2026-10-03 | 5.5 | Clipnorm, AMSGrad, AdamW (3 semillas) | EXP-010_bs256_sqrt_60ep | — | sin mejora | `EXP-012_*` | ejecutado |
-| EXP-013 | 2026-10-03 | 6 | Regularización: dropout, L2, BatchNorm (3 semillas) | EXP-010_bs256_sqrt_60ep | | | `EXP-013_*` | en ejecución |
+| EXP-013 | 2026-10-03 | 6 | Regularización: dropout, L2, BatchNorm (3 semillas); gana BN con lr ×3 | EXP-010_bs256_sqrt_60ep | 0,612 ± 0,005 | 0,590 ± 0,009 | `EXP-013_bn_before_lr3x*` | ejecutado |
+| EXP-014 | 2026-10-03 | 7 | Desbalance: class weights y sobremuestreo (3 semillas) | EXP-013_bn_before_lr3x | 0,614 ± 0,011 | 0,622 ± 0,005 | `EXP-014_cw_sqrt*` | ejecutado |
+| EXP-015 | 2026-10-03 | 8 | Data augmentation D4 y fotométrica (3 semillas) | EXP-014_cw_sqrt | 0,625 ± 0,003 | 0,656 ± 0,006 | `EXP-015_d4*` | ejecutado |
 
 ---
 
@@ -326,11 +328,81 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Siguiente paso:** fase 6, la regularización (EXP-013).
 
 ### EXP-013: Regularización (fase 6)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-010_bs256_sqrt_60ep` (3 semillas: 0,578 ± 0,007) · **Estado:** en ejecución · **Idea:** IDEA-007
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-010_bs256_sqrt_60ep` (3 semillas: 0,578 ± 0,007) · **Estado:** ejecutado · **Idea:** IDEA-007
 - **Hipótesis:** la brecha train-val de la base (train acc ≈ 0,76 frente a 0,62 en val) indica sobreajuste; regularizar debería cerrarla y, con suerte, subir la validación.
 - **Cambio:** una técnica cada vez: Dropout ∈ {0,1; 0,2; 0,3; 0,5} tras cada capa oculta; L2 ∈ {1e-5, 1e-4, 1e-3} en todas las `Dense`; BatchNormalization antes de la activación (sin sesgo en la `Dense`) o después. 3 semillas cada una.
 - **Fundamento:** Dropout [R5]; penalización L2 [R8 §7.1]; BatchNorm [R6].
-- **Resultados:** *pendiente*.
+- **Cambio añadido durante la fase:** el tope de épocas sube de 60 a 150 en toda la fase, porque con regularización el entrenamiento es más lento (en un primer intento, dropout 0,2 tuvo su mejor época en la 60 de 60). La base no cambia: sus 3 semillas pararon por EarlyStopping en las épocas 30, 41 y 42, y los runs son deterministas. Ese primer intento (4 runs) se descartó.
+- **Resultados** (3 semillas por variante, media ± desviación típica):
+
+| Variante | val mean recall | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|
+| Base (sin regularización) | 0,578 ± 0,007 | 0,616 ± 0,006 | 0,270 | 0,756 | 38 |
+| Dropout 0,1 | 0,555 ± 0,016 | 0,605 ± 0,012 | 0,206 | 0,672 | 41 |
+| Dropout 0,2 | 0,559 ± 0,011 | 0,605 ± 0,011 | 0,182 | 0,669 | 57 |
+| Dropout 0,3 | 0,530 ± 0,016 | 0,579 ± 0,013 | 0,155 | 0,615 | 51 |
+| Dropout 0,5 | 0,394 ± 0,014 | 0,479 ± 0,010 | 0,000 | 0,489 | 28 |
+| L2 1e-5 | 0,575 ± 0,021 | 0,614 ± 0,012 | 0,299 | 0,775 | 45 |
+| L2 1e-4 | 0,577 ± 0,007 | 0,611 ± 0,006 | 0,278 | 0,769 | 44 |
+| L2 1e-3 | 0,469 ± 0,012 | 0,550 ± 0,008 | 0,030 | 0,581 | 34 |
+| BN antes de la activación | 0,578 ± 0,014 | 0,608 ± 0,002 | 0,281 | 0,836 | 32 |
+| BN después de la activación | 0,578 ± 0,006 | 0,613 ± 0,004 | 0,277 | 0,821 | 35 |
+| **BN antes, lr ×3 (3,6e-3)** | 0,590 ± 0,009 | 0,612 ± 0,005 | 0,323 | 0,797 | 32 |
+| BN después, lr ×3 | 0,569 ± 0,011 | 0,602 ± 0,006 | 0,244 | 0,700 | 29 |
+
+- **Conclusión:**
+  - **Se refuta para dropout y L2:** al aumentar la regularización, **train y validación bajan juntas** (dropout 0,5: train acc 0,489, val 0,479). No hay una varianza que recortar: la regularización solo empuja hacia el subajuste. La brecha de la base (train 0,76 frente a val 0,62) no se cierra subiendo la validación, sino bajando train. El límite parece ser el sesgo del modelo: un MLP sobre píxeles no tiene ninguna invarianza espacial [R8 §9.2]. Es lo que pueden aportar la augmentation (fase 8) y, en la etapa siguiente del curso, las CNN.
+  - **BatchNorm** con la misma lr empata con la base (0,578 en los dos órdenes). Con **lr ×3 y BN antes de la activación** llega a **0,590 ± 0,009** (+1,2 pp, min recall 0,32 frente a 0,27): BN permite una lr mayor [R6]. Con 3 semillas por grupo es una mejora **marginal** (t ≈ 2), pero las tres semillas superan o igualan a la mejor de la base. **Se adopta BN antes de la activación con lr = 3,6e-3.**
+- **Siguiente paso:** fase 7, el desbalance de clases (EXP-014).
+
+### EXP-014: Tratamiento del desbalance de clases (fase 7)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-013_bn_before_lr3x` (3 semillas) · **Estado:** ejecutado · **Idea:** IDEA-005 (probada)
+- **Hipótesis:** con un desbalance de 32:1, la pérdida está dominada por las clases frecuentes. Reponderar o sobremuestrear sube el recall de las minoritarias y, con él, el mean recall, a costa de algo de accuracy global.
+- **Cambio:** pesos por muestra n_total / (n_clases · n_c) (inverso) o su raíz cuadrada, normalizados para que su media sobre las muestras sea 1 (misma escala de pérdida); o sobremuestreo dentro del generador con probabilidad por clase ∝ n_c^(1−α): α = 1 balanceado, α = 0,5 con raíz. 3 semillas.
+- **Fundamento:** IDEA-005 [R10, R11]. Reponderar la pérdida y sobremuestrear son equivalentes en esperanza, pero el sobremuestreo cambia la varianza del gradiente (repite ejemplos).
+- **Resultados** (3 semillas por variante):
+
+| Variante | val mean recall | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|
+| Base (sin tratamiento) | 0,590 ± 0,009 | 0,612 ± 0,005 | 0,323 | 0,797 | 32 |
+| `class_weight` inverso | 0,625 ± 0,010 | 0,588 ± 0,025 | 0,214 | 0,746 | 42 |
+| **`class_weight` con raíz** | 0,622 ± 0,005 | 0,614 ± 0,011 | 0,252 | 0,795 | 40 |
+| Sobremuestreo balanceado (α = 1) | 0,619 ± 0,002 | 0,598 ± 0,010 | 0,241 | 0,774 | 37 |
+| Sobremuestreo con raíz (α = 0,5) | 0,620 ± 0,003 | 0,604 ± 0,014 | 0,249 | 0,778 | 31 |
+
+  Recall por clase (media de 3 semillas), base → `class_weight` con raíz, de mayor a menor ganancia: Helipad 0,455 → 0,636; Pylon 0,731 → 0,839; Dump truck 0,403 → 0,454; Motorboat 0,495 → 0,545; Bus 0,397 → 0,437; Storage tank 0,626 → 0,660; Excavator 0,650 → 0,684; Cargo plane 0,740 → 0,760; Shipping container 0,678 → 0,697; Small car 0,791 → 0,794; Fishing vessel 0,615 → 0,610; Building 0,752 → 0,717; Truck 0,342 → 0,252.
+- **Conclusión:**
+  - **Se confirma, y con claridad:** las cuatro técnicas suben el mean recall unos **3 pp** (0,619–0,625 frente a 0,590), más de tres σ por encima de la base. Es la mejora más clara desde la fase 2. Entre ellas, las diferencias están dentro del ruido.
+  - Los pesos inversos bajan la accuracy (0,588 frente a 0,612), como se esperaba; con la raíz no baja (0,614).
+  - La ganancia se concentra en las clases minoritarias (Helipad 0,455 → 0,636, Pylon 0,731 → 0,839), pero **Truck baja** (0,342 → 0,252) y Building algo (0,752 → 0,717): los pesos desplazan predicciones de las clases grandes hacia las pequeñas, y el **min recall baja** (0,323 → 0,252), ahora en Truck. Truck ya era la clase más difícil desde EXP-000; se revisa en la matriz de confusión.
+  - **Se elige `class_weight` con raíz:** el mismo mean recall que los pesos inversos (0,622 ± 0,005 frente a 0,625 ± 0,010) sin perder accuracy, y con la menor varianza entre semillas.
+- **Siguiente paso:** fase 8, la augmentation (EXP-015).
+
+### EXP-015: Data augmentation (fase 8)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-014_cw_sqrt` con paciencia 15 / 6 (`EXP-015_none_patience15`) · **Estado:** ejecutado · **Idea:** IDEA-008
+- **Hipótesis:** las imágenes aéreas no tienen un "arriba" canónico, así que las 8 transformaciones del grupo diedral D4 conservan la etiqueta. Mostrarlas en train es codificar esa invarianza, que el MLP no tiene, y debería reducir la brecha train-val. Las variaciones suaves de brillo y contraste imitan cambios de iluminación y sensor.
+- **Cambio:** solo en train, dentro del generador y sobre la caché: volteos horizontal y vertical aleatorios (`flip`); rotación aleatoria de 0/90/180/270° (`rot90`); ambas (`d4`, el grupo completo); brillo ±20 niveles y contraste ×[0,8; 1,2] (`color`); y `d4` + `color`. Con augmentation se necesitan más épocas: en toda la fase EarlyStopping 15 y ReduceLROnPlateau 6, también en la referencia sin augmentation, para que solo cambie la augmentation. 3 semillas.
+- **Fundamento:** IDEA-008 [R8 §7.4]. Para una ffNN, que no comparte pesos entre posiciones, la invarianza se tiene que aprender a partir de los ejemplos, así que el beneficio será menor que en una CNN [R8 §9.2].
+- **Resultados** (3 semillas por variante):
+
+| Variante | val mean recall | val acc | min recall | train acc | Épocas |
+|---|---|---|---|---|---|
+| Sin augmentation (referencia, paciencia 15/6) | 0,615 ± 0,007 | 0,606 ± 0,011 | 0,288 | 0,837 | 44 |
+| Volteos | 0,647 ± 0,003 | 0,623 ± 0,007 | 0,176 | 0,707 | 71 |
+| Rotaciones de 90° | 0,654 ± 0,015 | 0,629 ± 0,009 | 0,202 | 0,684 | 59 |
+| **D4 (volteos + rotaciones)** | 0,656 ± 0,006 | 0,625 ± 0,003 | 0,186 | 0,694 | 66 |
+| Brillo y contraste | 0,596 ± 0,009 | 0,594 ± 0,007 | 0,279 | 0,788 | 49 |
+| D4 + brillo y contraste | 0,619 ± 0,007 | 0,599 ± 0,006 | 0,136 | 0,633 | 62 |
+
+  Recall por clase (media de 3 semillas), sin augmentation → D4: Helipad 0,576 → 0,818; Motorboat 0,539 → 0,664; Dump truck 0,406 → 0,503; Fishing vessel 0,582 → 0,676; Cargo plane 0,792 → 0,849; Bus 0,458 → 0,497; Small car 0,752 → 0,775; Storage tank 0,628 → 0,642; Building 0,706 → 0,719; Excavator 0,692 → 0,700; Shipping container 0,717 → 0,715; Pylon 0,860 → 0,785; Truck 0,288 → 0,186.
+  Confusiones principales con D4 (semilla 1): Truck → Small car 0,20; Dump truck → Excavator 0,16; Truck → Dump truck 0,16; Bus → Small car 0,16; Dump truck → Truck 0,15; Storage tank → Building 0,15.
+- **Conclusión:**
+  - **Se confirma, y es la mayor mejora del plan:** D4 sube el mean recall de 0,615 ± 0,007 a **0,656 ± 0,006** (+4,1 pp, unas seis σ). Los volteos solos (0,647) y las rotaciones solas (0,654) dan casi lo mismo. La brecha se cierra por el lado bueno: train acc baja de 0,84 a 0,69 y val acc sube de 0,606 a 0,625. La red deja de memorizar píxeles ligados a una orientación concreta, justo la invarianza que la fase 6 apuntaba que faltaba.
+  - **La augmentation fotométrica empeora** (0,596 sola, 0,619 con D4): a 16×16, el brillo y el contraste son información útil (p. ej. Storage tank frente a Building), no ruido. Sin verificar por clase.
+  - La ganancia se concentra en Helipad, Motorboat, Dump truck y Fishing vessel, pero **Truck vuelve a bajar** (0,288 → 0,186) y es la clase de min recall: se confunde con Small car, Dump truck y Shipping container. Hipótesis: a 16×16 se pierde el detalle que distingue los vehículos; se prueba 32×32 en la fase 9.
+  - **Se elige D4 sin augmentation fotométrica**, con paciencia 15 / 6.
+  - La referencia con paciencia 15/6 (0,615 ± 0,007) es igual, dentro del ruido, a la base con paciencia 10/4 (0,622 ± 0,005): el cambio de paciencia por sí solo no influye.
+- **Siguiente paso:** fase 9, combinación, ajuste fino, ablación y modelo final (EXP-016 en adelante).
 
 ---
 
@@ -443,7 +515,7 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Qué:** `EarlyStopping(monitor='val_loss', patience≈5–8, restore_best_weights=True)`, `ReduceLROnPlateau(monitor='val_loss', patience≈3)` y `epochs` lo bastante grande para que sea EarlyStopping quien termine.
 - **Por qué:** ISS-002. La parada temprana es una forma de regularización [R8 §7.8].
 
-### IDEA-005: Tratar el desbalance de clases · prioridad media
+### IDEA-005: Tratar el desbalance de clases · probada → EXP-014
 - **Qué:** `class_weight` inversamente proporcional a la frecuencia (o según el "effective number" [R11]), u oversampling de las clases minoritarias en el generador.
 - **Por qué:** el desbalance es de 32:1 (Building 3 594 frente a Helipad 111). Sin corregirlo, la pérdida está dominada por las clases frecuentes. En CNNs, el oversampling suele ser la estrategia más robusta [R10]. La métrica guía debe ser el mean recall (balanced accuracy), no la accuracy.
 - **Evidencia de EXP-000:** Helipad (minoritaria) tiene recall 0, pero también Truck, que es la 3.ª clase más frecuente. No todo es desbalance: aplicar esta idea después de IDEA-001 para no confundir los dos efectos.
@@ -452,10 +524,10 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Qué:** redimensionar a 64×64 o 32×32 antes de `Flatten`.
 - **Por qué:** divide la dimensión de entrada por ≈ 12 o ≈ 49, y con ella los parámetros de la primera capa: menos varianza (mejor relación datos/parámetros) y menos cálculo por paso. Esto último importa poco ahora que hay GPU (CHG-003) y que la carga de imágenes domina el tiempo por paso (ISS-005), porque el redimensionado se hace después de leer cada imagen. **Coste:** se pierde detalle en objetos pequeños (Small car, Pylon).
 
-### IDEA-007: Regularización (dropout, L2, BatchNorm) · prioridad media, tras IDEA-002
+### IDEA-007: Regularización (dropout, L2, BatchNorm) · probada → EXP-013
 - **Por qué:** cuando el MLP tenga capacidad de sobreajustar (hueco entre `train_accuracy` y `val_accuracy` en `runs.csv`). Dropout [R5], penalización L2 [R8 §7.1], BatchNorm para estabilizar y acelerar el entrenamiento [R6].
 
-### IDEA-008: Data augmentation con rotaciones de 90° y flips · prioridad media (clave en la etapa CNN)
+### IDEA-008: Data augmentation con rotaciones de 90° y flips · probada → EXP-015
 - **Por qué:** en imágenes aéreas no hay un "arriba" canónico, así que las 8 transformaciones del grupo diedral D4 conservan la etiqueta. Es aumentar los datos codificando una invarianza conocida [R8 §7.4]. Para una ffNN, que no comparte pesos espacialmente, el beneficio será menor que en una CNN.
 
 ### IDEA-009: Leer cada imagen una sola vez (caché del dataset) · hecha → CHG-007

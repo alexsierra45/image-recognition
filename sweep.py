@@ -241,7 +241,9 @@ def phase5_check():
 
 
 # EXP-012 (3 seeds): clipnorm, AMSGrad and AdamW weight decay change nothing beyond noise. Phase 5 result = PHASE5_5_BASE.
-PHASE6_BASE = PHASE5_5_BASE
+# Regularisation slows training down (dropout 0.2 peaked at epoch 60/60): cap raised to 150 epochs. The base is unchanged
+# by this (its 3 seeds were stopped by EarlyStopping before epoch 45, and runs are deterministic).
+PHASE6_BASE = dict(PHASE5_5_BASE, epochs=150)
 PHASE6_VARIANTS = [('dropout0.1', {'dropout': 0.1}), ('dropout0.2', {'dropout': 0.2}), ('dropout0.3', {'dropout': 0.3}),
                    ('dropout0.5', {'dropout': 0.5}), ('l2_1e-5', {'l2': 1e-5}), ('l2_1e-4', {'l2': 1e-4}),
                    ('l2_1e-3', {'l2': 1e-3}), ('bn_before', {'bn': 'before'}), ('bn_after', {'bn': 'after'})]
@@ -252,6 +254,51 @@ def phase6():
     for seed in SEEDS:
         for tag, change in PHASE6_VARIANTS:
             run(seeded('EXP-013_%s' % tag, seed), 'EXP-013', 6, '%s' % tag, dict(PHASE6_BASE, seed=seed, **change))
+
+
+
+
+def phase6_bn_lr():
+    # BatchNorm tied with the base at the same lr; it usually tolerates a larger lr: try lr x3.
+    for seed in SEEDS:
+        for bn in ['before', 'after']:
+            opt_run(seeded('EXP-013_bn_%s_lr3x' % bn, seed), 'EXP-013', 'bn_%s, lr x3' % bn, dict(PHASE6_BASE, bn=bn, seed=seed),
+                    {'lr': 3 * PHASE6_BASE['optimizer']['lr']})
+
+
+# EXP-013 (3 seeds): dropout and L2 lower train AND validation (underfitting side); BN at the same lr ties the base.
+# BN before the activation with lr x3 (3.6e-3): 0.590 +- 0.009 vs 0.578 +- 0.007 -> adopted (marginal, t ~ 2).
+# Reference for phase 7 (3 seeds): EXP-013_bn_before_lr3x[_seed2|_seed3].
+PHASE7_BASE = merge_cfg(PHASE6_BASE, bn='before', optimizer={'lr': 3 * PHASE6_BASE['optimizer']['lr']})
+
+PHASE7_VARIANTS = [('cw_inverse', {'class_weight': 'inverse'}), ('cw_sqrt', {'class_weight': 'sqrt'}),
+                   ('oversample_balanced', {'oversample': 1.0}), ('oversample_sqrt', {'oversample': 0.5})]
+
+
+def phase7():
+    # Class imbalance, 3 seeds each. Base = phase-6 winner (PHASE7_BASE, 3 seeds already run in phase 6).
+    for seed in SEEDS:
+        for tag, change in PHASE7_VARIANTS:
+            run(seeded('EXP-014_%s' % tag, seed), 'EXP-014', 7, tag, dict(PHASE7_BASE, seed=seed, **change))
+
+
+# EXP-014 (3 seeds): every imbalance treatment adds ~3 pp of mean recall (0.619-0.625 vs 0.590 +- 0.009), tied among them.
+# Square-root class weights kept: same mean recall as inverse weights (0.622 +- 0.005 vs 0.625 +- 0.010) without the
+# accuracy drop (0.614 vs 0.588).
+PHASE8_BASE = dict(PHASE7_BASE, class_weight='sqrt')
+
+PHASE8_VARIANTS = [('flip', ['flip']), ('rot90', ['rot90']), ('d4', ['flip', 'rot90']), ('color', ['color']),
+                   ('d4_color', ['flip', 'rot90', 'color'])]
+
+
+def phase8():
+    # Augmentation (train only), 3 seeds each. Augmentation needs more epochs: patience 15 / 6 for every run of the
+    # phase, including a no-augmentation reference with the same patience (so only the augmentation changes).
+    b = dict(PHASE8_BASE, es_patience=15, rlr_patience=6)
+    for seed in SEEDS:
+        run(seeded('EXP-015_none_patience15', seed), 'EXP-015', 8, 'no augmentation, patience 15/6', dict(b, seed=seed))
+        for tag, ops in PHASE8_VARIANTS:
+            run(seeded('EXP-015_%s' % tag, seed), 'EXP-015', 8, 'augmentation %s' % tag, dict(b, seed=seed, augment=ops))
 
 
 if __name__ == '__main__':
