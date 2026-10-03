@@ -19,11 +19,11 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 5: optimizador (EXP-008 en adelante) |
-| Mejor experimento | `EXP-007_leaky0.3`: 16×16 `/255` → 4 × `Dense(256)` + LeakyReLU(0,3), `he_normal` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
-| Mejor val accuracy / mean recall | 0,635 / 0,591 (min recall 0,273; split estratificado, no comparable con EXP-000) |
+| Fase en curso | Fase 6: regularización (EXP-013) |
+| Mejor experimento | `EXP-007_leaky0.3` (batch 16) por mean recall; la base de trabajo desde la fase 5 es `EXP-010_bs256_sqrt_60ep`: igual red, Adam lr = 1,2e-3, β₁ = 0,95, batch 256 (15 veces más rápida) |
+| Mejor val accuracy / mean recall | EXP-007, 3 semillas: 0,626 ± 0,008 / 0,587 ± 0,004 · base de la fase 5: 0,616 ± 0,006 / 0,578 ± 0,007 (split estratificado, no comparable con EXP-000) |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | La validación se estanca en ~0,57 mientras train sube con la capacidad (sobreajuste por encima de ~200 k parámetros; brecha de 20 pp en el modelo elegido). La lr óptima depende del número de entradas (EXP-005) |
+| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp de mean recall (EXP-009): las diferencias < 3 pp con una semilla no son concluyentes. Brecha train-val de ~14 pp de accuracy: sobreajuste moderado |
 | Próximo paso | Fases 2 → 9 del plan (DEC-006) |
 
 ## Índice de experimentos
@@ -40,7 +40,12 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-005 | 2026-10-03 | 2 | Resolución de entrada (8–224) con `Dense(256)`, y rejilla resolución × lr | EXP-003 | 0,600 | 0,549 | `EXP-005_r16` | ejecutado |
 | EXP-006 | 2026-10-03 | 3 | Profundidad y anchura de las capas ocultas (16×16) | EXP-005_r16 | 0,604 | 0,572 | `EXP-006_h256-256-256-256` | ejecutado |
 | EXP-007 | 2026-10-03 | 4 | Activación de las capas ocultas | EXP-006_h256-256-256-256 | 0,635 | 0,591 | `EXP-007_leaky0.3` | ejecutado |
-| EXP-008 | 2026-10-03 | 5.1 | Learning rate (Adam y SGD con momentum), runs de ≤ 20 épocas | EXP-007_leaky0.3 | | | `EXP-008_*` | en ejecución |
+| EXP-008 | 2026-10-03 | 5.1 | Learning rate (Adam y SGD con momentum), runs de ≤ 20 épocas | EXP-007_leaky0.3 | 0,609 | 0,582 | `EXP-008_sgdm_lr1e-2` | ejecutado |
+| EXP-009 | 2026-10-03 | 5.2 | Momentum, β de Adam, RMSprop (≤ 20 épocas); ruido entre 3 semillas | EXP-008 | 0,608 ± 0,019 | 0,571 ± 0,009 | `EXP-009_adam_b1_0.95*` | ejecutado |
+| EXP-010 | 2026-10-03 | 5.3 | Tamaño de batch con lr reescalada; batch 256 con 60 épocas, 3 semillas | EXP-009_adam_b1_0.95 | 0,616 ± 0,006 | 0,578 ± 0,007 | `EXP-010_bs256_sqrt_60ep*` | ejecutado |
+| EXP-011 | 2026-10-03 | 5.4 | Schedule de la lr (3 semillas en los finalistas) | EXP-010_bs256_sqrt_60ep | — | sin mejora | `EXP-011_*` | ejecutado |
+| EXP-012 | 2026-10-03 | 5.5 | Clipnorm, AMSGrad, AdamW (3 semillas) | EXP-010_bs256_sqrt_60ep | — | sin mejora | `EXP-012_*` | ejecutado |
+| EXP-013 | 2026-10-03 | 6 | Regularización: dropout, L2, BatchNorm (3 semillas) | EXP-010_bs256_sqrt_60ep | | | `EXP-013_*` | en ejecución |
 
 ---
 
@@ -190,7 +195,142 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - Pero quitar las neuronas muertas no basta: LeakyReLU con α = 0,1 queda *por debajo* de ReLU (0,544), así que parte de estas diferencias de 1–3 pp es ruido de una sola semilla [R9]. No hay que sobreinterpretar la ventaja de α = 0,3.
   - GELU, ELU y SELU llegan a una train acc de 0,92–1,00 y su pérdida de validación **sube** desde la época ~12: memorizan más fácilmente sin generalizar mejor. tanh es la peor, como se esperaba de una activación que satura por los dos lados [R25].
   - **Se elige LeakyReLU con α = 0,3** (`he_normal`).
+  - *Añadido al cerrar la fase 5:* repetido con las semillas 2 y 3, da **0,587 ± 0,004** de mean recall y 0,626 ± 0,008 de val acc.
 - **Siguiente paso:** fase 5.1, la learning rate (EXP-008).
+
+### EXP-008: Learning rate de Adam y de SGD con momentum (fase 5.1)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-007_leaky0.3` con **≤ 20 épocas** · **Estado:** ejecutado
+- **Hipótesis:** la lr es el hiperparámetro más influyente [R26 §3.1.1]. Para Adam se espera el óptimo cerca de 1e-3, el valor que ya mostró ser bueno a 16×16 en la rejilla de EXP-005. SGD con momentum, al no normalizar por la magnitud del gradiente, necesitará lr mayores (1e-2 a 1e-1).
+- **Cambio:** Adam (AMSGrad, clipnorm = 1) con lr ∈ {1e-4, 3e-4, 1e-3, 3e-3, 1e-2}; SGD con momentum 0,9 y lr ∈ {1e-3, 1e-2, 1e-1}. Rejilla logarítmica.
+- **Presupuesto:** la fase 5 explora con runs cortos (máximo 20 épocas, con EarlyStopping 10 y ReduceLROnPlateau 4), como pide el plan. Por eso la referencia es `EXP-008_adam_lr1e-3` (la configuración de EXP-007 con 20 épocas), no EXP-007: con menos épocas las cifras son más bajas y favorecen a las lr altas, que convergen antes. El modelo final se reentrena más tiempo en la fase 9.
+- **Fundamento:** [R26 §3.1.1] (la lr como primer hiperparámetro a ajustar, en escala logarítmica); Adam [R4]; momentum [R8 §8.3.2].
+- **Resultados** (ids `EXP-008_<optimizador>_lr<lr>`):
+
+| Variante | Mejor época / épocas | train acc | val acc | train mean recall | **val mean recall** | min recall | s/época |
+|---|---|---|---|---|---|---|---|
+| Adam lr 1e-4 | 20 / 20 | 0,657 | 0,581 | 0,605 | 0,527 | 0,182 | 10,5 s |
+| Adam lr 3e-4 | 16 / 20 | 0,687 | 0,570 | 0,660 | 0,535 | 0,226 | 10,5 s |
+| Adam lr 1e-3 | 20 / 20 | 0,665 | 0,559 | 0,652 | 0,518 | 0,222 | 10,4 s |
+| Adam lr 3e-3 | 20 / 20 | 0,592 | 0,539 | 0,535 | 0,480 | 0,000 | 10,7 s |
+| Adam lr 1e-2 | 17 / 20 | 0,642 | 0,578 | 0,593 | 0,520 | 0,182 | 10,6 s |
+| SGD momentum 0.9 lr 1e-3 | 20 / 20 | 0,571 | 0,533 | 0,498 | 0,455 | 0,000 | 7,5 s |
+| SGD momentum 0.9 lr 1e-2 | 20 / 20 | 0,773 | 0,609 | 0,747 | 0,582 | 0,364 | 7,4 s |
+| SGD momentum 0.9 lr 1e-1 | 20 / 20 | 0,622 | 0,547 | 0,589 | 0,512 | 0,182 | 7,6 s |
+
+- **Conclusión:**
+  - **Adam es casi insensible a la lr entre 1e-4 y 1e-2** con este presupuesto: todo cae en 0,52–0,535 salvo 3e-3 (0,480), y esas diferencias son del orden del ruido de una semilla. No diverge ni a 1e-2, probablemente por `clipnorm = 1` y AMSGrad. El mejor punto es 3e-4 (0,535).
+  - **SGD con momentum 0,9 y lr = 1e-2 es claramente el mejor** (0,582, val acc 0,609, min recall 0,364): +4,7 pp sobre el mejor Adam con el mismo presupuesto, y cada época es un 30 % más rápida (menos estado del optimizador). A 1e-3 avanza demasiado despacio (0,455) y a 1e-1 es inestable (0,512).
+  - **El presupuesto de 20 épocas pesa:** la referencia (Adam 1e-3) da 0,518 frente a 0,591 en EXP-007, cuya mejor época fue la 30. Varias variantes tienen su mejor época en la 20.ª, así que este barrido mide también la velocidad de convergencia. Al cerrar la fase 5 se comprueba la configuración ganadora con el presupuesto completo frente a EXP-007.
+  - Se siguen ambos: **SGD con lr = 1e-2** para el barrido de momentum, y **Adam con lr = 3e-4** para sus β.
+- **Siguiente paso:** fase 5.2, momentum y comparación de optimizadores (EXP-009).
+
+### EXP-009: Momentum y comparación de optimizadores (fase 5.2)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-008_sgdm_lr1e-2` (SGD) y `EXP-008_adam_lr3e-4` (Adam), ≤ 20 épocas · **Estado:** ejecutado
+- **Hipótesis:** momentum alto (0,9–0,95) acelera SGD al promediar gradientes en direcciones consistentes; 0,99 puede volverse inestable a lr = 1e-2 (la lr efectiva es lr/(1 − m) = 1). Nesterov suele ayudar un poco. En Adam, β₁ hace el papel del momentum; β₂ = 0,99 adapta antes la escala.
+- **Cambio:** SGD (lr = 1e-2) con momentum ∈ {0; 0,5; 0,9; 0,95; 0,99}, con y sin Nesterov; Adam (lr = 3e-4) con β₁ ∈ {0,8; 0,95} y β₂ = 0,99; RMSprop con lr ∈ {1e-4, 3e-4, 1e-3, 3e-3}. Cada optimizador se compara con su mejor lr.
+- **Fundamento:** momentum y Nesterov [R8 §8.3.2–8.3.3; R27]; Adam [R4]; RMSprop [R8 §8.5.2].
+- **Resultados** (ids `EXP-009_*`; SGD con momentum 0,9 sin Nesterov es `EXP-008_sgdm_lr1e-2`: 0,582):
+
+| Variante | Mejor época / épocas | train acc | val acc | **val mean recall** | min recall |
+|---|---|---|---|---|---|
+| SGD lr 1e-2 momentum 0.0 | 14 / 20 | 0,542 | 0,519 | 0,459 | 0,000 |
+| SGD lr 1e-2 momentum 0.5 | 20 / 20 | 0,642 | 0,576 | 0,524 | 0,182 |
+| SGD lr 1e-2 momentum 0.95 | 20 / 20 | 0,614 | 0,537 | 0,508 | 0,182 |
+| SGD lr 1e-2 momentum 0.99 | 20 / 20 | 0,572 | 0,520 | 0,451 | 0,182 |
+| SGD lr 1e-2 momentum 0.5 Nesterov | 20 / 20 | 0,645 | 0,573 | 0,526 | 0,182 |
+| SGD lr 1e-2 momentum 0.9 Nesterov | 18 / 20 | 0,695 | 0,584 | 0,559 | 0,249 |
+| SGD lr 1e-2 momentum 0.95 Nesterov | 14 / 20 | 0,681 | 0,601 | 0,572 | 0,182 |
+| SGD lr 1e-2 momentum 0.99 Nesterov | 20 / 20 | 0,611 | 0,553 | 0,506 | 0,182 |
+| Adam beta_1 0.8 | 17 / 20 | 0,703 | 0,595 | 0,553 | 0,213 |
+| Adam beta_1 0.95 | 20 / 20 | 0,761 | 0,614 | 0,569 | 0,273 |
+| Adam beta_2 0.99 | 20 / 20 | 0,747 | 0,603 | 0,558 | 0,273 |
+| RMSprop lr 1e-4 | 20 / 20 | 0,636 | 0,554 | 0,528 | 0,182 |
+| RMSprop lr 3e-4 | 14 / 20 | 0,697 | 0,601 | 0,562 | 0,182 |
+| RMSprop lr 1e-3 | 18 / 20 | 0,629 | 0,551 | 0,516 | 0,091 |
+| RMSprop lr 3e-3 | 20 / 20 | 0,647 | 0,562 | 0,536 | 0,182 |
+| SGD lr 1e-2 momentum 0.9, seed 2 | 20 / 20 | 0,718 | 0,621 | 0,568 | 0,182 |
+| Adam beta_1 0.95, seed 2 | 20 / 20 | 0,758 | 0,625 | 0,582 | 0,273 |
+| SGD lr 1e-2 momentum 0.9, seed 3 | 17 / 20 | 0,682 | 0,593 | 0,545 | 0,273 |
+| Adam beta_1 0.95, seed 3 | 16 / 20 | 0,687 | 0,587 | 0,564 | 0,226 |
+
+  **Ruido entre semillas** (los dos finalistas, semillas 1, 2 y 3): SGD con momentum 0,9 → 0,582 / 0,568 / 0,545 = **0,565 ± 0,018**; Adam con β₁ = 0,95 → 0,569 / 0,582 / 0,564 = **0,571 ± 0,009** (val acc 0,608 ± 0,014 y 0,608 ± 0,019).
+- **Conclusión:**
+  - **El momentum importa:** SGD sin momentum se queda en 0,459 y con 0,9 llega a 0,582. A partir de 0,95 empeora (0,99: 0,451), porque la lr efectiva lr/(1 − m) se vuelve demasiado grande [R27]. Nesterov no da una ventaja consistente (mejor con 0,95, peor con 0,9).
+  - En Adam, β₁ = 0,95 (0,569) y β₂ = 0,99 (0,558) mejoran la referencia de β = (0,9; 0,999) (0,535), pero β₁ = 0,8 también (0,553): los resultados no son monótonos.
+  - RMSprop rinde parecido a Adam en su mejor lr (3e-4: 0,562).
+  - **La medida de ruido cambia la lectura de todo el barrido:** con σ ≈ 1–2 pp entre semillas, las diferencias de menos de ~3 pp con una sola semilla no son concluyentes, tanto aquí como en las fases 3–4. Los dos finalistas **empatan** (0,565 ± 0,018 frente a 0,571 ± 0,009).
+  - **Se elige Adam con lr = 3e-4 y β₁ = 0,95**: tiene la mitad de varianza entre semillas, en la 5.1 fue casi insensible a la lr (importante para reescalarla en la 5.3), y los ajustes de la 5.5 son de Adam. A cambio, SGD es un 30 % más rápido por época. Elección por robustez, no por rendimiento.
+- **Siguiente paso:** fase 5.3, el tamaño de batch (EXP-010).
+
+### EXP-010: Tamaño de batch (fase 5.3)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-009_adam_b1_0.95` (Adam lr = 3e-4, β₁ = 0,95, batch 16), ≤ 20 épocas · **Estado:** ejecutado
+- **Hipótesis:** batches mayores dan gradientes menos ruidosos y épocas más rápidas en GPU (menos sobrecarga por paso, CHG-007), pero menos actualizaciones por época; con un presupuesto fijo de 20 épocas pueden quedarse cortos. El ruido de los batches pequeños puede además actuar como regularizador.
+- **Cambio:** batch ∈ {32, 64, 128, 256} con lr = 3e-4 · √(batch/16) (regla de la raíz), y con lr = 3e-4 · batch/16 (regla lineal) para 64 y 256.
+- **Fundamento:** la regla lineal mantiene la escala del paso de SGD por muestra [R28]; para optimizadores adaptativos se suele proponer la raíz cuadrada (heurística, sin un resultado tan establecido; ver [R29]). Que el batch grande generaliza peor es una observación empírica discutida [R30].
+- **Resultados** (ids `EXP-010_bs<batch>_<regla>`):
+
+| Variante | Mejor época / épocas | val acc | **val mean recall** | min recall | s/época | Hasta val acc ≥ 0,58 |
+|---|---|---|---|---|---|---|
+| batch 16, lr 3e-4 (= `EXP-009_adam_b1_0.95`) | 20 / 20 | 0,614 | 0,569 | 0,273 | 10,6 s | 159 s |
+| batch 32, lr 0.00042 (sqrt rule) | 20 / 20 | 0,578 | 0,552 | 0,273 | 4,45 s | 68 s |
+| batch 64, lr 0.0006 (sqrt rule) | 20 / 20 | 0,614 | 0,571 | 0,253 | 2,52 s | 34 s |
+| batch 128, lr 0.00085 (sqrt rule) | 19 / 20 | 0,611 | 0,566 | 0,273 | 1,44 s | 26 s |
+| batch 256, lr 0.0012 (sqrt rule) | 20 / 20 | 0,609 | 0,574 | 0,240 | 0,68 s | 14 s |
+| batch 64, lr 0.0012 (linear rule) | 17 / 20 | 0,582 | 0,563 | 0,113 | 2,8 s | 45 s |
+| batch 256, lr 0.0048 (linear rule) | 20 / 20 | 0,591 | 0,565 | 0,258 | 0,66 s | 12 s |
+
+  Con el presupuesto completo (60 épocas, EarlyStopping 10), batch 256 da lo mismo (`EXP-010_bs256_sqrt_60ep`: mejor época 20, parada en la 30) y, con 3 semillas, **0,578 ± 0,007** de mean recall y 0,616 ± 0,006 de val acc.
+- **Conclusión:**
+  - **Todas las variantes caen dentro del ruido** (0,552–0,574 frente a σ ≈ 1–2 pp, EXP-009), con cualquiera de las dos reglas. No se observa la peor generalización de los batches grandes [R30] en este rango.
+  - **El coste cae drásticamente:** 10,6 s por época con batch 16 frente a 0,7 s con 256 (×15; con batch 16 manda la sobrecarga por paso de la GPU, CHG-007), y val acc 0,58 se alcanza en 14 s en lugar de 159 s.
+  - **Se elige batch 256 con lr = 1,2e-3** (regla de la raíz). Como un run baja de 1 min, se abandona el presupuesto corto de exploración: **vuelta a 60 épocas con EarlyStopping 10, y 3 semillas en cada decisión** a partir de la 5.4.
+- **Siguiente paso:** fase 5.4, el schedule de la lr (EXP-011).
+
+### EXP-011: Schedule de la learning rate (fase 5.4)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-010_bs256_sqrt_60ep` (ReduceLROnPlateau, lr = 1,2e-3, 60 épocas) · **Estado:** ejecutado
+- **Hipótesis:** un decaimiento suave (coseno) o un warmup que permita una lr inicial mayor pueden encontrar mejores mínimos que reducir la lr a saltos.
+- **Cambio:** coseno sobre 60 épocas; decaimiento exponencial (×0,9 por época); warmup lineal de 3 épocas + coseno con lr ×2; warmup de 3 épocas + plateau con lr ×2. Para separar factores, también plateau con lr ×2 sin warmup. Los finalistas, con 3 semillas.
+- **Fundamento:** decaimiento de la lr en SGD [R8 §8.3.1]; coseno [R31]; warmup para lr altas o batches grandes [R28].
+- **Resultados:**
+
+| Variante | Semillas | val mean recall | val acc |
+|---|---|---|---|
+| ReduceLROnPlateau, lr 1,2e-3 (base, `EXP-010_bs256_sqrt_60ep`) | 3 | 0,578 ± 0,007 | 0,616 ± 0,006 |
+| Coseno | 1 | 0,570 | 0,594 |
+| Exponencial 0,9/época | 1 | 0,554 | 0,589 |
+| Warmup 3 + coseno, lr ×2 | 1 | 0,581 | 0,604 |
+| Plateau, lr ×2 (sin warmup) | 1 | 0,590 | 0,615 |
+| Warmup 3 + plateau, lr ×2 | 3 | 0,584 ± 0,028 | 0,613 ± 0,018 |
+
+- **Conclusión:** **ningún schedule supera a la base más allá del ruido.** Con una semilla, warmup + plateau con lr ×2 parecía el mejor (0,594), pero sin warmup da lo mismo (0,590), y con 3 semillas empata con la base con cuatro veces más varianza. El coseno y el exponencial no mejoran (y con EarlyStopping el coseno no llega a completar su ciclo). **Se mantiene ReduceLROnPlateau con lr = 1,2e-3 y sin warmup**, la opción más simple y estable.
+- **Siguiente paso:** fase 5.5 (EXP-012).
+
+### EXP-012: Clipnorm, AMSGrad y weight decay desacoplado (fase 5.5)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-010_bs256_sqrt_60ep` · **Estado:** ejecutado
+- **Hipótesis:** `clipnorm = 1` y AMSGrad venían del enunciado sin justificar; puede que no aporten. El weight decay desacoplado de AdamW regulariza de forma distinta a la L2 dentro de Adam.
+- **Cambio:** sin clipnorm; sin AMSGrad; AdamW con weight decay ∈ {1e-4, 1e-3, 1e-2}. 3 semillas cada uno.
+- **Fundamento:** AMSGrad [R4]; AdamW [R32].
+- **Resultados:**
+
+| Variante | Semillas | val mean recall | val acc |
+|---|---|---|---|
+| Base (Adam, AMSGrad, clipnorm 1) | 3 | 0,578 ± 0,007 | 0,616 ± 0,006 |
+| Sin clipnorm | 3 | 0,565 ± 0,032 | 0,605 ± 0,017 |
+| Sin AMSGrad | 3 | 0,572 ± 0,006 | 0,608 ± 0,003 |
+| AdamW, weight decay 1e-4 | 3 | 0,565 ± 0,017 | 0,606 ± 0,011 |
+| AdamW, weight decay 1e-3 | 3 | 0,579 ± 0,023 | 0,611 ± 0,010 |
+| AdamW, weight decay 1e-2 | 3 | 0,566 ± 0,010 | 0,606 ± 0,008 |
+
+- **Conclusión:** **nada cambia más allá del ruido.** Quitar clipnorm aumenta la varianza entre semillas (σ = 0,032), lo que sugiere que estabiliza algo el entrenamiento, aunque no mejora la media. Se mantiene la base.
+- **Cierre de la fase 5, comprobación con 3 semillas frente a EXP-007:** EXP-007 (Adam, lr = 1e-3, β₁ = 0,9, batch 16) da **0,587 ± 0,004** (val acc 0,626 ± 0,008), frente a **0,578 ± 0,007** de la base de la fase 5. La fase 5 cuesta **~1 pp** (algo más de una σ: probablemente real, pero pequeño) a cambio de épocas 15 veces más rápidas. Hipótesis: el ruido del batch pequeño regulariza. Se sigue con batch 256 en las fases 6–8 (3 semillas por variante serían inviables con batch 16), y el modelo final se vuelve a probar con batch 16 en la fase 9 (IDEA-011).
+- **Siguiente paso:** fase 6, la regularización (EXP-013).
+
+### EXP-013: Regularización (fase 6)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-010_bs256_sqrt_60ep` (3 semillas: 0,578 ± 0,007) · **Estado:** en ejecución · **Idea:** IDEA-007
+- **Hipótesis:** la brecha train-val de la base (train acc ≈ 0,76 frente a 0,62 en val) indica sobreajuste; regularizar debería cerrarla y, con suerte, subir la validación.
+- **Cambio:** una técnica cada vez: Dropout ∈ {0,1; 0,2; 0,3; 0,5} tras cada capa oculta; L2 ∈ {1e-5, 1e-4, 1e-3} en todas las `Dense`; BatchNormalization antes de la activación (sin sesgo en la `Dense`) o después. 3 semillas cada una.
+- **Fundamento:** Dropout [R5]; penalización L2 [R8 §7.1]; BatchNorm [R6].
+- **Resultados:** *pendiente*.
 
 ---
 
@@ -329,6 +469,11 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Por qué:** EXP-004 empeoró porque, con Adam a lr = 1e-3, una entrada de mayor magnitud satura antes la softmax. No se probó la ventaja de centrar en cero [R1 §4.3] en igualdad de condiciones. Con capas ocultas y BatchNorm el efecto puede ser distinto.
 - **Coste:** un run. **Éxito:** mean recall ≥ el de `/255` con la misma configuración.
 
+### IDEA-011: Entrenar el modelo final con batch pequeño · prioridad media (fase 9)
+- **Qué:** reentrenar la configuración final con batch 16 (lr reescalada por la regla de la raíz) y 3 semillas, y compararla con batch 256.
+- **Por qué:** EXP-007 con batch 16 da 0,587 ± 0,004 frente a 0,578 ± 0,007 con batch 256 (EXP-012). Puede ser el efecto regularizador del ruido de los batches pequeños [R30]. Con regularización explícita (fase 6) o augmentation (fase 8) la diferencia podría desaparecer.
+- **Coste:** ~8 min por run con batch 16. **Éxito:** > 1 pp por encima del batch 256 con 3 semillas.
+
 ### Etapas futuras del curso (para no perderlas de vista)
 - **CNN:** conectividad local, compartición de pesos y equivarianza a traslaciones reducen los parámetros en órdenes de magnitud frente a la ffNN [R8 §9.2].
 - **Arquitecturas conocidas desde cero frente a transfer learning:** la transferibilidad de las features baja con la distancia entre dominios [R12]. El paso de ImageNet (fotos naturales) a imágenes aéreas es un salto de dominio grande, así que conviene comparar congelar capas frente a fine-tuning completo.
@@ -402,6 +547,11 @@ El usuario aporta un plan de mejora de la ffNN en 9 fases y pide ejecutarlo junt
 - **[R23]** Hendrycks, Gimpel (2016). *Gaussian Error Linear Units (GELUs)*. arXiv:1606.08415.
 - **[R24]** Klambauer, Unterthiner, Mayr, Hochreiter (2017). *Self-Normalizing Neural Networks*. NeurIPS. (SELU, `lecun_normal`, AlphaDropout)
 - **[R25]** Glorot, Bengio (2010). *Understanding the difficulty of training deep feedforward neural networks*. AISTATS.
+- **[R26]** Bengio (2012). *Practical Recommendations for Gradient-Based Training of Deep Architectures*. En *Neural Networks: Tricks of the Trade*, 2.ª ed., Springer. (§3.1.1: hiperparámetros de la red; la lr inicial como el hiperparámetro más importante, buscada en escala logarítmica)
+- **[R27]** Sutskever, Martens, Dahl, Hinton (2013). *On the importance of initialization and momentum in deep learning*. ICML. (momentum clásico y de Nesterov)
+- **[R28]** Goyal et al. (2017). *Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour*. arXiv:1706.02677. (regla lineal de la lr con el batch y warmup)
+- **[R29]** Malladi, Lyu, Panigrahi, Arora (2022). *On the SDEs and Scaling Rules for Adaptive Gradient Algorithms*. NeurIPS. (regla de la raíz cuadrada para Adam/RMSprop)
+- **[R30]** Keskar et al. (2017). *On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima*. ICLR.
 
 ---
 

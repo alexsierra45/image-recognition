@@ -63,9 +63,40 @@ def expand_config(df):
     df['dropout'] = [c['dropout'] for c in cfgs]
     df['l2'] = [c['l2'] for c in cfgs]
     df['bn'] = [c['bn'] or 'none' for c in cfgs]
+    df['variant'] = df['id'].str.replace(r'_seed\d+$', '', regex=True)
+    df['seed'] = [c['seed'] for c in cfgs]
     df['gap'] = df['train_mean_recall'] - df['mean_recall']
     df['gap_acc'] = df['train_acc'] - df['val_acc']
     return df
+
+
+def seed_summary(df, by='variant', cols=('mean_recall', 'val_acc', 'min_recall', 'train_mean_recall', 'train_acc')):
+    """Mean and std over seeds per variant (expects expand_config columns)."""
+    g = df.groupby(by, sort=False)
+    out = g[list(cols)].agg(['mean', 'std'])
+    out.columns = ['%s_%s' % c for c in out.columns]
+    out.insert(0, 'n_seeds', g.size())
+    return out.reset_index()
+
+
+def plot_seed_bars(summary, y='mean_recall', label='variant', name=None, title=None, ax=None):
+    """Bars = mean over seeds of the validation metric, error bars = std; train mean as a dashed tick."""
+    fig, ax = (ax.figure, ax) if ax is not None else plt.subplots(figsize=(max(5.0, 0.75 * len(summary)), 3.8))
+    xs = np.arange(len(summary))
+    ax.bar(xs, summary[y + '_mean'], 0.6, yerr=summary[y + '_std'], color=PALETTE[0], ecolor=INK2, capsize=3,
+           label='val (mean ± std over seeds)')
+    train_col = {'mean_recall': 'train_mean_recall', 'val_acc': 'train_acc'}.get(y)
+    if train_col:
+        ax.hlines(summary[train_col + '_mean'], xs - 0.3, xs + 0.3, colors=INK, linestyles='--', lw=1.2, label='train (mean)')
+    for x_, v in zip(xs, summary[y + '_mean']):
+        ax.text(x_ + 0.32, v, '%.3f' % v, ha='left', va='center', fontsize=6.5, color=INK2)
+    ax.set_xticks(xs)
+    ax.set_xticklabels(summary[label], rotation=30, ha='right')
+    ax.set_ylabel(METRIC_LABELS.get(y, y))
+    ax.grid(axis='x', visible=False)
+    ax.set_title(title or METRIC_LABELS.get(y, y))
+    ax.legend(fontsize=7, loc='upper left', bbox_to_anchor=(1.0, 1.0))
+    return _save(fig, name)
 
 
 def _save(fig, name):

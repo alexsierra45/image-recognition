@@ -1,0 +1,44 @@
+==== phase5_1 ====
+EXP-008_adam_lr1e-4          Adam lr 1e-4                             params=397581    ep=20/20 train_acc=0.657 val_acc=0.581 mean_recall=0.527 min_rec=0.182 211s
+EXP-008_adam_lr3e-4          Adam lr 3e-4                             params=397581    ep=16/20 train_acc=0.687 val_acc=0.570 mean_recall=0.535 min_rec=0.226 212s
+EXP-008_adam_lr1e-3          Adam lr 1e-3                             params=397581    ep=20/20 train_acc=0.665 val_acc=0.559 mean_recall=0.518 min_rec=0.222 208s
+EXP-008_adam_lr3e-3          Adam lr 3e-3                             params=397581    ep=20/20 train_acc=0.591 val_acc=0.539 mean_recall=0.480 min_rec=0.000 214s
+EXP-008_adam_lr1e-2          Adam lr 1e-2                             params=397581    ep=17/20 train_acc=0.642 val_acc=0.578 mean_recall=0.520 min_rec=0.182 212s
+EXP-008_sgdm_lr1e-3          SGD momentum 0.9 lr 1e-3                 params=397581    ep=20/20 train_acc=0.571 val_acc=0.533 mean_recall=0.455 min_rec=0.000 150s
+EXP-008_sgdm_lr1e-2          SGD momentum 0.9 lr 1e-2                 params=397581    ep=20/20 train_acc=0.773 val_acc=0.609 mean_recall=0.582 min_rec=0.364 149s
+EXP-008_sgdm_lr1e-1          SGD momentum 0.9 lr 1e-1                 params=397581    ep=20/20 train_acc=0.622 val_acc=0.547 mean_recall=0.512 min_rec=0.182 152s
+==== phase5_2 ====
+EXP-009_sgd_m0.0             SGD lr 1e-2 momentum 0.0                 params=397581    ep=14/20 train_acc=0.542 val_acc=0.519 mean_recall=0.459 min_rec=0.000 132s
+EXP-009_sgd_m0.5             SGD lr 1e-2 momentum 0.5                 params=397581    ep=20/20 train_acc=0.642 val_acc=0.576 mean_recall=0.524 min_rec=0.182 154s
+EXP-009_sgd_m0.95            SGD lr 1e-2 momentum 0.95                params=397581    ep=20/20 train_acc=0.614 val_acc=0.537 mean_recall=0.508 min_rec=0.182 147s
+EXP-009_sgd_m0.99            SGD lr 1e-2 momentum 0.99                params=397581    ep=20/20 train_acc=0.572 val_acc=0.520 mean_recall=0.451 min_rec=0.182 155s
+EXP-009_sgd_m0.5_nesterov    SGD lr 1e-2 momentum 0.5 Nesterov        params=397581    ep=20/20 train_acc=0.645 val_acc=0.573 mean_recall=0.526 min_rec=0.182 151s
+EXP-009_sgd_m0.9_nesterov    SGD lr 1e-2 momentum 0.9 Nesterov        params=397581    ep=18/20 train_acc=0.695 val_acc=0.584 mean_recall=0.559 min_rec=0.249 155s
+EXP-009_sgd_m0.95_nesterov   SGD lr 1e-2 momentum 0.95 Nesterov       params=397581    ep=14/20 train_acc=0.681 val_acc=0.601 mean_recall=0.572 min_rec=0.182 154s
+EXP-009_sgd_m0.99_nesterov   SGD lr 1e-2 momentum 0.99 Nesterov       params=397581    ep=20/20 train_acc=0.611 val_acc=0.553 mean_recall=0.506 min_rec=0.182 153s
+EXP-009_adam_b1_0.8          Adam beta_1 0.8                          params=397581    ep=17/20 train_acc=0.703 val_acc=0.595 mean_recall=0.553 min_rec=0.213 210s
+EXP-009_adam_b1_0.95         Adam beta_1 0.95                         params=397581    ep=20/20 train_acc=0.761 val_acc=0.614 mean_recall=0.569 min_rec=0.273 213s
+EXP-009_adam_b2_0.99         Adam beta_2 0.99                         params=397581    ep=20/20 train_acc=0.747 val_acc=0.603 mean_recall=0.558 min_rec=0.273 212s
+EXP-009_rmsprop_lr1e-4       RMSprop lr 1e-4                          params=397581    ep=20/20 train_acc=0.636 val_acc=0.554 mean_recall=0.528 min_rec=0.182 161s
+EXP-009_rmsprop_lr3e-4       RMSprop lr 3e-4                          params=397581    ep=14/20 train_acc=0.697 val_acc=0.601 mean_recall=0.562 min_rec=0.182 164s
+EXP-009_rmsprop_lr1e-3       RMSprop lr 1e-3                          params=397581    ep=18/20 train_acc=0.630 val_acc=0.551 mean_recall=0.516 min_rec=0.091 163s
+EXP-009_rmsprop_lr3e-3       RMSprop lr 3e-3                          params=397581    ep=20/20 train_acc=0.647 val_acc=0.562 mean_recall=0.536 min_rec=0.182 160s
+==== phase5_2_seeds ====
+EXP-009_sgd_m0.9_seed2       SGD lr 1e-2 momentum 0.9, seed 2         params=397581    ep=20/20 train_acc=0.718 val_acc=0.621 mean_recall=0.568 min_rec=0.182 135s
+EXP-009_adam_b1_0.95_seed2   Adam beta_1 0.95, seed 2                 params=397581    ep=20/20 train_acc=0.758 val_acc=0.625 mean_recall=0.582 min_rec=0.273 205s
+EXP-009_sgd_m0.9_seed3       SGD lr 1e-2 momentum 0.9, seed 3         params=397581    ep=17/20 train_acc=0.682 val_acc=0.593 mean_recall=0.545 min_rec=0.273 149s
+EXP-009_adam_b1_0.95_seed3   Adam beta_1 0.95, seed 3                 params=397581    ep=16/20 train_acc=0.687 val_acc=0.587 mean_recall=0.564 min_rec=0.226 208s
+==== phase5_3 ====
+Traceback (most recent call last):
+  File "/home/alexsierra45/muia/vision-computer/image-recognition/sweep.py", line 207, in <module>
+    globals()[name]()
+  File "/home/alexsierra45/muia/vision-computer/image-recognition/sweep.py", line 175, in phase5_3
+    lr0, bs0 = b['optimizer']['lr'], b['batch_size']
+KeyError: 'batch_size'
+==== phase5_3 ====
+EXP-010_bs32_sqrt            batch 32, lr 0.00042 (sqrt rule)         params=397581    ep=20/20 train_acc=0.723 val_acc=0.578 mean_recall=0.552 min_rec=0.273 90s
+EXP-010_bs64_sqrt            batch 64, lr 0.0006 (sqrt rule)          params=397581    ep=20/20 train_acc=0.750 val_acc=0.614 mean_recall=0.571 min_rec=0.253 51s
+EXP-010_bs128_sqrt           batch 128, lr 0.00085 (sqrt rule)        params=397581    ep=19/20 train_acc=0.723 val_acc=0.611 mean_recall=0.566 min_rec=0.273 30s
+EXP-010_bs256_sqrt           batch 256, lr 0.0012 (sqrt rule)         params=397581    ep=20/20 train_acc=0.718 val_acc=0.609 mean_recall=0.574 min_rec=0.240 14s
+EXP-010_bs64_linear          batch 64, lr 0.0012 (linear rule)        params=397581    ep=17/20 train_acc=0.660 val_acc=0.582 mean_recall=0.563 min_rec=0.113 57s
+EXP-010_bs256_linear         batch 256, lr 0.0048 (linear rule)       params=397581    ep=20/20 train_acc=0.661 val_acc=0.591 mean_recall=0.565 min_rec=0.258 14s

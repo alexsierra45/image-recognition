@@ -133,6 +133,127 @@ def phase5_1():
                 {'name': 'sgd', 'lr': lr, 'momentum': 0.9})
 
 
+# EXP-008 (<= 20 epochs): SGD + momentum 0.9 at lr 1e-2 is best (0.582); Adam is flat within noise, best at lr 3e-4 (0.535).
+SGD_LR, ADAM_LR = 1e-2, 3e-4
+PHASE5_2_BASE = merge_cfg(PHASE5_BASE, optimizer={'lr': ADAM_LR})
+
+
+def phase5_2():
+    # Momentum. SGD at its best lr from 5.1 (momentum 0.9 without Nesterov is already in 5.1); Adam betas; RMSprop lr.
+    b = PHASE5_2_BASE
+    for m in [0.0, 0.5, 0.95, 0.99]:
+        opt_run('EXP-009_sgd_m%s' % m, 'EXP-009', 'SGD lr %s momentum %s' % (lr_tag(SGD_LR), m), b,
+                {'name': 'sgd', 'lr': SGD_LR, 'momentum': m})
+    for m in [0.5, 0.9, 0.95, 0.99]:
+        opt_run('EXP-009_sgd_m%s_nesterov' % m, 'EXP-009', 'SGD lr %s momentum %s Nesterov' % (lr_tag(SGD_LR), m), b,
+                {'name': 'sgd', 'lr': SGD_LR, 'momentum': m, 'nesterov': True})
+    for b1 in [0.8, 0.95]:
+        opt_run('EXP-009_adam_b1_%s' % b1, 'EXP-009', 'Adam beta_1 %s' % b1, b, {'beta_1': b1})
+    opt_run('EXP-009_adam_b2_0.99', 'EXP-009', 'Adam beta_2 0.99', b, {'beta_2': 0.99})
+    for lr in [1e-4, 3e-4, 1e-3, 3e-3]:
+        opt_run('EXP-009_rmsprop_lr%s' % lr_tag(lr), 'EXP-009', 'RMSprop lr %s' % lr_tag(lr), b,
+                {'name': 'rmsprop', 'lr': lr, 'momentum': 0.0})
+
+
+def phase5_2_seeds():
+    # Single-seed differences in 5.2 are non-monotonic (noise ~2-3 pp?): repeat the two finalists with seeds 2 and 3.
+    for seed in [2, 3]:
+        opt_run('EXP-009_sgd_m0.9_seed%d' % seed, 'EXP-009', 'SGD lr 1e-2 momentum 0.9, seed %d' % seed, PHASE5_2_BASE,
+                {'name': 'sgd', 'lr': SGD_LR, 'momentum': 0.9}, seed=seed)
+        opt_run('EXP-009_adam_b1_0.95_seed%d' % seed, 'EXP-009', 'Adam beta_1 0.95, seed %d' % seed, PHASE5_2_BASE,
+                {'beta_1': 0.95}, seed=seed)
+
+
+# EXP-009: seed noise ~1-2 pp. SGD+m 0.9 (0.565 +- 0.018, 3 seeds) and Adam beta_1 0.95 (0.571 +- 0.009) tie;
+# Adam is kept: lower seed variance, flat lr response in 5.1, and phase 5.5 is about Adam options.
+PHASE5_3_BASE = merge_cfg(PHASE5_2_BASE, optimizer={'beta_1': 0.95})
+
+
+def phase5_3():
+    # Batch size, lr rescaled with the square-root rule (and the linear rule for two sizes).
+    b = PHASE5_3_BASE
+    lr0, bs0 = b['optimizer']['lr'], b.get('batch_size', DEFAULT_CFG['batch_size'])
+    for bs in [32, 64, 128, 256]:
+        lr = lr0 * (bs / bs0) ** 0.5
+        opt_run('EXP-010_bs%d_sqrt' % bs, 'EXP-010', 'batch %d, lr %.2g (sqrt rule)' % (bs, lr), b, {'lr': lr}, batch_size=bs)
+    for bs in [64, 256]:
+        lr = lr0 * bs / bs0
+        opt_run('EXP-010_bs%d_linear' % bs, 'EXP-010', 'batch %d, lr %.2g (linear rule)' % (bs, lr), b, {'lr': lr}, batch_size=bs)
+
+
+# EXP-010: every batch size within seed noise (0.552-0.574); batch 256 with lr 1.2e-3 (sqrt rule) is 15x faster per epoch.
+# Runs now take < 1 min, so the short exploration budget is dropped: back to 60 epochs (EarlyStopping 10).
+PHASE5_4_BASE = merge_cfg(PHASE5_3_BASE, optimizer={'lr': 3e-4 * (256 / 16) ** 0.5}, batch_size=256, epochs=60)
+
+
+def phase5_4():
+    # Reference with the full budget first (only the epoch budget changes vs EXP-010_bs256_sqrt).
+    run('EXP-010_bs256_sqrt_60ep', 'EXP-010', 5, 'batch 256, lr 0.0012, 60 epochs (new base)', PHASE5_4_BASE)
+    # Learning-rate schedule (the reference is ReduceLROnPlateau, already in the base).
+    b = PHASE5_4_BASE
+    lr = b['optimizer']['lr']  # PHASE5_4_BASE is built with merge_cfg, so it always has 'optimizer'
+    opt_run('EXP-011_cosine', 'EXP-011', 'cosine decay', b, schedule='cosine')
+    opt_run('EXP-011_exponential', 'EXP-011', 'exponential decay 0.9/epoch', b, schedule='exponential', exp_decay=0.9)
+    opt_run('EXP-011_warmup_cosine_2x', 'EXP-011', 'warmup 3 ep + cosine, lr x2', b, {'lr': 2 * lr}, schedule='cosine', warmup_epochs=3)
+    opt_run('EXP-011_warmup_plateau_2x', 'EXP-011', 'warmup 3 ep + plateau, lr x2', b, {'lr': 2 * lr}, warmup_epochs=3)
+
+
+def phase5_4_check():
+    # Warmup + 2x lr won: separate the two factors, and use 3 seeds now that a run takes ~25 s.
+    b = PHASE5_4_BASE
+    lr = b['optimizer']['lr']
+    opt_run('EXP-011_plateau_2x', 'EXP-011', 'plateau, lr x2 (no warmup)', b, {'lr': 2 * lr})
+    for seed in [2, 3]:
+        run('EXP-010_bs256_sqrt_60ep_seed%d' % seed, 'EXP-010', 5, 'batch 256, lr 0.0012, 60 epochs, seed %d' % seed,
+            dict(PHASE5_4_BASE, seed=seed))
+        opt_run('EXP-011_warmup_plateau_2x_seed%d' % seed, 'EXP-011', 'warmup 3 ep + plateau, lr x2, seed %d' % seed, b,
+                {'lr': 2 * lr}, warmup_epochs=3, seed=seed)
+
+
+# EXP-011 (3 seeds): no schedule beats ReduceLROnPlateau beyond noise (warmup + plateau x2: 0.584 +- 0.028 vs base
+# 0.578 +- 0.007). Keep the base: plateau, lr 1.2e-3, no warmup.
+PHASE5_5_BASE = PHASE5_4_BASE
+SEEDS = [1, 2, 3]
+
+
+def seeded(run_id, seed):
+    return run_id if seed == 1 else '%s_seed%d' % (run_id, seed)
+
+
+def phase5_5():
+    # Other optimizer settings: clipnorm, AMSGrad, decoupled weight decay. 3 seeds each (runs take ~25 s);
+    # the base with seeds 1-3 is EXP-010_bs256_sqrt_60ep[_seed2|_seed3].
+    b = PHASE5_5_BASE
+    for seed in SEEDS:
+        opt_run(seeded('EXP-012_no_clipnorm', seed), 'EXP-012', 'no clipnorm', b, {'clipnorm': 0.0}, seed=seed)
+        opt_run(seeded('EXP-012_no_amsgrad', seed), 'EXP-012', 'no AMSGrad', b, {'amsgrad': False}, seed=seed)
+        for wd in [1e-4, 1e-3, 1e-2]:
+            opt_run(seeded('EXP-012_adamw_wd%s' % lr_tag(wd), seed), 'EXP-012', 'AdamW weight decay %s' % lr_tag(wd), b,
+                    {'name': 'adamw', 'weight_decay': wd}, seed=seed)
+
+
+def phase5_check():
+    # End of phase 5: is the new base (batch 256, 0.578 +- 0.007) really comparable to EXP-007 (0.591, one seed)?
+    for seed in [2, 3]:
+        run('EXP-007_leaky0.3_seed%d' % seed, 'EXP-007', 4, 'activation leaky0.3, seed %d' % seed,
+            dict(PHASE4_BASE, activation='leaky_relu', leaky_alpha=0.3, seed=seed))
+
+
+
+# EXP-012 (3 seeds): clipnorm, AMSGrad and AdamW weight decay change nothing beyond noise. Phase 5 result = PHASE5_5_BASE.
+PHASE6_BASE = PHASE5_5_BASE
+PHASE6_VARIANTS = [('dropout0.1', {'dropout': 0.1}), ('dropout0.2', {'dropout': 0.2}), ('dropout0.3', {'dropout': 0.3}),
+                   ('dropout0.5', {'dropout': 0.5}), ('l2_1e-5', {'l2': 1e-5}), ('l2_1e-4', {'l2': 1e-4}),
+                   ('l2_1e-3', {'l2': 1e-3}), ('bn_before', {'bn': 'before'}), ('bn_after', {'bn': 'after'})]
+
+
+def phase6():
+    # Regularisation, one technique at a time, 3 seeds each. Base with seeds 1-3: EXP-010_bs256_sqrt_60ep[_seed2|_seed3].
+    for seed in SEEDS:
+        for tag, change in PHASE6_VARIANTS:
+            run(seeded('EXP-013_%s' % tag, seed), 'EXP-013', 6, '%s' % tag, dict(PHASE6_BASE, seed=seed, **change))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)
