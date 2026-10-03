@@ -16,3 +16,6 @@ __pycache__/
 
 # Claude Code: ajustes personales
 .claude/settings.local.json
+
+# Caché de imágenes en .npy (se regenera desde el dataset, CHG-007)
+cache/

@@ -17,19 +17,27 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 
 | | |
 |---|---|
-| Etapa del curso | ffNN (red feedforward) |
-| Entorno | Celda 1 original restaurada (CHG-004): con el kernel global, Keras usa TensorFlow y entrena en CPU. El `.venv` con PyTorch + CUDA sigue instalado, pero el notebook ya no lo activa (ISS-003 reabierta) |
-| Mejor experimento | EXP-000 (run `EXP-000_20261003-025155`) |
-| Mejor val accuracy / mean recall | 0,385 / 0,340 (época 17 de 20; estimación optimista, ver EXP-000) |
-| Referencia trivial | Clase mayoritaria (Building): 19,2 % de accuracy · azar: 7,7 % de mean recall (1/13) |
-| Diagnóstico | Sin overfitting (val ≥ train). El cuello de botella es la optimización: softmax saturada (pérdida ~3 000) y val acc que oscila ±5 pp entre épocas |
-| Próximo paso | IDEA-009 (caché del dataset, CHG: los runs pasarían de ~70 min a minutos) → EXP-001 = IDEA-003 (semilla y split estratificado, nueva base) → EXP-002 = IDEA-001 (normalizar la entrada) |
+| Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
+| Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
+| Fase en curso | Fase 2: resolución de entrada (EXP-005) |
+| Mejor experimento | EXP-003 (`val_mean_recall`): regresión softmax sobre píxeles `/255`, callbacks ajustados |
+| Mejor val accuracy / mean recall | 0,413 / 0,382 (min recall 0,199; split estratificado, no comparable con EXP-000) |
+| Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
+| Diagnóstico | Modelo lineal con brecha train-val de ~15 pp. La lr = 1e-3 es alta para 150 528 entradas: la pérdida solo baja de verdad cuando ReduceLROnPlateau reduce la lr (EXP-003, EXP-004) |
+| Próximo paso | Fases 2 → 9 del plan (DEC-006) |
 
 ## Índice de experimentos
 
-| ID | Fecha | Etapa | Cambio respecto a la base | Base | val acc | mean recall | Run | Estado |
-|----|-------|-------|---------------------------|------|---------|-------------|-----|--------|
-| EXP-000 | 2026-10-03 | ffNN | Baseline del enunciado, sin cambios | — | 0,385 | 0,340 | `EXP-000_20261003-025155` | ejecutado |
+Las métricas de cada variante están en [experiments/experiments.csv](experiments/experiments.csv) (EXP-001 en adelante). Gráficas e interpretación por fase: [hyperparameter_sweep.ipynb](hyperparameter_sweep.ipynb).
+
+| ID | Fecha | Fase | Cambio respecto a la base | Base | val acc | mean recall | Run | Estado |
+|----|-------|------|---------------------------|------|---------|-------------|-----|--------|
+| EXP-000 | 2026-10-03 | — | Baseline del enunciado, sin cambios | — | 0,385 | 0,340 | `EXP-000_20261003-025155` | ejecutado (split antiguo) |
+| EXP-001 | 2026-10-03 | 0 | Semilla 1 y split estratificado | EXP-000 | 0,389 | 0,282 | `EXP-001` | ejecutado (nueva base) |
+| EXP-002 | 2026-10-03 | 1 | `Rescaling(1/255)` | EXP-001 | 0,418 | 0,365 | `EXP-002` | ejecutado |
+| EXP-003 | 2026-10-03 | 1 | Callbacks ES 10 / RLR 4, 60 épocas; métrica vigilada (mejor: `val_mean_recall`) | CHG-008 | 0,413 | 0,382 | `EXP-003_val_mean_recall` | ejecutado |
+| EXP-004 | 2026-10-03 | 1 | Estandarización por canal en lugar de `/255` | EXP-003 | 0,367 | 0,344 | `EXP-004` | ejecutado (descartado) |
+| EXP-005 | 2026-10-03 | 2 | Resolución de entrada 32/64/112/224 con `Dense(256)` | EXP-003 | | | `EXP-005_r*` | en ejecución |
 
 ---
 
@@ -55,6 +63,60 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
   - **Clases que nunca se predicen:** que Helipad no se prediga encaja con el desbalance (IDEA-005). Truck, en cambio, es la 3.ª clase más frecuente (2 210 imágenes), así que su recall 0 no se explica por el desbalance. Hipótesis (sin verificar): con la softmax saturada, la fila de logits de Truck pierde siempre frente a las de Small car, Excavator y Storage tank, hacia las que van sus errores; para un clasificador lineal sobre píxeles crudos, esas clases ocupan regiones solapadas. Comprobarlo tras IDEA-001: si con la entrada normalizada Truck empieza a predecirse, la causa era la optimización.
   - **El 0,385 es optimista:** es el máximo de 20 épocas muy ruidosas, elegido y medido sobre la misma validación [R18]. Un valor más representativo es la media de las épocas 11–20 (0,317). Hasta que se estabilice el entrenamiento, comparar experimentos por su mejor época exagera las diferencias.
 - **Siguiente paso:** IDEA-009 (caché, un CHG que no cambia el modelo) para pasar de ~70 min a minutos por run. Después EXP-001 = IDEA-003: el split estratificado cambia el conjunto de validación, así que EXP-001 pasa a ser la nueva base y los números de EXP-000 no son comparables con los siguientes. Luego EXP-002 = IDEA-001.
+
+### EXP-001: Baseline con semilla fija y split estratificado (fase 0)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-000 · **Estado:** ejecutado · **Idea:** IDEA-003 (probada)
+- **Hipótesis:** mismo modelo y entrenamiento que EXP-000; solo cambia el conjunto de validación (estratificado) y el run pasa a ser reproducible. Es la referencia del plan de fases (DEC-006).
+- **Cambio:** `train_test_split(..., stratify=labels)` y semilla 1 (`keras.utils.set_random_seed` + determinismo de TF, CHG-007). Imágenes desde la caché (CHG-007).
+- **Fundamento:** IDEA-003. Con estratificación, cada clase tiene en validación exactamente su 10 % (Helipad: 11 casos frente a los 9 de EXP-000), y la semilla elimina la varianza entre runs que hace inconcluyentes diferencias de ~1 pp [R9].
+- **Configuración:** `Flatten → ReLU → Dense(13) → softmax` (1 956 877 parámetros), píxeles crudos, Adam AMSGrad lr = 1e-3 con clipnorm = 1, batch 16, 20 épocas, callbacks originales (ReduceLROnPlateau con paciencia 10, EarlyStopping con paciencia 40, checkpoint sobre `val_accuracy`). Run `EXP-001` en `experiments/experiments.csv`, que es la evidencia de este y de todos los EXP siguientes.
+- **Resultados:** mejor época 12 de 20 · **val acc 0,389 · mean recall 0,282 · min recall 0** (Fishing vessel y Helipad nunca se predicen; Motorboat 0,02, Excavator 0,06) · train acc 0,438 (en inferencia) · pérdida de train ~3 200–3 800 durante todo el run · 290 s (14,5 s por época, GPU).
+- **Conclusión:** reproduce el comportamiento de EXP-000: softmax saturada (pérdida de ~10³), oscilación de la val acc (σ = 0,041 en las últimas 10 épocas) y clases que no se predicen nunca. La val acc es similar (0,389 frente a 0,385), pero el mean recall es menor (0,282 frente a 0,340): las validaciones son distintas, y con estas oscilaciones el mejor valor de 20 épocas depende mucho de la suerte. No se comparan. **Esta es la línea base del plan.**
+- **Siguiente paso:** fase 1 (EXP-002).
+
+### EXP-002: Normalizar la entrada con `Rescaling(1/255)` (fase 1)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-001 · **Estado:** ejecutado · **Idea:** IDEA-001 (probada; la estandarización por canal va en EXP-004)
+- **Hipótesis:** escalar a [0, 1] reduce la magnitud de los logits y desatura la softmax, así que mejora mucho la optimización (IDEA-001, conclusión de EXP-000).
+- **Cambio:** `Input(224, 224, 3) → Rescaling(1/255)` como primera capa del modelo. Al ir dentro del modelo, train, validación y test reciben el mismo preprocesado sin tocar el resto del código.
+- **Fundamento:** IDEA-001 [R1 §4.3].
+- **Resultados:** mejor época 20 de 20 · **val acc 0,418 · mean recall 0,365 (+8,3 pp frente a EXP-001) · min recall 0** (Helipad) · train acc 0,550 · pérdida de train: 13,6 en la época 1 y 4,2 en la 20 (de ~3 500 en EXP-001). ReduceLROnPlateau actuó una vez (lr 1e-3 → 1e-4). 271 s.
+- **Conclusión:** **se confirma** en parte. Mejora clara del mean recall; Fishing vessel (0,45) y Motorboat (0,42) pasan a predecirse. Pero la pérdida de la época 1 es 13,6 y no ln 13 ≈ 2,6: con 150 528 entradas en [0, 1] (media ≈ 0,24), un paso de Adam de tamaño ≈ lr por peso mueve un logit hasta ≈ 1e-3 × 150 528 × 0,24 ≈ 36, así que la softmax se vuelve a saturar enseguida [R4 §2.1]. Apunta a que lr = 1e-3 es alta para este modelo (fase 5.1) y a que centrar la entrada debería ayudar (EXP-004). La val acc sigue oscilando (σ = 0,064 en las últimas 10 épocas) y la mejor época es la última: el entrenamiento no había terminado (ISS-002, EXP-003). Aparece una brecha train-val de 13 pp: el modelo lineal ya empieza a memorizar.
+- **Siguiente paso:** CHG-008 y EXP-003.
+
+### EXP-003: Callbacks acoplados a la duración real del entrenamiento y métrica vigilada (fase 1)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** CHG-008 (= EXP-002 sin el ReLU tras `Flatten`) · **Estado:** ejecutado · **Idea:** IDEA-004 (probada) · **Resuelve:** ISS-002
+- **Hipótesis:** con paciencias acordes al número de épocas, ReduceLROnPlateau baja la lr cuando la validación se estanca, lo que estabiliza el final del entrenamiento, y EarlyStopping lo termina. Vigilar una señal más suave que `val_accuracy` debería elegir mejor la época.
+- **Cambio:** `epochs` 20 → 60, `EarlyStopping` con paciencia 40 → 10 (el mejor modelo se recupera del checkpoint), `ReduceLROnPlateau` con paciencia 10 → 4 (factor 0,1). Se prueban tres métricas vigiladas (checkpoint, EarlyStopping y ReduceLROnPlateau a la vez): `val_loss`, `val_accuracy` y `val_mean_recall`.
+- **Fundamento:** parada temprana como regularización [R8 §7.8]; bajar la lr al estancarse reduce el ruido del gradiente estocástico cerca del mínimo [R8 §8.3.1]. Las paciencias (4 y 10) son heurísticas.
+- **Resultados:**
+
+| Métrica vigilada | Mejor época / épocas | val acc | mean recall | min recall | train acc | Tiempo |
+|---|---|---|---|---|---|---|
+| `val_loss` | 50 / 60 | 0,410 | 0,365 | 0,182 | 0,576 | 823 s |
+| `val_accuracy` | 10 / 20 | 0,417 | 0,338 | 0,081 | 0,513 | 253 s |
+| **`val_mean_recall`** | **24 / 34** | **0,413** | **0,382** | **0,199** | 0,560 | 434 s |
+
+  En las tres, ReduceLROnPlateau actúa varias veces (lr hasta 1e-6 o menos) y la val acc se estabiliza: σ de las últimas 10 épocas 0,001–0,013, frente a 0,064 en EXP-002.
+- **Conclusión:**
+  - **Se confirma:** los callbacks ya actúan, y con la lr reducida desaparecen las oscilaciones y las clases con recall 0 (min recall de 0 a ~0,19).
+  - Vigilando `val_accuracy`, EarlyStopping corta en la época 20 tras un máximo temprano y ruidoso (época 10).
+  - `val_mean_recall` da el mejor mean recall (+1,7 pp sobre `val_loss`, poco concluyente con una semilla) y en menos tiempo. **Se elige `val_mean_recall`**, porque además coincide con la métrica de decisión (DEC-006). Contrapartida: la época se elige con la misma métrica con la que se compara, así que la cifra es algo optimista [R18].
+- **Siguiente paso:** EXP-004 (estandarizar en lugar de escalar).
+
+### EXP-004: Estandarización por canal en lugar de `/255` (fase 1)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-003 (`val_mean_recall`) · **Estado:** ejecutado
+- **Hipótesis:** centrar en cero y escalar a varianza 1 mejora el condicionamiento [R1 §4.3] y debería superar a `/255`, que deja las entradas en [0, 1] con media ≈ 0,24.
+- **Cambio:** `keras.layers.Normalization(mean, variance)` por canal, con la media y la varianza de **train** (sin información de validación), en lugar de `Rescaling(1/255)`.
+- **Resultados:** mejor época 12 de 22 · **val acc 0,367 · mean recall 0,344 (−3,8 pp frente a EXP-003) · min recall 0,181** · train acc 0,501 · pérdida de train en la época 1: **60,2** (13,6 con `/255`) · 277 s.
+- **Conclusión:** **se refuta** con este optimizador. Con Adam, cada peso se mueve ≈ lr por paso, sea cual sea su gradiente [R4 §2.1], así que el cambio de un logit en un paso escala con Σ|x_i|. Las entradas estandarizadas tienen |x| medio ≈ 0,8, frente a ≈ 0,24 con `/255`: los logits se mueven unas 3 veces más por paso y la softmax se satura antes (pérdida inicial 60 frente a 13,6). La ventaja de centrar queda tapada por una lr demasiado alta. **Se mantiene `Rescaling(1/255)`.** Volver a probar cuando la lr esté ajustada (IDEA-010).
+- **Siguiente paso:** fase 2, la resolución de entrada (EXP-005).
+
+### EXP-005: Resolución de entrada (fase 2)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-003 (`val_mean_recall`) + una capa oculta `Dense(256, relu, he_normal)` · **Estado:** en ejecución · **Idea:** IDEA-006 (y primera prueba de IDEA-002)
+- **Hipótesis:** a 224×224 la primera capa tiene 150 528 × 256 ≈ 38,5 M de pesos para 16 871 imágenes: mucha varianza. Reducir la imagen (con promedio por área, CHG-007) divide los parámetros de la primera capa por 4 (112), 12 (64) o 49 (32) a cambio de perder detalle fino (Small car, Pylon). Se espera un óptimo en 32–64.
+- **Cambio:** solo la resolución de entrada (32, 64, 112, 224), con la misma arquitectura `Flatten → Dense(256) → Dense(13)` en todas.
+- **Fundamento:** compromiso sesgo-varianza: menos parámetros libres por ejemplo reducen la varianza del estimador [R8 §5.4]. Un MLP con capa oculta es un aproximador universal [R3; R8 §6.4.1]; He init para ReLU [R2]. El submuestreo por área es un filtro paso bajo, que evita el aliasing [R19, cap. 4].
+- **Resultados:** *pendiente*.
 
 ---
 
@@ -93,24 +155,49 @@ A petición del usuario, la celda 1 vuelve a ser `import tensorflow as tf` / `pr
 - Dependencias: `nbclient` y `nbformat`, instaladas en el `.venv` (añadidas a las instrucciones de `CLAUDE.md` para recrearlo). El Python global no se toca.
 - **Probado** (2026-10-03) con notebooks pequeños y el kernel global: éxito con barra de progreso (queda "step 5/5", el kernel es el Python global y el directorio de trabajo es el del notebook), fallo en la 2.ª celda (notebook intacto, exit 1) y notebook modificado durante la ejecución (no se sobrescribe). En Windows fija `WindowsSelectorEventLoopPolicy`, porque `zmq` no funciona con el event loop Proactor.
 
+### CHG-006: El proyecto pasa a WSL2 con TensorFlow y GPU (2026-10-03)
+Hecho por el usuario: clonó el repositorio en WSL2 (Ubuntu, `~/muia/vision-computer/image-recognition`) y creó un `.venv` con `pip install "tensorflow[and-cuda]"`. Al final de `.venv/bin/activate` se añadió un `export LD_LIBRARY_PATH` con las librerías CUDA que instala pip (`site-packages/nvidia/*/lib`). Sin él, TF no encuentra la GPU.
+- **Entorno resultante:** Python 3.10.12, TensorFlow 2.21.0, Keras 3.12.4 (backend TensorFlow), cuDNN 9.27, RTX 4050 Laptop (6 GB) visible: `tf.config.list_physical_devices('GPU')` devuelve la GPU en la celda 1 del notebook. Se añadieron al `.venv` `rasterio 1.4.4`, `scikit-learn 1.7.2`, `matplotlib 3.10.9`, `pandas 2.3.3`, `nbclient 0.11.0` y `nbformat`.
+- **Efecto:** la celda 1 original (CHG-004) ya entrena en GPU sin ningún cambio de código. Resuelve ISS-003. El backend torch de CHG-003/DEC-004 deja de ser necesario (en este `.venv` no está torch).
+- **Dataset:** copiado por el usuario a `xview_recognition/` (ver ISS-006). WSL tiene 7,6 GB de RAM (unos 4–5 GB libres), así que la caché de 224 se lee con memmap (CHG-007).
+- `CLAUDE.md` actualizado con el entorno nuevo.
+
+### CHG-007: Caché del dataset e infraestructura de barridos (2026-10-03)
+No cambia el modelo: cambia de dónde salen los píxeles y añade la maquinaria del plan de fases (DEC-006). Resuelve ISS-005 e IDEA-009.
+- **`xview_data.py`:** lee cada TIF una sola vez con el mismo `load_geoimage` del notebook y lo guarda en `cache/train_<res>.npy` y `cache/test_<res>.npy` (`uint8`, no versionado). Las resoluciones menores se generan desde la de 224 con `tf.image.resize(method='area')`, que promedia los píxeles cubiertos, es decir, filtra paso bajo antes de submuestrear y evita el aliasing [R19, cap. 4]. También incluye el split (`train_test_split(..., random_state=1, stratify=labels)`) y la lista de test filtrada a `*.tif` (ISS-006).
+- **`experiment_utils.py`:** `run_experiment(run_id, exp_id, phase, change, cfg)` construye el modelo a partir de un diccionario de configuración (`DEFAULT_CFG`), siembra todo (`keras.utils.set_random_seed`) con `tf.config.experimental.enable_op_determinism()` [R20], entrena con un `PyDataset` que lee de la caché y convierte a `float32` por batch (con augmentation, oversampling y pesos por muestra opcionales), y selecciona la mejor época por `cfg['monitor']` con `ModelCheckpoint`. La validación se calcula una vez por época en un callback (`EpochMetrics`), en batches de 256: `val_loss`, `val_accuracy` y `val_mean_recall`, el recall macro que es la métrica guía, para que EarlyStopping y ReduceLROnPlateau puedan vigilarlo. Al terminar evalúa con los pesos de la mejor época en validación **y en todo train** (en modo inferencia, sin dropout ni augmentation) para medir la brecha train-val. Escribe una fila en `experiments/experiments.csv`, el historial completo en `experiments/history/<id>.json` (con recall por clase y matriz de confusión) y el modelo en `experiments/models/<id>.keras`.
+- **`plot_utils.py`:** `plot_learning_curves`, `plot_sweep`, `plot_capacity`, `plot_per_class_recall`, `plot_confusion_matrix` y `plot_bars`. Guardan en `experiments/plots/` con prefijo de fase.
+- **`sweep.py`:** una función por fase; `python sweep.py phase1 phase2`. Salta los ids que ya están en el CSV, así que se puede reanudar.
+- **Verificado:**
+  - La caché es idéntica a leer los TIF (300 imágenes de train y 100 de test comparadas con `np.array_equal`). Construirla tarda 43 s (train y test, 224).
+  - Determinismo: dos runs con la misma semilla dan métricas idénticas hasta el 4.º decimal.
+  - Una época a 224 con el modelo de EXP-000 tarda 19 s (frente a 111–446 s en EXP-000). A 64 con `Dense(256)`, ~7 s: con batch 16 el límite ya no es la E/S sino la sobrecarga por paso de la GPU (~6 ms por paso de `fit`; ni `steps_per_execution` ni `tf.data` la bajan).
+- **Diferencias con el generador del notebook:** el orden de barajado sale de otro RNG (`np.random.default_rng(seed)`) y dentro de cada batch las muestras se ordenan por índice (la lectura del memmap es más rápida), lo que no cambia el gradiente del batch. Por lo demás, mismos píxeles y mismas etiquetas.
+
+### CHG-008: Se quita el ReLU tras `Flatten` y se usa `keras.Input` (2026-10-03)
+Desde la fase 1, los modelos empiezan con `keras.Input(shape=(res, res, 3))`, lo que elimina el warning de Keras 3 por `input_shape`, y no llevan el `Activation('relu')` tras `Flatten`. Resuelve ISS-001. **Verificado con un run** (`CHG-008` en `experiments.csv`, base EXP-002): métricas idénticas a EXP-002 (val acc 0,418, mean recall 0,365, mismas épocas), como se esperaba, porque ReLU(x) = x para x ≥ 0.
+
 ---
 
 ## Incidencias (ISS)
 
-### ISS-001: El ReLU tras `Flatten` no hace nada · abierta
+### ISS-001: El ReLU tras `Flatten` no hace nada · resuelta (→ CHG-008)
 `Activation('relu')` se aplica directamente a los píxeles, que son `uint8` en [0, 255] (verificado en 200 imágenes de train). ReLU(x) = x para x ≥ 0, así que no hay ninguna no linealidad y el modelo es lineal (EXP-000). Probablemente faltaba una `Dense` antes del ReLU. **Resolución:** IDEA-002.
 
-### ISS-002: Los callbacks no llegan a actuar con 20 épocas · abierta
+### ISS-002: Los callbacks no llegan a actuar con 20 épocas · resuelta (→ EXP-003)
 `EarlyStopping(patience=40)` no puede dispararse con `epochs=20`. `ReduceLROnPlateau(patience=10)` puede actuar como mucho una vez (en la época 11 o más tarde). Además, ambos vigilan `val_accuracy`, que es una señal ruidosa y escalonada. Vigilar `val_loss` es más suave. **Confirmada en EXP-000:** la lr fue 1e-3 las 20 épocas. La mejor val acc llegó en la época 17, así que ReduceLROnPlateau no tuvo margen para actuar, y EarlyStopping no podía. **Resolución:** IDEA-004.
 
-### ISS-003: No hay GPU · reabierta (CHG-004; se había resuelto en CHG-003)
+### ISS-003: No hay GPU · resuelta (→ CHG-006: WSL2 + TF 2.21 con CUDA)
 `tf.config.list_physical_devices('GPU')` devuelve `[]`. TensorFlow 2.10 fue la última versión con soporte de GPU en Windows nativo [R13], y el kernel usa TF 2.20, así que todo se entrena en CPU aunque CUDA 12.5 esté instalado. Esto condiciona el coste de cada experimento. **Opciones:** Google Colab (el notebook viene de Colab según sus metadatos), WSL2 con `tensorflow[and-cuda]`, o reducir el coste por época (IDEA-006). **Resolución:** Keras 3 sobre PyTorch con CUDA (CHG-003, DEC-004). El `torch 2.3.1+cu118` del Python global sí veía la GPU, pero falla al importar con su `numpy 2.2.6` ("A module that was compiled using NumPy 1.x cannot be run in NumPy 2.2.6"), por eso se usa un entorno aparte. **Reabierta** porque CHG-004 restaura la celda 1 original, que ya no activa el backend torch. Para volver a la GPU hay que fijar `os.environ['KERAS_BACKEND'] = 'torch'` antes del primer `import keras` y usar el kernel del `.venv`.
 
 ### ISS-004: Comentario engañoso sobre "resampling" · abierta (menor)
 En la celda que construye `anns` aparece `# Resampling strategy to reduce training time`, pero no hay ningún remuestreo implementado. Hay que eliminarlo o implementar lo que promete (relacionado con IDEA-005).
 
-### ISS-005: La carga de imágenes domina el tiempo de entrenamiento · abierta
+### ISS-005: La carga de imágenes domina el tiempo de entrenamiento · resuelta (→ CHG-007)
 El generador abre con rasterio cada TIF de 224×224 en cada batch y en cada época, en el mismo hilo que el entrenamiento. Medido (CHG-003): 63 ms por batch de 16 con la caché de disco caliente y 232 ms en frío, frente a 13,8 ms del paso de entrenamiento en GPU. Por la ley de Amdahl [R16], acelerar solo el cálculo da como mucho (63 + 26,4) / (63 + 13,8) ≈ ×1,16 por paso con la caché caliente, aunque la GPU haga el cálculo ×1,9 más rápido. En la prueba de CHG-003, con lecturas en frío, el paso completo fue de unos 240 ms. Mientras no se resuelva, la GPU apenas acorta las épocas de esta ffNN. Con modelos más pesados (un MLP grande o una CNN) el cálculo pesará más y la GPU se notará más, pero la carga seguirá costando unos 63 ms por paso. **Medido en EXP-000** (CPU, TF 2.20, 1,5 GB de RAM libre): de 105 a 422 ms por paso según la época, y 70 min en total. Las épocas varían mucho (111–446 s) sin ningún cambio en el cálculo, lo que delata que el tiempo lo marca la E/S y la caché de disco. **Resolución:** IDEA-009.
+
+### ISS-006: Archivos `:Zone.Identifier` en la copia del dataset · resuelta (→ CHG-007)
+Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<nombre>.tif:Zone.Identifier` (el flujo alternativo "Mark of the Web" de NTFS convertido en archivo): 21 112 archivos de más. La celda de test del notebook recorre `xview_test/` con `os.walk` sin filtrar la extensión, así que habría contado 4 730 imágenes de test y fallado al abrir los `Zone.Identifier` con rasterio. **Resolución:** el usuario pidió borrarlos (`find xview_recognition -name '*:Zone.Identifier' -delete`; quedan 18 746 + 2 365 TIF y el JSON) y, además, `xview_data.list_test_files()` filtra por `*.tif`. Pendiente aplicar el mismo filtro en la celda de test del notebook (fase 9).
 
 ---
 
@@ -118,7 +205,7 @@ El generador abre con rasterio cada TIF de 224×224 en cada batch y en cada épo
 
 Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la idea pasa a *probada → EXP-###*.
 
-### IDEA-001: Normalizar la entrada · prioridad alta · coste mínimo
+### IDEA-001: Normalizar la entrada · probada → EXP-002, EXP-004
 - **Qué:** escalar los píxeles a [0, 1], o estandarizar por canal con la media y la desviación típica de train.
 - **Por qué:** (1) si todas las entradas son positivas, los gradientes de los pesos que llegan a una neurona tienen todos el mismo signo y el descenso avanza en zigzag; centrar en cero mejora el condicionamiento [R1 §4.3]. Adam reescala cada parámetro (precondicionador diagonal), lo que compensa la escala pero no la correlación que introduce una media no nula. (2) Con `glorot_uniform` y 150 528 entradas, la desviación típica inicial de los logits es ≈ 110 con píxeles crudos frente a ≈ 1,4 con entradas estandarizadas (estimación con las estadísticas reales: media ≈ 62, desviación ≈ 47,5). Con logits ≈ 10² la softmax está saturada desde el principio.
 - **Éxito:** la pérdida inicial ≈ ln 13 ≈ 2,56 y una convergencia más rápida que en EXP-000.
@@ -129,13 +216,13 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Por qué:** sin capa oculta el modelo es lineal. Un MLP con una sola capa oculta ya es un aproximador universal [R3; R8 §6.4.1]. Para ReLU, la inicialización He conserva la varianza de las activaciones entre capas [R2]; `glorot_uniform` (la de Keras por defecto) está pensada para activaciones simétricas.
 - **Cuidado:** con 150 528 entradas, una capa de 512 neuronas tiene ≈ 77 M de parámetros frente a 16 871 imágenes de train: hay alto riesgo de overfitting. En float32, entre pesos, gradientes y los tres estados de Adam con AMSGrad, ocupa ≈ 5 × 308 MB ≈ 1,5 GB, que caben en los 6 GB de la GPU (CHG-003). Combinar con IDEA-006 e IDEA-007.
 
-### IDEA-003: Semilla fija y split estratificado · prioridad alta (prerrequisito)
+### IDEA-003: Semilla fija y split estratificado · probada → EXP-001
 - **Qué:** `keras.utils.set_random_seed(...)` al inicio y `train_test_split(..., stratify=<labels>)`.
 - **Por qué:** sin semilla, la inicialización y el barajado cambian entre runs, y diferencias de ~1 pp pueden ser solo ruido [R9]. Con un split no estratificado, Helipad (111 imágenes en total) tiene unas 11 en validación: la desviación típica de su recall estimado es √(p(1−p)/n) ≈ 0,15 para p = 0,5, así que las métricas por clase son muy ruidosas.
 - **Ojo:** estratificar cambia el conjunto de validación, así que el primer run con este cambio (EXP-001) es la **nueva base** y sus números no se comparan con los de EXP-000.
 - **En GPU** (CHG-003): con el backend torch, `keras.utils.set_random_seed` también siembra `torch` (lo hace `keras/src/utils/rng_utils.py`). Aun así, algunas operaciones de CUDA no son deterministas; `torch.use_deterministic_algorithms(True)` lo fuerza a costa de velocidad [R15].
 
-### IDEA-004: Ajustar callbacks y número de épocas · prioridad media
+### IDEA-004: Ajustar callbacks y número de épocas · probada → EXP-003
 - **Qué:** `EarlyStopping(monitor='val_loss', patience≈5–8, restore_best_weights=True)`, `ReduceLROnPlateau(monitor='val_loss', patience≈3)` y `epochs` lo bastante grande para que sea EarlyStopping quien termine.
 - **Por qué:** ISS-002. La parada temprana es una forma de regularización [R8 §7.8].
 
@@ -154,11 +241,16 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 ### IDEA-008: Data augmentation con rotaciones de 90° y flips · prioridad media (clave en la etapa CNN)
 - **Por qué:** en imágenes aéreas no hay un "arriba" canónico, así que las 8 transformaciones del grupo diedral D4 conservan la etiqueta. Es aumentar los datos codificando una invarianza conocida [R8 §7.4]. Para una ffNN, que no comparte pesos espacialmente, el beneficio será menor que en una CNN.
 
-### IDEA-009: Leer cada imagen una sola vez (caché del dataset) · prioridad alta · coste bajo
+### IDEA-009: Leer cada imagen una sola vez (caché del dataset) · hecha → CHG-007
 - **Qué:** (a) volcar las imágenes a un único `.npy` en `uint8` y leerlo con `np.load(..., mmap_mode='r')`, o cargarlo entero en RAM. Ocupa 18 746 × 150 528 B ≈ 2,8 GB. (b) Como alternativa, o además, pasar el generador a `keras.utils.PyDataset` con `workers > 1` para que la carga se solape con el cálculo.
 - **Por qué:** ISS-005. La parte serie (la E/S) limita la aceleración total [R16]. Con la caché, el paso bajaría hacia los ~14 ms del cálculo en GPU: unas 1 055 × 14 ms ≈ 15 s de entrenamiento por época, más la validación.
 - **Coste/riesgo:** 2,8 GB de disco para el `.npy`. El equipo tiene 15,7 GB de RAM, pero solo había unos 2,5 GB libres al medir, así que es mejor memmap que cargarlo todo. Es un cambio del pipeline, no del modelo (CHG): hay que comprobar que los batches salen idénticos (mismos píxeles, mismo orden con la misma semilla) para que los runs sigan siendo comparables.
 - **Éxito:** tiempo por paso cercano a 14 ms en GPU, medido en la barra de progreso de `fit` o en `history.csv`.
+
+### IDEA-010: Volver a probar la estandarización por canal con la lr ajustada · prioridad baja
+- **Qué:** repetir EXP-004 sobre el mejor modelo de la fase 5 (lr ya ajustada).
+- **Por qué:** EXP-004 empeoró porque, con Adam a lr = 1e-3, una entrada de mayor magnitud satura antes la softmax. No se probó la ventaja de centrar en cero [R1 §4.3] en igualdad de condiciones. Con capas ocultas y BatchNorm el efecto puede ser distinto.
+- **Coste:** un run. **Éxito:** mean recall ≥ el de `/255` con la misma configuración.
 
 ### Etapas futuras del curso (para no perderlas de vista)
 - **CNN:** conectividad local, compartición de pesos y equivarianza a traslaciones reducen los parámetros en órdenes de magnitud frente a la ffNN [R8 §9.2].
@@ -191,6 +283,19 @@ El dataset (`xview_recognition/`, se descarga del enlace del enunciado), los pes
 ### DEC-005: Repositorio remoto en GitHub (2026-10-03)
 El remoto es `https://github.com/alexsierra45/image-recognition` (público), elegido por el usuario. Ya tenía un commit inicial con `LICENSE`: el primer commit local se hizo encima de él, sin forzar el push. Al ser público, todo lo versionado (notebook con salidas, bitácora, evidencias de los runs) queda visible. El dataset, los pesos y los PDF siguen fuera (DEC-003).
 
+### DEC-006: Se adopta el plan de mejora de la ffNN en 9 fases (2026-10-03)
+El usuario aporta un plan de mejora de la ffNN en 9 fases y pide ejecutarlo junto con la recomendación previa (IDEA-009 → EXP-001 → normalizar). Decisiones para encajarlo en este proyecto:
+- **Restricciones del plan:** solo capas densas (`Dense`, `Flatten`, `Dropout`, `BatchNormalization`, `Rescaling`, `Resizing`, activaciones, regularizadores), optimizadores, schedulers, class weights y augmentation con numpy. Sin convoluciones ni modelos preentrenados. **El test no se usa para decidir nada**; solo genera `prediction.json` al final.
+- **Métrica guía:** mean recall (macro) en validación, porque las clases están desbalanceadas. Secundarias: accuracy, `val_loss`, recall por clase (Helipad, Pylon, Cargo plane), parámetros y tiempo por época. Se mide además la brecha con train para diagnosticar subajuste o sobreajuste (`train_acc` y `train_mean_recall`, evaluados en modo inferencia).
+- **Split estratificado** (`stratify=labels`, `random_state=1`). El plan pedía no tocar el split, pero el usuario eligió la recomendación EXP-001 = IDEA-003. Por eso el baseline se vuelve a ejecutar con el split nuevo (EXP-001), y es la referencia de todo lo que sigue. EXP-000 deja de ser comparable.
+- **Backend:** el plan suponía Keras sobre torch; tras CHG-006 se usa TensorFlow con GPU en WSL2. La semilla se fija con `keras.utils.set_random_seed`, que siembra `random`, numpy y TF; `torch.manual_seed` no aplica.
+- **Archivos** (nombres en inglés, como pide el plan), todos dentro de `experiments/` para no dispersar las evidencias: `experiments.csv`, `history/<id>.json`, `models/<id>.keras` (no versionados, regla `*.keras`), `plots/phase<N>_*.png` y `logs/`. Código: `xview_data.py`, `experiment_utils.py`, `plot_utils.py`, `sweep.py`, `hyperparameter_sweep.ipynb` (notebook auxiliar con gráficas e interpretación por fase). `experiments/runs.csv` sigue siendo el registro de los runs del notebook entregable.
+- **IDs:** una entrada EXP por barrido de un solo factor (por ejemplo, "anchura de la capa oculta"), y una fila por variante en `experiments.csv`, con id `EXP-###_<variante>`. Los cambios que no deberían alterar el resultado (por ejemplo quitar el ReLU tras `Flatten`) son CHG, pero se verifican igual con un run.
+- **Fase 1 en escalera:** el plan aplica juntas todas las correcciones de base, pero la regla de la bitácora es un factor por experimento. Se encadenan (EXP-002 normalizar → CHG-008 quitar el ReLU → EXP-003 callbacks → EXP-004 estandarizar), cada paso sobre el anterior, de modo que también se ve el efecto acumulado frente a EXP-001.
+- **Elección entre variantes:** la de mayor mean recall. Con una sola semilla, diferencias de ~1 pp no son concluyentes [R9]; en ese caso se prefiere la variante más simple o con menos parámetros, y se dice. La mejor época se elige y se mide sobre la misma validación, así que todas las cifras son algo optimistas [R18]; afecta igual a todas las variantes. La fase 9 repite el modelo final con 3 semillas.
+- **Commits:** uno por fase (elección del usuario), sin push.
+- **Notebook entregable:** se mantiene su estructura y se actualiza en la fase 9 con el modelo final (caché, `Rescaling`, predicción por lotes, filtro `*.tif`) y una tabla resumen. Los barridos viven fuera (`sweep.py` + notebook auxiliar).
+
 ---
 
 ## Referencias externas
@@ -213,6 +318,8 @@ El remoto es `https://github.com/alexsierra45/image-recognition` (público), ele
 - **[R16]** Amdahl (1967). *Validity of the single processor approach to achieving large scale computing capabilities*. AFIPS Spring Joint Computer Conference.
 - **[R17]** Bishop (2006). *Pattern Recognition and Machine Learning*. Springer. (§4.1.7: el perceptrón no converge si los datos no son linealmente separables)
 - **[R18]** Cawley, Talbot (2010). *On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation*. JMLR 11.
+- **[R19]** Gonzalez, Woods (2018). *Digital Image Processing*, 4.ª ed. Pearson. (cap. 4: muestreo, aliasing y filtrado paso bajo antes de submuestrear)
+- **[R20]** TensorFlow. *tf.config.experimental.enable_op_determinism* (documentación de la API). https://www.tensorflow.org/api_docs/python/tf/config/experimental/enable_op_determinism
 
 ---
 

@@ -1,0 +1,15 @@
+==== phase0 ====
+EXP-001                      baseline (seed 1, stratified split)      params=1956877   ep=12/20 train_acc=0.438 val_acc=0.389 mean_recall=0.282 min_rec=0.000 290s
+==== phase1 ====
+EXP-002                      + Rescaling(1/255)                       params=1956877   ep=20/20 train_acc=0.550 val_acc=0.418 mean_recall=0.365 min_rec=0.000 271s
+CHG-008                      - ReLU after Flatten (no-op check)       params=1956877   ep=20/20 train_acc=0.550 val_acc=0.418 mean_recall=0.365 min_rec=0.000 242s
+EXP-003_val_loss             callbacks ES10/RLR4, 60 ep, monitor val_ params=1956877   ep=50/60 train_acc=0.576 val_acc=0.410 mean_recall=0.365 min_rec=0.182 823s
+EXP-003_val_accuracy         callbacks ES10/RLR4, 60 ep, monitor val_ params=1956877   ep=10/20 train_acc=0.513 val_acc=0.417 mean_recall=0.338 min_rec=0.081 253s
+EXP-003_val_mean_recall      callbacks ES10/RLR4, 60 ep, monitor val_ params=1956877   ep=24/34 train_acc=0.560 val_acc=0.413 mean_recall=0.382 min_rec=0.199 434s
+==== phase1 ====
+skip EXP-002
+skip CHG-008
+skip EXP-003_val_loss
+skip EXP-003_val_accuracy
+skip EXP-003_val_mean_recall
+EXP-004                      per-channel standardisation (train mean/ params=1956877   ep=12/22 train_acc=0.501 val_acc=0.367 mean_recall=0.344 min_rec=0.181 277s

@@ -6,10 +6,11 @@ Proyecto de la asignatura de Visión por Computador (MUIA), trabajo "xview_recog
 Esta carpeta es la raíz del proyecto. **No usar material de la carpeta padre.** La documentación que haga falta la añade el usuario a [references/](references/README.md).
 
 ## Entorno
-- **Ahora (CHG-004)**: la celda 1 es la original (`import tensorflow as tf`), así que el notebook corre con el **Python 3.12 global** (TF 2.20, Keras 3.13 con backend TensorFlow) y entrena **en CPU**: TF ≥ 2.11 no soporta GPU en Windows nativo. Los imports son `keras.*`, equivalentes a `tensorflow.keras.*` en TF 2.20.
-- **GPU disponible pero desactivada** (CHG-003, DEC-004, ISS-003): kernel **"Python 3.12 (image_recognition, GPU)"** = `.venv/` de esta carpeta (no versionado), con Keras 3.13 sobre `torch 2.6.0+cu124` y una RTX 4050 Laptop (6 GB). Para activarla, la primera celda debe fijar `os.environ['KERAS_BACKEND'] = 'torch'` antes de importar Keras, y hay que usar ese kernel; en el `.venv` no hay TensorFlow. En el Python global el backend torch falla: su torch 2.3.1 no funciona con su numpy 2.2.
-- Para recrear el `.venv`: `py -3.12 -m venv .venv`, luego `pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124` y `pip install keras==3.13.0 numpy rasterio scikit-learn matplotlib ipykernel nbclient nbformat`.
-- **Cuello de botella**: cargar las imágenes (~63 ms por batch de 16) cuesta más que el propio paso de entrenamiento (~26 ms en CPU, ~14 ms en GPU) (ISS-005). Tenerlo en cuenta al estimar el coste de cada experimento.
+- **Ahora (CHG-006)**: WSL2 (Ubuntu), proyecto en `~/muia/vision-computer/image-recognition`. Kernel = `.venv/` de esta carpeta (Python 3.10, TF 2.21 con CUDA, Keras 3.12, backend TensorFlow) y **GPU RTX 4050 (6 GB)**. La celda 1 original ya detecta la GPU. `.venv/bin/activate` exporta `LD_LIBRARY_PATH` con las librerías CUDA de pip: activar siempre el `.venv` (`source .venv/bin/activate`) antes de ejecutar Python, o TF no verá la GPU.
+- Para recrear el `.venv`: `python3 -m venv .venv`, `pip install "tensorflow[and-cuda]" rasterio scikit-learn matplotlib pandas ipykernel nbclient nbformat`, y añadir a `activate` el `export LD_LIBRARY_PATH` de CHG-006.
+- El backend torch de CHG-003/DEC-004 (Windows) ya no se usa.
+- **Caché** (CHG-007): `cache/<split>_<res>.npy` (`uint8`, no versionado), creada por `xview_data.load_cache`. Con la caché, una época a 224 tarda ~19 s; a resoluciones bajas con batch 16 el límite es la sobrecarga por paso (~6 ms). WSL tiene 7,6 GB de RAM: la caché de 224 (2,8 GB) se lee con memmap.
+- **Barridos** (DEC-006): `sweep.py phaseN` → `experiment_utils.run_experiment` → `experiments/experiments.csv`, `experiments/history/`, `experiments/models/`, `experiments/plots/`. Lanzarlos en segundo plano con un log en `experiments/logs/`.
 - Dataset en `xview_recognition/` (no versionado): 18 746 imágenes de train, `uint8` en [0, 255], muy desbalanceado (Building 3 594, Helipad 111). Las rutas del notebook son relativas a esta carpeta.
 
 ## Regla principal: la bitácora
@@ -30,7 +31,7 @@ Para proponer los siguientes pasos, usar el skill `next-ideas`.
 - El usuario suele tener el notebook abierto en VS Code: al editarlo desde fuera, avisarle de que lo recargue.
 - No cambiar el modelo ni el entrenamiento sin que el usuario lo pida: proponer primero (como IDEA) y editar después.
 - `git diff` muestra solo el código de las celdas (textconv): usarlo para ver qué cambió.
-- **Ejecutar un experimento sin interfaz** (CHG-005): `.venv/Scripts/python.exe tools/run_notebook.py ffNN_example.ipynb --python C:/Users/alexs/AppData/Local/Programs/Python/Python312/python.exe`, en segundo plano. El ejecutor necesita `nbclient`, que está en el `.venv`; el kernel usa el intérprete de `--python`, hoy el global, por la celda 1. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU (ISS-005).
+- **Ejecutar un experimento sin interfaz** (CHG-005): `source .venv/bin/activate && python tools/run_notebook.py ffNN_example.ipynb --python .venv/bin/python`, en segundo plano. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU en Windows (ISS-005); con la caché y la GPU, minutos.
 
 ## Git
 - Tras clonar o inicializar el repositorio: `bash tools/setup.sh` (activa `.githooks/pre-commit` y el diff de notebooks).
