@@ -1,0 +1,25 @@
+{
+  "exp_id": "EXP-010",
+  "resolution": 16,
+  "batch_size": 256,
+  "epochs": 60,
+  "optimizer": {
+    "name": "adam",
+    "learning_rate": 0.0012000000569969416,
+    "weight_decay": null,
+    "clipnorm": 1.0,
+    "global_clipnorm": null,
+    "clipvalue": null,
+    "use_ema": false,
+    "ema_momentum": 0.99,
+    "ema_overwrite_frequency": null,
+    "loss_scale_factor": null,
+    "gradient_accumulation_steps": null,
+    "beta_1": 0.95,
+    "beta_2": 0.999,
+    "epsilon": 1e-08,
+    "amsgrad": true
+  },
+  "loss": "categorical_crossentropy",
+  "monitor": "val_mean_recall"
+}

@@ -9,6 +9,7 @@ Usage: python scripts/build_figures.py reports/delivery_01
 import json
 import os
 import re
+import shutil
 import sys
 
 import numpy as np
@@ -213,7 +214,7 @@ def fig_progress(data, spec, cfg):
     ax.set_xticks(xs)
     ax.set_xlabel('phase (0 = baseline)')
     ax.set_ylabel('validation metric')
-    ax.set_title('Progress: validation metric after each phase (phases 4-9: mean of 3 seeds)')
+    ax.set_title(spec.get('options', {}).get('title', 'Progress: validation metric after each phase'))
     ax.legend(fontsize=7)
     return fig, {'included': [p['variant'] for p in ph], 'omitted': [], 'criterion': 'winner of each phase (delivery.yaml)', 'note': ''}
 
@@ -275,9 +276,65 @@ def fig_confusion(data, spec):
                  'criterion': 'seed 1 = the model trained in ffNN_example.ipynb', 'note': ''}
 
 
+def cfg_path(c, path):
+    for k in path.split('.'):
+        c = c[k]
+    return c
+
+
+def fig_group_sweep(data, spec):
+    """Validation (solid) and train (dashed) metric vs a hyperparameter, one line per group (as plot_utils.plot_sweep)."""
+    sel, opt = spec['select'], spec.get('options', {})
+    runs = [r for r in data.rows if data.rows[r]['exp_id'] == sel['exp_id'] and not re.search(r'_seed\d+$', r)]
+    groups = {}
+    for r in runs:
+        c = cfg_of(data, r)
+        groups.setdefault(cfg_path(c, sel['group']), []).append((cfg_path(c, sel['x']), r))
+    fig, ax = ps.new_figure(spec['layout'])
+    for i, (g, pts) in enumerate(sorted(groups.items())):
+        pts.sort()
+        xs = [p[0] for p in pts]
+        label = sel.get('group_labels', {}).get(g, g)
+        ax.plot(xs, [float(data.rows[p[1]]['mean_recall']) for p in pts], marker='o', color=ps.PALETTE[i], label='%s val' % label)
+        ax.plot(xs, [float(data.rows[p[1]]['train_mean_recall']) for p in pts], marker='o', mfc='white', ls='--', lw=1.1,
+                color=ps.PALETTE[i], label='%s train' % label)
+    if opt.get('logx'):
+        ax.set_xscale('log')
+    ax.set_xlabel(opt.get('xlabel', sel['x']))
+    ax.set_ylabel('mean recall (macro)')
+    ax.set_title(opt.get('title', ''))
+    ax.legend(fontsize=7)
+    return fig, {'included': sorted(runs), 'omitted': ['seed repetitions'] if any(re.search(r'_seed', r) for r in data.rows) else [],
+                 'criterion': 'every run of %s (seed 1), one line per %s' % (sel['exp_id'], sel['group']), 'note': ''}
+
+
+def fig_stopping(data, spec):
+    """Validation metric per epoch for each seed of a variant: star = best epoch (restored checkpoint),
+    end of the line = epoch where EarlyStopping stopped."""
+    sel, opt = spec['select'], spec.get('options', {})
+    key = 'val_' + opt.get('metric', 'mean_recall')
+    fig, ax = ps.new_figure(spec['layout'])
+    runs = data.runs(sel['variant'])
+    for i, r in enumerate(runs):
+        h = data.history(r)
+        y = h['history'][key]
+        ep = np.arange(1, len(y) + 1)
+        b = int(h['best_epoch']) - 1
+        seed = cfg_of(data, r)['seed']
+        ax.plot(ep, y, color=ps.PALETTE[i], lw=1.3, label='seed %d (best epoch %d, stop %d)' % (seed, b + 1, len(y)))
+        ax.plot(ep[b], y[b], marker='*', markersize=11, color=ps.PALETTE[i], zorder=4)
+        ax.plot(ep[-1], y[-1], marker='x', markersize=7, color=ps.PALETTE[i], zorder=4)
+    ax.set_xlabel('epoch')
+    ax.set_ylabel(key.replace('_', ' '))
+    ax.set_title(opt.get('title', 'Stopping point: %s per epoch' % key.replace('_', ' ')))
+    ax.legend(fontsize=7, loc='lower right')
+    return fig, {'included': runs, 'omitted': [], 'criterion': 'every seed of %s; star = checkpoint kept, x = EarlyStopping' % sel['variant'],
+                 'note': ''}
+
+
 TYPES = {'class_distribution': fig_class_distribution, 'sweep': fig_sweep, 'capacity': fig_capacity, 'strength': fig_strength,
          'bars': fig_bars, 'learning_curves': fig_learning_curves, 'per_class_recall': fig_per_class_recall,
-         'confusion': fig_confusion}
+         'confusion': fig_confusion, 'group_sweep': fig_group_sweep, 'stopping': fig_stopping}
 NEEDS_CFG = {'progress': fig_progress, 'ablation': fig_ablation}
 
 
@@ -286,6 +343,7 @@ def main(delivery_dir):
     specs = yaml.safe_load(open(os.path.join(delivery_dir, 'figure_specs.yaml'), encoding='utf-8'))
     fig_dir = os.path.join(delivery_dir, 'overleaf', 'figures')
     gen_dir = os.path.join(delivery_dir, 'overleaf', 'generated')
+    shutil.rmtree(fig_dir, ignore_errors=True)  # figures/ is always rebuilt from scratch
     os.makedirs(fig_dir, exist_ok=True)
     os.makedirs(gen_dir, exist_ok=True)
     data = Data()

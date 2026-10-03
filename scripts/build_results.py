@@ -9,6 +9,7 @@ import json
 import math
 import os
 import re
+import shutil
 import sys
 
 import yaml
@@ -122,10 +123,24 @@ def pm(data, variant, col, d, ds):
     return num(m, d) if n == 1 else '%s $\\pm$ %s' % (num(m, d), num(s, ds))
 
 
+def write_ablation(data, cfg, variants, fmt, out):
+    """Ablation table: each row removes one ingredient from the combined model (cfg['ablation_base'] key)."""
+    base_key = cfg.get('ablation_base', 'phase8')
+    base_m, _, _ = data.stat(variants[base_key], 'mean_recall')
+    rows = [['Referencia (%s)' % tex(variants[base_key]), pm(data, variants[base_key], 'mean_recall', fmt['metric'], fmt['std']), '--']]
+    for a in cfg['ablation']:
+        m, _, _ = data.stat(variants[a['variant']], 'mean_recall')
+        rows.append([tex(a['label']), pm(data, variants[a['variant']], 'mean_recall', fmt['metric'], fmt['std']),
+                     num(100 * (m - base_m), fmt['pp'])])
+    table(os.path.join(out, 'tables', 'ablation.tex'), ['Quitando', 'Mean recall', 'Diferencia (pp)'], rows, 'lcc',
+          'Cada fila quita un solo ingrediente; 3 semillas por fila.')
+
+
 def main(delivery_dir):
     cfg = yaml.safe_load(open(os.path.join(delivery_dir, 'delivery.yaml'), encoding='utf-8'))
     fmt = cfg['format']
     out = os.path.join(delivery_dir, 'overleaf', 'generated')
+    shutil.rmtree(os.path.join(out, 'tables'), ignore_errors=True)  # generated/ is always rebuilt from scratch
     os.makedirs(os.path.join(out, 'tables'), exist_ok=True)
     data = Data()
     M = Macros(fmt)
@@ -239,14 +254,8 @@ def main(delivery_dir):
              ('+' if rec_f[k] >= rec_b[k] else '') + num(rec_f[k] - rec_b[k], fmt['metric'])] for k in order]
     table(os.path.join(out, 'tables', 'per_class_recall.tex'), ['Clase', 'Casos (val)', 'Baseline', 'Final', 'Diferencia'], rows, 'lrccc',
           'Recall de validación; el modelo final es la media de %d semillas.' % data.stat(variants['final'], 'mean_recall')[2])
-    base_m, _, _ = data.stat(variants['phase8'], 'mean_recall')
-    rows = [[tex('Modelo combinado (EXP-015\\_d4)').replace('\\textbackslash{}\\_', '\\_'), pm(data, variants['phase8'], 'mean_recall', fmt['metric'], fmt['std']), '--']]
-    for a in cfg['ablation']:
-        m, _, _ = data.stat(variants[a['variant']], 'mean_recall')
-        rows.append([tex(a['label']), pm(data, variants[a['variant']], 'mean_recall', fmt['metric'], fmt['std']),
-                     num(100 * (m - base_m), fmt['pp'])])
-    table(os.path.join(out, 'tables', 'ablation.tex'), ['Quitando', 'Mean recall', 'Diferencia (pp)'], rows, 'lcc',
-          'Cada fila quita un solo ingrediente; 3 semillas por fila.')
+    if cfg.get('ablation'):
+        write_ablation(data, cfg, variants, fmt, out)
 
     # Keys used by the template (aliases of the final model and run count)
     for a, b in [('best-mean-recall', 'final-mean-recall'), ('best-mean-recall-std', 'final-mean-recall-std'),

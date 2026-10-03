@@ -1,26 +1,27 @@
-% Fuentes: EXP-005, EXP-013, EXP-014, EXP-015, EXP-017, EXP-018 ("Siguiente paso").
+% Fuentes: EXP-002..EXP-010; plan de fases (DEC-006, DEC-008).
 \section{Conclusiones y siguientes pasos}
 \begin{itemize}
-  \item \textbf{Lo que más aportó:} reducir la entrada a \res{final-res}~$\times$~\res{final-res}
-  (+\res{gain-resolution}~pp), tratar el desbalance (+\res{gain-imbalance}~pp) y la invarianza a la orientación
-  mediante augmentation D4 (+\res{gain-d4}~pp). En el modelo final, la profundidad y BatchNorm son además
-  imprescindibles (Cuadro~\ref{tab:ablation}).
-  \item \textbf{Lo que no aportó:} dropout, L2, schedules de la \emph{learning rate} y la mayoría de ajustes del
-  optimizador, cuyas diferencias quedaron dentro del ruido entre semillas.
-  \item \textbf{Límite:} una red densa sobre píxeles no comparte pesos entre posiciones ni tiene invarianzas
-  espaciales; los vehículos, que a esta resolución se distinguen por detalles finos, siguen confundiéndose.
-  \item \textbf{Siguiente paso:} redes convolucionales, que incorporan por diseño la conectividad local y la
-  equivarianza a traslaciones~\cite{goodfellow}, partiendo de este modelo como baseline de la siguiente entrega.
+  \item \textbf{Lo que más aportó:} normalizar la entrada (+\res{gain-normalisation}~pp), reducirla a
+  \res{final-res}~$\times$~\res{final-res} (+\res{gain-resolution}~pp) y apilar capas en lugar de ensanchar una sola
+  (+\res{gain-depth}~pp).
+  \item \textbf{Validación y parada:} con callbacks sobre el \emph{mean recall} de validación, la propia validación
+  reduce la \emph{learning rate}, decide cuándo parar y qué época se conserva.
+  \item \textbf{Optimización:} Adam y SGD con momentum empatan dentro del ruido entre semillas; un batch de
+  \res{final-batch} cuesta unos \res{cost-batch256}~pp frente a uno de \res{phase4-batch}, pero hace la exploración
+  \res{speedup-batch256} veces más rápida.
+  \item \textbf{Límite:} con más capacidad solo crece la memorización; una red densa sobre píxeles no tiene
+  invarianzas espaciales~\cite{goodfellow}, y los vehículos siguen confundiéndose.
+  \item \textbf{Siguientes pasos:} regularización, tratamiento del desbalance de clases y \emph{data augmentation}
+  sobre este modelo, y después redes convolucionales.
 \end{itemize}
 
-Todas las cifras proceden de \texttt{experiments/experiments.csv} (\res{n-experiments} entrenamientos); el
-razonamiento de cada decisión está en la bitácora del proyecto.
+Todas las cifras proceden de \texttt{experiments/experiments.csv}; el razonamiento de cada decisión está en la
+bitácora del proyecto.
 
 \begin{thebibliography}{9}\small
 \bibitem{xview} D. Lam et al. \emph{xView: Objects in Context in Overhead Imagery}. arXiv:1802.07856, 2018.
 \bibitem{lecun} Y. LeCun, L. Bottou, G. Orr, K.-R. Müller. \emph{Efficient BackProp}. En \emph{Neural Networks: Tricks of the Trade}, Springer, 1998.
 \bibitem{goodfellow} I. Goodfellow, Y. Bengio, A. Courville. \emph{Deep Learning}. MIT Press, 2016.
-\bibitem{ioffe} S. Ioffe, C. Szegedy. \emph{Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift}. ICML, 2015.
 \bibitem{bouthillier} X. Bouthillier et al. \emph{Accounting for Variance in Machine Learning Benchmarks}. MLSys, 2021.
 \bibitem{cawley} G. Cawley, N. Talbot. \emph{On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation}. JMLR 11, 2010.
 \end{thebibliography}

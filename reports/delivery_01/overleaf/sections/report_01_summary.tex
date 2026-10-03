@@ -1,11 +1,11 @@
-% Fuentes: LOGBOOK.md (DEC-006, EXP-001, EXP-018), experiments.csv.
+% Fuentes: LOGBOOK.md (DEC-006, DEC-008, EXP-001..EXP-010), experiments.csv.
 \section*{Resumen}
-Se mejora una red neuronal densa (ffNN) que clasifica recortes de imágenes aéreas de xView~\cite{xview} en
-\res{n-classes} clases. El modelo de partida, el del enunciado, es en la práctica una regresión logística sobre los
-píxeles y obtiene un \emph{mean recall} de validación de \res{baseline-mean-recall}. Un plan de nueve fases, que
-cambia un solo factor en cada experimento y decide con \res{final-seeds} semillas en su segunda mitad
-(\res{n-experiments} entrenamientos en total), lleva el modelo final a un \emph{mean recall} de
+Se diseña y entrena una red neuronal densa (ffNN) que clasifica recortes de imágenes aéreas de xView~\cite{xview} en
+\res{n-classes} clases. Partiendo del modelo del enunciado, que en la práctica es una regresión logística sobre los
+píxeles (\emph{mean recall} de validación \res{baseline-mean-recall}), se eligen la resolución de entrada, la
+arquitectura, la activación, el algoritmo de optimización y los parámetros de entrenamiento cambiando un solo factor
+en cada experimento. El conjunto de validación decide tanto los hiperparámetros como el punto de parada
+(\emph{EarlyStopping} sobre el \emph{mean recall}). El modelo final, una red de \res{final-hidden} unidades sobre
+imágenes de \res{final-res}~$\times$~\res{final-res} entrenada con Adam, alcanza un \emph{mean recall} de
 \res{best-mean-recall}~$\pm$~\res{best-mean-recall-std} y una \emph{accuracy} de
-\res{best-val-acc}~$\pm$~\res{best-val-acc-std}. Las mejoras decisivas fueron reducir la resolución de entrada,
-tratar el desbalance de clases y aumentar los datos con las simetrías del cuadrado (grupo D4); la regularización
-clásica no ayudó.
+\res{best-val-acc}~$\pm$~\res{best-val-acc-std} (\res{final-seeds} semillas).

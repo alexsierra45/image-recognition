@@ -1,6 +1,6 @@
-# Curated figures of delivery 1, redrawn from experiments/ (never copied from experiments/plots/), in the same style
-# as the experiment plots (plot_theme.py), English labels, PNG: overleaf/figures/<id>.png. The same PNG is used in the
-# report and in the slides. Captions (caption_es) are Spanish: they are document text.
+# Curated figures of delivery 1 (phases 0-5), redrawn from experiments/ (never copied from experiments/plots/), in the
+# same style as the experiment plots (plot_theme.py), English labels, PNG: overleaf/figures/<id>.png. The same PNG is
+# used in the report and in the slides. Captions (caption_es) are Spanish: they are document text.
 # Selection rules are fixed here, before looking at the figures, and are based on validation metrics only.
 
 - id: class_distribution
@@ -25,54 +25,32 @@
   layout: half
   caption_es: "Accuracy de train (discontinua) y de validación (continua) de las 12 arquitecturas probadas según su número de parámetros, una línea por número de capas ocultas."
 
-- id: regularisation
-  type: strength
-  select: {base: EXP-010_bs256_sqrt_60ep, prefix: EXP-013_dropout, param: dropout}
-  options: {xlabel: "dropout rate", title: "Validation curve: accuracy vs dropout rate (mean of 3 seeds)"}
-  layout: half
-  caption_es: "Curva de validación: accuracy de train (discontinua) y de validación (continua) según la tasa de dropout (media de 3 semillas)."
-
-- id: imbalance
-  type: bars
+- id: lr_sweep
+  type: group_sweep
   select:
-    variants:
-      - {variant: EXP-013_bn_before_lr3x, label: "base (no treatment)", role: baseline}
-      - {variant: EXP-014_cw_inverse, label: "inverse class weights"}
-      - {variant: EXP-014_cw_sqrt, label: "sqrt class weights"}
-      - {variant: EXP-014_oversample_balanced, label: "balanced oversampling"}
-      - {variant: EXP-014_oversample_sqrt, label: "sqrt oversampling"}
-  options: {metric: mean_recall, title: "Phase 7: class imbalance (3 seeds)"}
+    exp_id: EXP-008
+    x: optimizer.lr
+    group: optimizer.name
+    group_labels: {adam: "Adam", sgd: "SGD + momentum 0.9"}
+  options: {logx: true, xlabel: "learning rate (log)", title: "Phase 5: mean recall vs learning rate (<= 20 epochs)"}
   layout: half
-  caption_es: "Tratamiento del desbalance: mean recall de validación (barras, media y desviación típica de 3 semillas) y de train (trazo discontinuo)."
+  caption_es: "Mean recall de validación (continua) y de train (discontinua) según la learning rate, para Adam y SGD con momentum (los 8 runs de la fase 5.1, entrenamientos de hasta 20 épocas)."
 
-- id: augmentation_curves
-  type: learning_curves
-  select:
-    runs:
-      - {variant: EXP-015_none_patience15, label: "no augmentation"}
-      - {variant: EXP-015_d4, label: "D4 (flips + 90° rotations)"}
-  options: {metric: accuracy, show_train: true, smooth: 1, title: "Phase 8: learning curves with and without augmentation"}
+- id: stopping
+  type: stopping
+  select: {variant: EXP-010_bs256_sqrt_60ep}
+  options: {metric: mean_recall, title: "Final model: validation mean recall per epoch (3 seeds)"}
   layout: half
-  caption_es: "Accuracy de train (discontinua, con augmentation) y de validación (continua) por época; media de 3 semillas, banda = mínimo y máximo."
+  caption_es: "Punto de parada del modelo final: mean recall de validación por época para cada semilla. La estrella marca la mejor época (la que se conserva) y la cruz, la época en que se detiene EarlyStopping."
 
 - id: progress
   type: progress
+  options: {title: "Progress: validation metric after each phase (phases 4-5: mean of 3 seeds)"}
   layout: full
-  caption_es: "Mean recall y accuracy de validación tras cada fase (desde la fase 4, media de 3 semillas)."
-
-- id: ablation
-  type: ablation
-  layout: half
-  caption_es: "Ablación: mean recall de validación al quitar cada ingrediente del modelo combinado (barras, 3 semillas) y de train (trazo discontinuo)."
+  caption_es: "Mean recall y accuracy de validación tras cada fase (fases 4 y 5: media de 3 semillas)."
 
 - id: per_class_recall
   type: per_class_recall
-  select: {baseline: EXP-001, final: EXP-018_final}
+  select: {baseline: EXP-001, final: EXP-010_bs256_sqrt_60ep}
   layout: full
   caption_es: "Recall de validación por clase: baseline frente al modelo final (media de 3 semillas)."
-
-- id: confusion
-  type: confusion
-  select: {run: EXP-018_final}          # seed 1, the model of the notebook
-  layout: full
-  caption_es: "Matriz de confusión de validación del modelo final (semilla 1), normalizada por filas."

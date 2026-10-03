@@ -15,37 +15,22 @@
 - Included: EXP-006_h64, EXP-006_h128, EXP-006_h256, EXP-006_h512, EXP-006_h1024, EXP-006_h256-128, EXP-006_h512-128, EXP-006_h512-256, EXP-006_h1024-256, EXP-006_h512-256-128, EXP-006_h1024-512-256, EXP-006_h256-256-256-256
 - Omitted: none
 
-## regularisation (strength)
-- Criterion: dropout variants of EXP-013 + their base, mean of 3 seeds
-- Included: EXP-010_bs256_sqrt_60ep, EXP-013_dropout0.1, EXP-013_dropout0.2, EXP-013_dropout0.3, EXP-013_dropout0.5
-- Omitted: EXP-013 L2 and BatchNorm variants (other techniques)
+## lr_sweep (group_sweep)
+- Criterion: every run of EXP-008 (seed 1), one line per optimizer.name
+- Included: EXP-008_adam_lr1e-2, EXP-008_adam_lr1e-3, EXP-008_adam_lr1e-4, EXP-008_adam_lr3e-3, EXP-008_adam_lr3e-4, EXP-008_sgdm_lr1e-1, EXP-008_sgdm_lr1e-2, EXP-008_sgdm_lr1e-3
+- Omitted: seed repetitions
 
-## imbalance (bars)
-- Criterion: all variants of the step and their base, 3 seeds each
-- Included: EXP-013_bn_before_lr3x, EXP-014_cw_inverse, EXP-014_cw_sqrt, EXP-014_oversample_balanced, EXP-014_oversample_sqrt
-- Omitted: none
-
-## augmentation_curves (learning_curves)
-- Criterion: reference without augmentation vs D4, 3 seeds each
-- Included: EXP-015_none_patience15, EXP-015_none_patience15_seed2, EXP-015_none_patience15_seed3, EXP-015_d4, EXP-015_d4_seed2, EXP-015_d4_seed3
+## stopping (stopping)
+- Criterion: every seed of EXP-010_bs256_sqrt_60ep; star = checkpoint kept, x = EarlyStopping
+- Included: EXP-010_bs256_sqrt_60ep, EXP-010_bs256_sqrt_60ep_seed2, EXP-010_bs256_sqrt_60ep_seed3
 - Omitted: none
 
 ## progress (progress)
 - Criterion: winner of each phase (delivery.yaml)
-- Included: EXP-001, EXP-003_val_mean_recall, EXP-005_r16, EXP-006_h256-256-256-256, EXP-007_leaky0.3, EXP-010_bs256_sqrt_60ep, EXP-013_bn_before_lr3x, EXP-014_cw_sqrt, EXP-015_d4, EXP-018_final
-- Omitted: none
-
-## ablation (ablation)
-- Criterion: every ablation of EXP-017 + the no-augmentation run of EXP-015
-- Included: EXP-015_d4, EXP-017_one_layer_256, EXP-017_no_bn, EXP-017_no_class_weight, EXP-015_none_patience15, EXP-017_adam_beta1_0.9, EXP-017_relu
+- Included: EXP-001, EXP-003_val_mean_recall, EXP-005_r16, EXP-006_h256-256-256-256, EXP-007_leaky0.3, EXP-010_bs256_sqrt_60ep
 - Omitted: none
 
 ## per_class_recall (per_class_recall)
 - Criterion: all 13 classes
-- Included: EXP-001, EXP-018_final, EXP-018_final_seed2, EXP-018_final_seed3
+- Included: EXP-001, EXP-010_bs256_sqrt_60ep, EXP-010_bs256_sqrt_60ep_seed2, EXP-010_bs256_sqrt_60ep_seed3
 - Omitted: none
-
-## confusion (confusion)
-- Criterion: seed 1 = the model trained in ffNN_example.ipynb
-- Included: EXP-018_final
-- Omitted: seeds 2 and 3 (one matrix per model)

@@ -1,13 +1,13 @@
-% Conclusiones y siguientes pasos (~1 min). Fuentes: EXP-013, EXP-018.
+% Conclusiones y siguientes pasos (~1 min). Fuentes: EXP-002..EXP-010.
 \begin{frame}{Conclusiones y siguientes pasos}
   \begin{itemize}
-    \item Lo decisivo: resolución, desbalance e invarianza D4
-    \item La regularización clásica no ayudó: el límite es el sesgo del modelo, no la varianza
-    \item Una red densa sobre píxeles no tiene invarianzas espaciales: los vehículos se siguen confundiendo
+    \item Lo decisivo: normalizar y reducir la entrada, y profundidad antes que anchura
+    \item La validación elige los hiperparámetros y el punto de parada
+    \item Con más capacidad solo crece la memorización: el límite es el sesgo de una red densa sobre píxeles
   \end{itemize}
   \vspace{0.2cm}
   \begin{alertblock}{Siguientes pasos}
-    Redes convolucionales, con este modelo como baseline de la siguiente entrega.
+    Regularización, desbalance de clases y data augmentation; después, redes convolucionales.
   \end{alertblock}
-  \speakernote{1}{Cerrar con el límite del modelo y el puente a las CNN.}
+  \speakernote{1}{Cerrar con el límite del modelo y lo que viene.}
 \end{frame}

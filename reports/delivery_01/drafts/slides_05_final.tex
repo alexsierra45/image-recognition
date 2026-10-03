@@ -1,11 +1,11 @@
-% Resultado final (~1 min). Fuentes: EXP-017, EXP-018.
+% Resultado final (~1 min). Fuentes: EXP-010.
 \begin{frame}{Resultado final}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.35\textwidth}
       \begin{itemize}
         \item Mean recall: \textbf{\res{best-mean-recall}} $\pm$ \res{best-mean-recall-std}
         \item Accuracy: \res{best-val-acc}
-        \item Todas las clases mejoran salvo Small car; la más difícil sigue siendo \res{final-worst-class} (\res{final-worst-recall})
+        \item Todas las clases mejoran; la más difícil sigue siendo \res{final-worst-class} (\res{final-worst-recall})
       \end{itemize}
     \end{column}
     \begin{column}{0.6\textwidth}
@@ -16,5 +16,5 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Modelo: \res{final-res}~$\times$~\res{final-res}, \res{final-hidden} con BatchNorm y ReLU, pesos de clase y D4. La ablación: profundidad, BatchNorm, pesos y D4 son lo que más pesa.}
+  \speakernote{1}{Modelo: \res{final-res}~$\times$~\res{final-res}, \res{final-hidden} con LeakyReLU, Adam y batch \res{final-batch}. Truck se confunde con Small car, Bus y Dump truck.}
 \end{frame}

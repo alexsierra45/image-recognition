@@ -8,7 +8,8 @@ estratificado (EXP-001) se detectaron tres problemas:
   razonable sería $\ln K \approx$ \res{chance-loss}, con $K$ = \res{n-classes} clases), la \emph{accuracy} oscila
   varios puntos entre épocas y algunas clases no se predicen nunca.
   \item \textbf{Callbacks inertes.} Con \res{baseline-epochs-cap} épocas, la paciencia de \emph{EarlyStopping}
-  (\res{baseline-es-patience}) y de \emph{ReduceLROnPlateau} (\res{baseline-rlr-patience}) impedía que actuaran.
+  (\res{baseline-es-patience}) y de \emph{ReduceLROnPlateau} (\res{baseline-rlr-patience}) impedía que actuaran: la
+  validación no decidía ni la \emph{learning rate} ni el punto de parada.
   \item \textbf{Coste.} Cada época volvía a leer los TIF del disco, y esa lectura dominaba el tiempo de
   entrenamiento. Se cachearon las imágenes una sola vez (sin cambiar el modelo); con la caché y la GPU, explorar
   muchas configuraciones pasó a ser viable.

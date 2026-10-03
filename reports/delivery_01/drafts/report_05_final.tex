@@ -1,12 +1,13 @@
-% Fuentes: EXP-018, CHG-010; experiments.csv / history (EXP-018_final, 3 semillas).
+% Fuentes: EXP-010 (EXP-010_bs256_sqrt_60ep, 3 semillas), CHG-013; experiments.csv / history.
 \section{Resultado final}
-El modelo final (EXP-018) es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $\rightarrow$ \res{final-hidden}
-[\texttt{Dense} $\rightarrow$ BatchNorm $\rightarrow$ ReLU] $\rightarrow$ softmax sobre imágenes de
-\res{final-res}~$\times$~\res{final-res} (\res{final-params} parámetros), entrenado con Adam ($\beta_1$ =
-\res{final-beta1}, \emph{learning rate} \res{final-lr}), batch de \res{final-batch}, pesos de clase con raíz cuadrada
-y augmentation D4. El Cuadro~\ref{tab:final} lo compara con el baseline: el \emph{mean recall} se multiplica por
-\res{gain-total-ratio} y la \emph{accuracy} sube \res{gain-total-acc}~pp (Figura~\ref{fig:progress}). El notebook de
-la entrega reproduce exactamente el entrenamiento de la semilla~1.
+El modelo final (EXP-010) es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $\rightarrow$ \res{final-hidden}
+[\texttt{Dense} $\rightarrow$ LeakyReLU] $\rightarrow$ softmax sobre imágenes de \res{final-res}~$\times$~\res{final-res}
+(\res{final-params} parámetros), entrenado con Adam ($\beta_1$ = \res{final-beta1}, \emph{learning rate}
+\res{final-lr}) y batch de \res{final-batch}. La validación fija también cuándo parar: \emph{EarlyStopping} con
+paciencia \res{final-es-patience} detiene cada entrenamiento y se conserva la mejor época (de media, la
+\res{final-best-epoch}; Figura~\ref{fig:train}, derecha). El Cuadro~\ref{tab:final} lo compara con el baseline: el
+\emph{mean recall} se multiplica por \res{gain-total-ratio} y la \emph{accuracy} sube \res{gain-total-acc}~pp
+(Figura~\ref{fig:progress}). El notebook de la entrega reproduce exactamente el entrenamiento de la semilla~1.
 
 \begin{table}[h]
   \centering\small
@@ -22,10 +23,11 @@ la entrega reproduce exactamente el entrenamiento de la semilla~1.
   \label{fig:progress}
 \end{figure}
 
-Todas las clases mejoran salvo Small car, que ya era la más fácil (Figura~\ref{fig:final}). La más difícil sigue
-siendo \res{final-worst-class} (recall \res{final-worst-recall}), que se confunde sobre todo con los otros vehículos.
-La mejor época y cada decisión se eligieron con el mismo conjunto de validación con el que se miden, así que todas las
-cifras son algo optimistas~\cite{cawley}.
+Todas las clases mejoran respecto al baseline (Figura~\ref{fig:final}), aunque de forma muy desigual. La más difícil
+sigue siendo \res{final-worst-class} (recall \res{final-worst-recall}), que se confunde con los otros vehículos. Entre
+train y validación queda una brecha (\emph{accuracy} \res{final-train-acc} frente a \res{final-val-acc}). La mejor
+época y cada decisión se eligieron con el mismo conjunto de validación con el que se miden, así que todas las cifras son
+algo optimistas~\cite{cawley}.
 
 \begin{figure}[t]
   \centering

@@ -3,6 +3,13 @@
 ## Contexto
 Proyecto de la asignatura de Visión por Computador (MUIA), trabajo "xview_recognition": clasificar 13 tipos de objeto en recortes 224×224×3 de imágenes aéreas (xView). El notebook [ffNN_example.ipynb](ffNN_example.ipynb) irá ganando complejidad con el curso: ffNN → CNN → arquitecturas conocidas (VGG, ResNet, GoogLeNet…) entrenadas desde cero frente a transfer learning.
 
+**Calendario de entregas del curso** (DEC-009). Cada entrega parte del modelo final de la anterior y solo muestra lo que pide su enunciado; los experimentos que se adelanten se guardan para la entrega que les corresponda:
+1. **ffNN:** arquitectura, algoritmo de optimización y parámetros de entrenamiento; la validación ajusta los hiperparámetros y decide el punto de parada (DEC-008: fases 0-5, final `EXP-010_bs256_sqrt_60ep`).
+2. **Regularización** de esa ffNN para reducir el sobreajuste: penalizaciones de norma, Dropout, BatchNorm, data augmentation. Sin CNN ni transfer learning.
+3. **CNN propias desde cero**, comparadas con arquitecturas conocidas (GoogLeNet, VGG, ResNet…) también desde cero.
+4. **Transfer learning** con esas arquitecturas preentrenadas, comparado con la entrega 3.
+5. **Experimentos pendientes** de las fases anteriores y modelo final refinado.
+
 Esta carpeta es la raíz del proyecto. **No usar material de la carpeta padre.** La documentación que haga falta la añade el usuario a [references/](references/README.md).
 
 ## Entorno

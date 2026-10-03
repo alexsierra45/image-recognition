@@ -1,11 +1,11 @@
-% Objetivo y datos (~1 min). Máx. 3 viñetas + 1 figura. Fuentes: CLAUDE.md (contexto), EXP-001, DEC-006.
+% Objetivo y datos (~1 min). Fuentes: CLAUDE.md (contexto), EXP-001, DEC-006.
 \begin{frame}{Objetivo y datos}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.45\textwidth}
       \begin{itemize}
         \item \res{n-images} recortes de imágenes aéreas (xView), \res{baseline-res}~$\times$~\res{baseline-res} píxeles
         \item \res{n-classes} clases, con \textbf{fuerte desbalanceo} (\res{imbalance-ratio}:1)
-        \item Objetivo: mejorar la red densa (ffNN) del enunciado; métrica guía, el \emph{mean recall} de validación
+        \item Objetivo: diseñar y entrenar una ffNN; la validación decide hiperparámetros y parada
       \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -16,5 +16,5 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Qué se clasifica. Con este desbalance la accuracy engaña (la clase mayoritaria sola da \res{majority-acc}), por eso el mean recall. Split estratificado del \res{valid-share}\,\%.}
+  \speakernote{1}{Qué se clasifica. Con este desbalance la accuracy engaña (la clase mayoritaria sola da \res{majority-acc}): métrica guía, el mean recall. Split estratificado del \res{valid-share}\,\%.}
 \end{frame}

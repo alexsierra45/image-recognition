@@ -19,11 +19,12 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward): **plan de mejora en 9 fases completado** (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Mejor experimento | **EXP-018** (modelo final, en `ffNN_example.ipynb`): 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 |
+| Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
+| Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrena ahora `ffNN_example.ipynb` (CHG-013) |
 | Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Etapa CNN del curso. Pendiente menor de la ffNN: IDEA-010 |
+| Próximo paso | Subir y compilar la entrega 1 en Overleaf. Las fases 6-9 (regularización, desbalance, augmentation) quedan para una entrega posterior; después, la etapa CNN. Pendiente menor: IDEA-010 |
 
 ## Índice de experimentos
 
@@ -546,6 +547,12 @@ No cambia el modelo ni los experimentos: lee `experiments/` (solo lectura) y LOG
 ### CHG-012: Nombres del equipo (2026-10-03)
 A petición del usuario: el equipo es Alex Sierra Alcalá, Roberto Inclán Alfonso y Mario Hernández Trillo. Se actualizan `\AuthorName` y `\AuthorShort` en `common/static_meta.tex` (plantilla y entrega 1) y los campos "Alumno 1/2/3" de la cabecera de `ffNN_example.ipynb` (solo esa celda markdown; el notebook no se vuelve a ejecutar). Paquete de la entrega 1 regenerado.
 
+### CHG-013: Entrega 1 recortada a las fases 0-5 y notebook alineado con ella (2026-10-03)
+Por DEC-008. Antes de recortar, el estado completo (entrega 1 con las fases 0-9 y notebook con EXP-018) se guardó en el commit `b72efda` con la etiqueta local `ffnn-full-plan`.
+- **`ffNN_example.ipynb`:** vuelve al modelo de `EXP-010_bs256_sqrt_60ep` (16×16 `/255` → 4 × [`Dense(256, he_normal)` → LeakyReLU(0,3)] → `Dense(13)`; Adam AMSGrad, lr = 1,2e-3, β₁ = 0,95, clipnorm 1; batch 256; hasta 60 épocas con EarlyStopping 10 y ReduceLROnPlateau 4 sobre `val_mean_recall`), sin pesos de clase ni augmentation; `EXP_ID = 'EXP-010'`; markdown y tabla de progreso limitados a las fases 0-5. **Ejecutado** de arriba abajo: run `EXP-010_20261003-160510`, idéntico al run del barrido (mejor época 20 de 30, val acc 0,6091, mean recall 0,5736, min recall 0,2398). `model.keras` y `prediction.json` (2 365 imágenes) salen ahora de este modelo.
+- **Entrega 1** (`reports/delivery_01/`): `delivery.yaml` con las fases 0-5 y final EXP-010; figuras nuevas `lr_sweep` (fase 5.1) y `stopping` (mean recall de validación por época de cada semilla del modelo final, con la mejor época y la parada); se quitan las de regularización, desbalance, augmentation y ablación. Texto reescrito para el alcance; 9 frames, ~5 páginas estimadas, `make bundle` sin errores.
+- **Scripts:** `build_figures.py` con los tipos `group_sweep` y `stopping`; la tabla de ablación es opcional en `build_results.py`; `generated/tables/` y `figures/` se vacían antes de regenerarse.
+
 ---
 
 ## Incidencias (ISS)
@@ -672,6 +679,16 @@ El usuario aporta un plan de mejora de la ffNN en 9 fases y pide ejecutarlo junt
 
 ### DEC-007: Estilo de las figuras de las entregas (2026-10-03)
 **Decisión del usuario:** las figuras del informe y de las slides usan el **mismo estilo que las de los experimentos** (`plot_theme.py`), con **textos en inglés** y en **PNG** (200 dpi), y se insertan así en LaTeX. Sustituye a lo que pedía el plan de entregas (etiquetas en español, estilo propio por contexto informe/slides y PDF vectorial), que se llegó a implementar y se descartó. Consecuencias: un solo PNG por figura para los dos documentos (cambia solo el ancho de inclusión); los nombres de clase se dejan en inglés también en tablas y texto, para que coincidan con las figuras; los pies de figura y el texto siguen en español.
+
+### DEC-008: Alcance de la entrega 1: fases 0-5 (2026-10-03)
+**Decisión del usuario.** El enunciado de la primera entrega pide diseñar y entrenar una ffNN eligiendo arquitectura, algoritmo de optimización y parámetros de entrenamiento, con un conjunto de validación para ajustar los hiperparámetros y decidir el punto de parada. Entran las fases 0-5 (baseline; normalización, callbacks y parada; resolución; arquitectura; activación; optimizador y batch). Quedan fuera las fases 6 (regularización), 7 (desbalance), 8 (augmentation) y 9 (ablación y EXP-018): sus experimentos y entradas de la bitácora no se tocan y servirán para una entrega posterior. El modelo final de la entrega es `EXP-010_bs256_sqrt_60ep` (0,578 ± 0,007 de mean recall); EXP-007 con batch 16 (0,587 ± 0,004) se cita como referencia del coste del batch grande. El notebook entregable se alinea con este modelo (CHG-013).
+**Alternativas descartadas:** fases 0-6 (incluir la regularización y BatchNorm, final EXP-013, 0,590 ± 0,009) y mantener todo con las fases 7-9 como extras.
+
+### DEC-009: Calendario de entregas del curso y reparto del trabajo ya hecho (2026-10-03)
+El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, optimizador y parámetros de entrenamiento, con la validación para ajustar hiperparámetros y decidir la parada; (2) regularización de esa ffNN (penalizaciones de norma, Dropout, BatchNorm, data augmentation; sin CNN ni transfer learning); (3) CNN propias desde cero frente a arquitecturas conocidas (GoogLeNet, VGG, ResNet…) desde cero; (4) transfer learning con esas arquitecturas frente a la entrega 3; (5) experimentos pendientes y modelo final refinado.
+**Reparto del plan de 9 fases (DEC-006):** fases 0-5 → entrega 1 (DEC-008); fase 6 (dropout, L2, BatchNorm) y fase 8 (augmentation) → entrega 2, con la ablación de la fase 9 como apoyo; fase 7 (desbalance de clases) e IDEA-010 → entrega 5.
+**Entrega 2 (decidido por el usuario siguiendo la recomendación):** EXP-015 (augmentation) se midió sobre el modelo con pesos de clase (EXP-014); para presentar la augmentation solo como regularización se repite sobre el ganador de la fase 6 (EXP-013, sin pesos de clase): EXP-019 en adelante. **El desbalance de clases (fase 7) pasa a la entrega 5.**
+**Consecuencia para la entrega 3:** la entrada de 16×16 (EXP-005) es una decisión propia de la ffNN; las CNN eligen su resolución de nuevo (la caché de 224×224 ya existe).
 
 ---
 

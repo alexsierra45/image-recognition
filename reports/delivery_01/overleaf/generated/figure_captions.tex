@@ -3,10 +3,7 @@
 \expandafter\def\csname figcap@class_distribution\endcsname{Imágenes por clase en el conjunto de entrenamiento.}
 \expandafter\def\csname figcap@resolution_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la resolución de entrada, con una capa oculta de 256. Se muestran 10 de 16 runs: todas las resoluciones con lr = 1e-3 y, en las resoluciones con varias lr probadas, la de mejor mean recall de validación.}
 \expandafter\def\csname figcap@capacity\endcsname{Accuracy de train (discontinua) y de validación (continua) de las 12 arquitecturas probadas según su número de parámetros, una línea por número de capas ocultas.}
-\expandafter\def\csname figcap@regularisation\endcsname{Curva de validación: accuracy de train (discontinua) y de validación (continua) según la tasa de dropout (media de 3 semillas).}
-\expandafter\def\csname figcap@imbalance\endcsname{Tratamiento del desbalance: mean recall de validación (barras, media y desviación típica de 3 semillas) y de train (trazo discontinuo).}
-\expandafter\def\csname figcap@augmentation_curves\endcsname{Accuracy de train (discontinua, con augmentation) y de validación (continua) por época; media de 3 semillas, banda = mínimo y máximo.}
-\expandafter\def\csname figcap@progress\endcsname{Mean recall y accuracy de validación tras cada fase (desde la fase 4, media de 3 semillas).}
-\expandafter\def\csname figcap@ablation\endcsname{Ablación: mean recall de validación al quitar cada ingrediente del modelo combinado (barras, 3 semillas) y de train (trazo discontinuo).}
+\expandafter\def\csname figcap@lr_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la learning rate, para Adam y SGD con momentum (los 8 runs de la fase 5.1, entrenamientos de hasta 20 épocas).}
+\expandafter\def\csname figcap@stopping\endcsname{Punto de parada del modelo final: mean recall de validación por época para cada semilla. La estrella marca la mejor época (la que se conserva) y la cruz, la época en que se detiene EarlyStopping.}
+\expandafter\def\csname figcap@progress\endcsname{Mean recall y accuracy de validación tras cada fase (fases 4 y 5: media de 3 semillas).}
 \expandafter\def\csname figcap@per_class_recall\endcsname{Recall de validación por clase: baseline frente al modelo final (media de 3 semillas).}
-\expandafter\def\csname figcap@confusion\endcsname{Matriz de confusión de validación del modelo final (semilla 1), normalizada por filas.}

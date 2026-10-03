@@ -1,9 +1,9 @@
-% Progreso por fase (~1 min): una sola gráfica. Fuente: delivery.yaml (ganador de cada fase), experiments.csv.
+% Progreso por fase (~1 min). Fuente: delivery.yaml (ganador de cada fase), experiments.csv.
 \begin{frame}{Progreso por fase}
   \begin{figure}
     \centering
     \safegraphics[width=0.8\textwidth]{figures/progress.png}{Mean recall de validación tras cada fase}
-    \caption{\footnotesize Mean recall en validación: de \res{baseline-mean-recall} (baseline) a \res{best-mean-recall} (final), $\times$\res{gain-total-ratio}. Desde la fase 4, media de \res{final-seeds} semillas.}
+    \caption{\footnotesize Mean recall en validación: de \res{baseline-mean-recall} (baseline) a \res{best-mean-recall} (final), $\times$\res{gain-total-ratio}. Fases 4 y 5: media de \res{final-seeds} semillas.}
   \end{figure}
-  \speakernote{1}{Tres saltos: resolución (fase 2), desbalance (fase 7) y D4 (fase 8). El resto, dentro del ruido entre semillas.}
+  \speakernote{1}{Los saltos: normalización (fase 1) y resolución (fase 2); después, ganancias pequeñas, cerca del ruido.}
 \end{frame}

@@ -1,10 +1,9 @@
-% Fuentes: LOGBOOK.md EXP-002..EXP-017, DEC-006.
+% Fuentes: LOGBOOK.md EXP-002..EXP-010, DEC-006.
 \section{Decisiones y resultados por fase}
-Cada experimento cambia un solo factor respecto al ganador de la fase anterior, y se elige por el \emph{mean
-recall} de validación. Medido con varias semillas, el ruido entre ejecuciones es de unos \res{seed-noise-pp}~pp;
-por eso, desde la fase~5 cada decisión se toma con la media de \res{final-seeds} semillas, y las diferencias menores
-que ese ruido no se consideran concluyentes~\cite{bouthillier}. El Cuadro~\ref{tab:phases} resume lo que se mantuvo
-en cada fase.
+Cada experimento cambia un solo factor respecto al ganador de la fase anterior, y se elige por el \emph{mean recall}
+de validación. Medido con varias semillas, el ruido entre ejecuciones es de unos \res{seed-noise-pp}~pp; por eso las
+últimas decisiones se toman con la media de \res{final-seeds} semillas, y las diferencias menores que ese ruido no se
+consideran concluyentes~\cite{bouthillier}. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada fase.
 
 \begin{table}[h]
   \centering\small
@@ -14,14 +13,19 @@ en cada fase.
   \label{tab:phases}
 \end{table}
 
-\subsection{Normalización y callbacks (fase 1)}
-\decisionpoint{con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura~\cite{lecun}.}
-{la pérdida del baseline, del orden de \res{baseline-train-loss}.}
-{escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} sube el \emph{mean recall} \res{gain-normalisation}~pp;
-con paciencias acordes a la duración del entrenamiento, la reducción de la \emph{learning rate} sí actúa, las
-oscilaciones desaparecen y ninguna clase queda sin predecir (recall mínimo \res{phase1-min-recall}).}
-{\texttt{Rescaling} dentro del modelo y callbacks que vigilan el \emph{mean recall}. La estandarización por canal
-fue peor con esa \emph{learning rate}.}
+\subsection{Normalización y punto de parada (fase 1)}
+\decisionpoint{con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura~\cite{lecun}; y unos callbacks
+que no actúan dejan sin usar la información de validación.}
+{la pérdida del baseline, del orden de \res{baseline-train-loss}, y una \emph{learning rate} que no cambia en todo el
+entrenamiento.}
+{escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} sube el \emph{mean recall} \res{gain-normalisation}~pp.
+Con paciencias acordes a la duración del entrenamiento, \emph{ReduceLROnPlateau} reduce la \emph{learning rate} al
+estancarse la validación, desaparecen las oscilaciones y ninguna clase queda sin predecir (recall mínimo
+\res{phase1-min-recall}). Vigilar el \emph{mean recall} dio el mejor resultado (\res{phase1-mean-recall}, frente a
+\res{monitor-loss-mean-recall} vigilando la pérdida y \res{monitor-acc-mean-recall} vigilando la \emph{accuracy};
+una sola semilla, diferencia pequeña), y es además la métrica de decisión.}
+{\texttt{Rescaling} dentro del modelo; \emph{EarlyStopping} y \emph{ReduceLROnPlateau} sobre el \emph{mean recall}
+de validación, y se conserva la mejor época.}
 
 \subsection{Resolución de entrada (fase 2)}
 \decisionpoint{a \res{res224-res}~$\times$~\res{res224-res}, una capa oculta (\res{res224-hidden}) tiene
@@ -31,8 +35,8 @@ es un problema de optimización, porque la mayoría de las ReLU queda inactiva.}
 {el máximo está en \res{phase2-res}~$\times$~\res{phase2-res}, con un \emph{mean recall} de \res{phase2-mean-recall}
 (+\res{gain-resolution}~pp sobre la fase~1), y se mantiene aunque cada resolución use su mejor \emph{learning rate}
 (\res{res32-lr3e-4-mean-recall} a \res{res32-lr3e-4-res} y \res{res64-lr1e-4-mean-recall} a \res{res64-lr1e-4-res};
-Figura~\ref{fig:sweeps}).}
-{entrada de \res{phase2-res}~$\times$~\res{phase2-res}, el mayor salto individual del plan.}
+Figura~\ref{fig:arch}, izquierda).}
+{entrada de \res{phase2-res}~$\times$~\res{phase2-res}, el mayor salto individual.}
 
 \begin{figure}[t]
   \centering
@@ -40,65 +44,45 @@ Figura~\ref{fig:sweeps}).}
     \safegraphics[width=\linewidth]{figures/resolution_sweep.png}{Barrido de resolución}
   \end{minipage}\hfill
   \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/regularisation.png}{Curva de validación del dropout}
+    \safegraphics[width=\linewidth]{figures/capacity.png}{Curva de capacidad}
   \end{minipage}
-  \caption{Izquierda: \figcaption{resolution_sweep} Derecha: \figcaption{regularisation}}
-  \label{fig:sweeps}
+  \caption{Izquierda: \figcaption{resolution_sweep} Derecha: \figcaption{capacity}}
+  \label{fig:arch}
 \end{figure}
 
-\subsection{Arquitectura, activación y optimizador (fases 3 a 5)}
-Con más capacidad, la validación se estanca mientras train sigue subiendo: la red de \res{big3layer-n-hidden} capas
-(\res{big3layer-hidden}) llega a una \emph{accuracy} de train de \res{big3layer-train-acc} con el mismo \emph{mean
-recall} (\res{big3layer-mean-recall}) que \res{phase3-hidden} (\res{phase3-mean-recall}), que tiene muchos menos
-parámetros (\res{phase3-params} frente a \res{big3layer-params}). Con el mismo presupuesto, la red profunda supera a
-una sola capa (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}). En la fase~4, LeakyReLU eliminó las ReLU
-muertas. En la fase~5, Adam y SGD con momentum empataron dentro del ruido; un batch de \res{phase5-batch} hace cada
-época \res{speedup-batch256} veces más rápida a cambio de unos \res{cost-batch256}~pp, y permitió usar
-\res{final-seeds} semillas en el resto del plan.
+\subsection{Arquitectura y activación (fases 3 y 4)}
+\decisionpoint{más capacidad (más anchura o más capas) debería mejorar la validación mientras no haya sobreajuste.}
+{con más parámetros la validación se estanca y train sigue subiendo (Figura~\ref{fig:arch}, derecha): la red de
+\res{big3layer-n-hidden} capas (\res{big3layer-hidden}) llega a una \emph{accuracy} de train de
+\res{big3layer-train-acc} con el mismo \emph{mean recall} (\res{big3layer-mean-recall}) que \res{phase3-hidden}.}
+{\res{phase3-hidden} (\res{phase3-mean-recall}, +\res{gain-depth}~pp sobre una sola capa) empata con la red mayor con
+muchos menos parámetros (\res{phase3-params} frente a \res{big3layer-params}), y con el mismo presupuesto supera a una
+sola capa ancha (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}). LeakyReLU eliminó las ReLU muertas y llegó a
+\res{phase4-mean-recall}.}
+{\res{phase3-hidden} con LeakyReLU e inicialización de He.}
 
-\subsection{Regularización (fase 6)}
-\decisionpoint{la brecha entre train y validación indica sobreajuste.}
-{con dropout o L2, train y validación bajan juntas (Figura~\ref{fig:sweeps}, derecha; con dropout
-\res{dropout05-dropout}, \res{dropout05-train-acc} y \res{dropout05-val-acc}): no hay varianza que recortar.}
-{BatchNorm~\cite{ioffe} antes de la activación sí permitió subir la \emph{learning rate} de \res{phase5-lr} a
-\res{phase6-lr} (+\res{gain-bn}~pp, una mejora marginal).}
-{BatchNorm, sin dropout ni L2. El límite parece ser el sesgo de una red densa sobre píxeles, que no tiene ninguna
-invarianza espacial~\cite{goodfellow}.}
-
-\subsection{Desbalance y augmentation (fases 7 y 8)}
-\decisionpoint{las clases frecuentes dominan la pérdida; y, en imágenes aéreas, sin orientación canónica, los
-volteos y las rotaciones de 90$^\circ$ (grupo D4) conservan la etiqueta.}
-{ponderar la pérdida por clase o sobremuestrear sube el \emph{mean recall} unos \res{gain-imbalance}~pp, pero los
-pesos inversos a la frecuencia bajan la \emph{accuracy} (\res{cw-inverse-val-acc}). Con D4, train baja de
-\res{no-aug-train-acc} a \res{phase8-train-acc} mientras validación sube (Figura~\ref{fig:imb_aug}).}
-{pesos con raíz cuadrada (\emph{accuracy} \res{phase7-val-acc}) y D4 (+\res{gain-d4}~pp); las variaciones de brillo
-y contraste empeoran (\res{color-mean-recall}).}
-{pesos de clase con raíz cuadrada y augmentation D4 en train.}
+\subsection{Algoritmo de optimización y parámetros de entrenamiento (fase 5)}
+\decisionpoint{la \emph{learning rate} es el hiperparámetro más influyente, y el optimizador y el batch fijan el coste
+de cada experimento.}
+{con hasta \res{adam-lr3e-4-epochs-cap} épocas, Adam es casi insensible a la \emph{learning rate}
+(mejor \res{adam-lr3e-4-mean-recall}) y SGD con momentum tiene un óptimo marcado (\res{sgd-m09-mean-recall} a
+\res{sgd-m09-lr}; Figura~\ref{fig:train}, izquierda). Repetidos con \res{final-seeds} semillas, los dos finalistas
+empatan dentro del ruido.}
+{Adam con $\beta_1$ = \res{final-beta1} y un batch de \res{final-batch} (\emph{learning rate} \res{final-lr}, escalada
+con la raíz del batch) hace cada época \res{speedup-batch256} veces más rápida que con batch \res{phase4-batch}, a
+cambio de unos \res{cost-batch256}~pp. Ningún \emph{schedule} ni otro ajuste del optimizador mejoró a
+\emph{ReduceLROnPlateau}.}
+{Adam con AMSGrad, $\beta_1$ = \res{final-beta1}, batch \res{final-batch}: la menor varianza entre semillas y la
+rapidez permiten decidir con varias semillas.}
 
 \begin{figure}[t]
   \centering
   \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/imbalance.png}{Tratamiento del desbalance}
+    \safegraphics[width=\linewidth]{figures/lr_sweep.png}{Barrido de learning rate}
   \end{minipage}\hfill
   \begin{minipage}[t]{0.49\linewidth}\centering
-    \safegraphics[width=\linewidth]{figures/augmentation_curves.png}{Curvas con y sin augmentation}
+    \safegraphics[width=\linewidth]{figures/stopping.png}{Punto de parada}
   \end{minipage}
-  \caption{Izquierda: \figcaption{imbalance} Derecha: \figcaption{augmentation_curves}}
-  \label{fig:imb_aug}
+  \caption{Izquierda: \figcaption{lr_sweep} Derecha: \figcaption{stopping}}
+  \label{fig:train}
 \end{figure}
-
-\subsection{Combinación y ablación (fase 9)}
-Como las fases se encadenaron, la combinación de todos los ganadores es el modelo de la fase~8. Ningún ajuste a su
-alrededor lo mejoró (\emph{learning rate} a la mitad o al doble, dropout, una red más ancha, entrada de
-\res{tune-res32-res}~$\times$~\res{tune-res32-res} o batch de \res{tune-batch16-batch}). La ablación
-(Cuadro~\ref{tab:ablation}) ordena lo que aporta cada ingrediente: profundidad, BatchNorm, pesos de clase y
-augmentation D4. Con BatchNorm, ReLU empata con LeakyReLU y tiene mejor \emph{accuracy} (\res{abl-relu-val-acc}),
-así que el modelo final usa ReLU.
-
-\begin{table}[h]
-  \centering\small
-  \safetable{generated/tables/ablation}
-  \caption{Ablación del modelo combinado (fase~8): cada fila quita un solo ingrediente; \res{final-seeds} semillas
-  por fila.}
-  \label{tab:ablation}
-\end{table}
