@@ -1,0 +1,20 @@
+% Resultado final (~1 min): recall por clase o matriz de confusión.
+\begin{frame}{Resultado final}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.35\textwidth}
+      \begin{itemize}
+        \item Mean recall: \textbf{\res{best-mean-recall}}
+        \item Accuracy: \res{best-val-acc}
+        \item \todoslot{clases que mejoran / siguen difíciles}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/per_class_recall.png}{Recall por clase}
+        \caption{\footnotesize \todoslot{pie de figura}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{\todoslot{qué decir}}
+\end{frame}

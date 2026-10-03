@@ -1,0 +1,13 @@
+% Fuentes: CLAUDE.md (contexto), EXP-001, DEC-006; xview_ann_train.json.
+\section{Objetivo y datos}
+La tarea es clasificar recortes de \res{baseline-res}~$\times$~\res{baseline-res} píxeles (RGB) en \res{n-classes}
+clases de objetos. Hay \res{n-images} imágenes etiquetadas, muy desbalanceadas: la clase más frecuente
+(\res{class-max-name}, \res{class-max-count}) tiene \res{imbalance-ratio} veces más ejemplos que la menos frecuente
+(\res{class-min-name}, \res{class-min-count}). Se separa un \res{valid-share}\,\% para validación con un
+\emph{split} estratificado y semilla fija (\res{n-train} imágenes de entrenamiento y \res{n-valid} de validación),
+de modo que cada clase conserva su proporción. El conjunto de test (\res{n-test} imágenes) no tiene etiquetas
+locales y no se usa para decidir nada.
+
+Por el desbalance, la métrica guía es el \emph{mean recall} (recall medio por clase), cuyo valor por azar es
+\res{chance-mean-recall}; predecir siempre la clase mayoritaria da una \emph{accuracy} de \res{majority-acc}. Todas
+las cifras de este informe son de validación.

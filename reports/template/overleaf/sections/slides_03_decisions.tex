@@ -1,0 +1,39 @@
+% ============================================================
+% DECISIONES (~1 min cada una; 3 o 4 en total).
+% Duplicar el frame de abajo por cada decisión relevante.
+% Estructura fija: hipótesis -> evidencia -> resultado -> decisión.
+% La figura debe ser una de las figuras CURADAS (figures/<id>.png).
+% ============================================================
+
+% ---------- Decisión (patrón con figura a la derecha) ----------
+\begin{frame}{\todoslot{título de la decisión}}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: \todoslot{...}
+        \item \textbf{Evidencia}: \todoslot{... usar \texttt{\textbackslash res\{...\}}}
+        \item \textbf{Resultado}: \todoslot{...}
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{\todoslot{qué se decide y por qué}}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/capacity_curve.png}{Curva de capacidad}
+        \caption{\footnotesize \todoslot{pie; indicar cuántos experimentos se muestran y el criterio}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{\todoslot{qué decir}}
+\end{frame}
+
+% ---------- Variante: figura grande a todo el ancho ----------
+% \begin{frame}{\todoslot{título}}
+%   \begin{figure}
+%     \centering
+%     \safegraphics[width=0.85\textwidth]{figures/ID.png}{descripción}
+%     \caption{\footnotesize ...}
+%   \end{figure}
+%   \speakernote{1}{...}
+% \end{frame}

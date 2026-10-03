@@ -19,3 +19,6 @@ __pycache__/
 
 # Caché de imágenes en .npy (se regenera desde el dataset, CHG-007)
 cache/
+
+# Paquetes de Overleaf de las entregas (se regeneran con make bundle)
+reports/*/*.zip

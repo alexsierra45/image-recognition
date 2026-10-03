@@ -1,0 +1,20 @@
+% Resultado final (~1 min). Fuentes: EXP-017, EXP-018.
+\begin{frame}{Resultado final}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.35\textwidth}
+      \begin{itemize}
+        \item Mean recall: \textbf{\res{best-mean-recall}} $\pm$ \res{best-mean-recall-std}
+        \item Accuracy: \res{best-val-acc}
+        \item Todas las clases mejoran salvo Small car; la más difícil sigue siendo \res{final-worst-class} (\res{final-worst-recall})
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/per_class_recall.png}{Recall por clase}
+        \caption{\footnotesize \figcaption{per_class_recall}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Modelo: \res{final-res}~$\times$~\res{final-res}, \res{final-hidden} con BatchNorm y ReLU, pesos de clase y D4. La ablación: profundidad, BatchNorm, pesos y D4 son lo que más pesa.}
+\end{frame}

@@ -1,0 +1,22 @@
+% Fuentes: EXP-000, EXP-001, ISS-001, ISS-002, ISS-005, CHG-007.
+\section{Punto de partida}
+El modelo del enunciado (Cuadro~\ref{tab:baseline}) aplica una ReLU a los píxeles, que no son negativos, así que
+la ReLU es la identidad y el modelo queda reducido a una regresión logística multinomial. Con el \emph{split}
+estratificado (EXP-001) se detectaron tres problemas:
+\begin{itemize}
+  \item \textbf{Softmax saturada.} La pérdida de entrenamiento se queda en torno a \res{baseline-train-loss} (lo
+  razonable sería $\ln K \approx$ \res{chance-loss}, con $K$ = \res{n-classes} clases), la \emph{accuracy} oscila
+  varios puntos entre épocas y algunas clases no se predicen nunca.
+  \item \textbf{Callbacks inertes.} Con \res{baseline-epochs-cap} épocas, la paciencia de \emph{EarlyStopping}
+  (\res{baseline-es-patience}) y de \emph{ReduceLROnPlateau} (\res{baseline-rlr-patience}) impedía que actuaran.
+  \item \textbf{Coste.} Cada época volvía a leer los TIF del disco, y esa lectura dominaba el tiempo de
+  entrenamiento. Se cachearon las imágenes una sola vez (sin cambiar el modelo); con la caché y la GPU, explorar
+  muchas configuraciones pasó a ser viable.
+\end{itemize}
+
+\begin{table}[h]
+  \centering
+  \safetable{generated/tables/baseline_summary}
+  \caption{Modelo de partida y sus métricas de validación (EXP-001).}
+  \label{tab:baseline}
+\end{table}

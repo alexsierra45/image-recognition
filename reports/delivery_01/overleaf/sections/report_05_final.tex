@@ -1,0 +1,35 @@
+% Fuentes: EXP-018, CHG-010; experiments.csv / history (EXP-018_final, 3 semillas).
+\section{Resultado final}
+El modelo final (EXP-018) es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $\rightarrow$ \res{final-hidden}
+[\texttt{Dense} $\rightarrow$ BatchNorm $\rightarrow$ ReLU] $\rightarrow$ softmax sobre imágenes de
+\res{final-res}~$\times$~\res{final-res} (\res{final-params} parámetros), entrenado con Adam ($\beta_1$ =
+\res{final-beta1}, \emph{learning rate} \res{final-lr}), batch de \res{final-batch}, pesos de clase con raíz cuadrada
+y augmentation D4. El Cuadro~\ref{tab:final} lo compara con el baseline: el \emph{mean recall} se multiplica por
+\res{gain-total-ratio} y la \emph{accuracy} sube \res{gain-total-acc}~pp (Figura~\ref{fig:progress}). El notebook de
+la entrega reproduce exactamente el entrenamiento de la semilla~1.
+
+\begin{table}[h]
+  \centering\small
+  \safetable{generated/tables/baseline_vs_final}
+  \caption{Baseline frente al modelo final (validación; media $\pm$ desviación típica de \res{final-seeds} semillas).}
+  \label{tab:final}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \safegraphics[width=0.85\linewidth]{figures/progress.png}{Progreso por fase}
+  \caption{\figcaption{progress}}
+  \label{fig:progress}
+\end{figure}
+
+Todas las clases mejoran salvo Small car, que ya era la más fácil (Figura~\ref{fig:final}). La más difícil sigue
+siendo \res{final-worst-class} (recall \res{final-worst-recall}), que se confunde sobre todo con los otros vehículos.
+La mejor época y cada decisión se eligieron con el mismo conjunto de validación con el que se miden, así que todas las
+cifras son algo optimistas~\cite{cawley}.
+
+\begin{figure}[t]
+  \centering
+  \safegraphics[width=0.85\linewidth]{figures/per_class_recall.png}{Recall por clase}
+  \caption{\figcaption{per_class_recall}}
+  \label{fig:final}
+\end{figure}

@@ -1,0 +1,11 @@
+% Punto de partida (~1 min). Fuentes: EXP-000, EXP-001, ISS-001, ISS-002, ISS-005.
+\begin{frame}{Punto de partida y problemas detectados}
+  \begin{itemize}
+    \item Baseline: \texttt{Flatten} $\rightarrow$ ReLU $\rightarrow$ \texttt{Dense} sobre píxeles en $[0, 255]$; la ReLU es la identidad, así que es una regresión logística
+    \item Mean recall en validación: \textbf{\res{baseline-mean-recall}} (accuracy \res{baseline-val-acc})
+    \item Problemas detectados: softmax saturada (pérdida $\approx$ \res{baseline-train-loss}, frente a \res{chance-loss} esperable), callbacks que no llegan a actuar y clases que nunca se predicen
+  \end{itemize}
+  \vspace{0.3cm}
+  \keymessage{Plan en nueve fases, un factor por experimento; desde la fase 5, \res{final-seeds} semillas por decisión.}
+  \speakernote{1}{Por qué el modelo es lineal y qué se arregla primero. Las imágenes se cachean una vez (antes se releían los TIF en cada época).}
+\end{frame}

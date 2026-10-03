@@ -1,0 +1,98 @@
+# Delivery 1: improvement of the ffNN (9-phase plan, LOGBOOK DEC-006, EXP-001 -> EXP-018).
+# Every number in the documents comes from experiments/ through these variant ids (a variant = a run id without the
+# _seedN suffix; its value is the mean over the seeds that exist).
+number: 1
+title_es: "Mejora de una red neuronal densa para clasificar objetos en imágenes aéreas"
+short_title_es: "ffNN para xView"
+subtitle_es: "Entrega 1: red feedforward (ffNN)"
+date: auto                       # or a fixed date, e.g. "3 de octubre de 2026"
+baseline_experiment: EXP-001     # EXP-000 used another (non-stratified) split: not mixed in tables or figures
+final_experiment: EXP-018_final
+previous_delivery: null
+highlight_phases: [2, 7, 8, 9]
+
+format:                          # decimals per kind of value (Spanish decimal comma)
+  metric: 3                      # recall, accuracy (proportions)
+  std: 3
+  pp: 1                          # differences in percentage points
+  seconds: 1
+  ratio: 1
+
+# Winner of each phase (the configuration kept for the next phase), from LOGBOOK.md.
+phases:
+  - {phase: 0, variant: EXP-001, key: phase0, label_es: "Baseline: píxeles crudos, modelo lineal (EXP-001)"}
+  - {phase: 1, variant: EXP-003_val_mean_recall, key: phase1, label_es: "Entrada escalada a [0, 1] y callbacks sobre el mean recall (EXP-002, EXP-003)"}
+  - {phase: 2, variant: EXP-005_r16, key: phase2, label_es: "Entrada de 16×16 y una capa oculta de 256 (EXP-005)"}
+  - {phase: 3, variant: EXP-006_h256-256-256-256, key: phase3, label_es: "Cuatro capas ocultas de 256 (EXP-006)"}
+  - {phase: 4, variant: EXP-007_leaky0.3, key: phase4, label_es: "LeakyReLU (EXP-007)"}
+  - {phase: 5, variant: EXP-010_bs256_sqrt_60ep, key: phase5, label_es: "Adam con β₁ = 0,95 y batch 256 (EXP-009, EXP-010)"}
+  - {phase: 6, variant: EXP-013_bn_before_lr3x, key: phase6, label_es: "BatchNorm y learning rate ×3 (EXP-013)"}
+  - {phase: 7, variant: EXP-014_cw_sqrt, key: phase7, label_es: "Pesos de clase con raíz cuadrada (EXP-014)"}
+  - {phase: 8, variant: EXP-015_d4, key: phase8, label_es: "Augmentation D4: volteos y rotaciones de 90° (EXP-015)"}
+  - {phase: 9, variant: EXP-018_final, key: final, label_es: "Modelo final: ReLU y entrenamiento más largo (EXP-018)"}
+
+# Other variants quoted in the text (key -> variant).
+variants:
+  normalisation: EXP-002
+  res224: EXP-005_r224
+  res32: EXP-005_r32
+  res64-lr1e-4: EXP-005_r64_lr1e-4
+  res32-lr3e-4: EXP-005_r32_lr3e-4
+  onelayer256: EXP-006_h256
+  onelayer512: EXP-006_h512
+  big3layer: EXP-006_h1024-512-256
+  relu-phase4: EXP-006_h256-256-256-256
+  sgd-m09: EXP-008_sgdm_lr1e-2
+  batch16-phase5: EXP-009_adam_b1_0.95
+  batch16-phase4: EXP-007_leaky0.3
+  dropout05: EXP-013_dropout0.5
+  dropout02: EXP-013_dropout0.2
+  l2-1e-3: EXP-013_l2_1e-3
+  cw-inverse: EXP-014_cw_inverse
+  no-aug: EXP-015_none_patience15
+  color: EXP-015_color
+  abl-no-depth: EXP-017_one_layer_256
+  abl-no-bn: EXP-017_no_bn
+  abl-no-cw: EXP-017_no_class_weight
+  abl-no-d4: EXP-015_none_patience15
+  abl-beta1: EXP-017_adam_beta1_0.9
+  abl-relu: EXP-017_relu
+  tune-res32: EXP-016_res32
+  tune-batch16: EXP-016_batch16
+
+# Differences quoted in the text: key = a - b (in percentage points of the metric).
+deltas:
+  - {key: gain-normalisation, a: normalisation, b: phase0, metric: mean_recall}
+  - {key: gain-resolution, a: phase2, b: phase1, metric: mean_recall}
+  - {key: gain-imbalance, a: phase7, b: phase6, metric: mean_recall}
+  - {key: gain-bn, a: phase6, b: phase5, metric: mean_recall}
+  - {key: gain-d4, a: phase8, b: no-aug, metric: mean_recall}
+  - {key: gain-total, a: final, b: phase0, metric: mean_recall}
+  - {key: gain-total-acc, a: final, b: phase0, metric: val_acc}
+  - {key: abl-no-depth, a: abl-no-depth, b: phase8, metric: mean_recall}
+  - {key: abl-no-bn, a: abl-no-bn, b: phase8, metric: mean_recall}
+  - {key: abl-no-cw, a: abl-no-cw, b: phase8, metric: mean_recall}
+  - {key: abl-no-d4, a: abl-no-d4, b: phase8, metric: mean_recall}
+  - {key: abl-beta1, a: abl-beta1, b: phase8, metric: mean_recall}
+  - {key: abl-relu, a: abl-relu, b: phase8, metric: mean_recall}
+  - {key: cost-batch256, a: batch16-phase4, b: phase5, metric: mean_recall}
+
+# Ratios quoted in the text: key = a / b.
+ratios:
+  - {key: gain-total-ratio, a: final, b: phase0, metric: mean_recall}
+  - {key: speedup-batch256, a: batch16-phase5, b: phase5, metric: s_per_epoch}
+
+# Ablation rows (removed ingredient -> variant), compared with the combined model (phase8). Labels in English:
+# they are used in the figure; the table uses the same labels (dataset / code terms).
+ablation:
+  - {label: "one hidden layer (256)", variant: abl-no-depth}
+  - {label: "no BatchNorm", variant: abl-no-bn}
+  - {label: "no class weights", variant: abl-no-cw}
+  - {label: "no D4 augmentation", variant: abl-no-d4}
+  - {label: "Adam beta_1 0.9", variant: abl-beta1}
+  - {label: "ReLU instead of LeakyReLU", variant: abl-relu}
+
+key_messages_es:
+  - "Reducir la entrada a 16×16 fue el mayor salto individual: a 224×224 casi todas las ReLU morían."
+  - "El desbalance (pesos de clase) y la invarianza D4 son las otras dos mejoras claras."
+  - "La regularización clásica (dropout, L2) no ayudó: el límite es el sesgo de una red densa sobre píxeles."

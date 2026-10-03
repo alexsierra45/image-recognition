@@ -1,0 +1,35 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+%  Informe de entrega (4-6 páginas) -- PLANTILLA
+%  Máster Universitario en Inteligencia Artificial (UPM)
+%  Visión por Computador
+%
+%  Este archivo solo ensambla. El contenido está en
+%  sections/report_XX_*.tex. Valores numéricos desde generated/.
+% ============================================================
+
+\input{common/shared_packages}
+\input{common/report_style}
+\input{common/static_meta}
+\input{common/placeholders}
+\input{common/results_interface}
+
+\input{generated/meta}
+\input{generated/results_macros}
+
+\title{\DeliveryTitle \\[0.3em] \large \DeliverySubtitle}
+\author{\AuthorName \\ \small \InstituteBlock}
+\date{\DeliveryDate}
+
+\begin{document}
+\maketitle
+
+\input{sections/report_01_summary}
+\input{sections/report_02_context}
+\input{sections/report_03_baseline}
+\input{sections/report_04_decisions}
+\input{sections/report_05_final}
+\input{sections/report_06_conclusions}
+
+\end{document}

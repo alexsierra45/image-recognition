@@ -1,0 +1,12 @@
+% >>> ARCHIVO GENERADO por scripts/build_figures.py. Se sobrescribe siempre (se carga desde results_macros.tex). <<<
+\renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}
+\expandafter\def\csname figcap@class_distribution\endcsname{Imágenes por clase en el conjunto de entrenamiento.}
+\expandafter\def\csname figcap@resolution_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la resolución de entrada, con una capa oculta de 256. Se muestran 10 de 16 runs: todas las resoluciones con lr = 1e-3 y, en las resoluciones con varias lr probadas, la de mejor mean recall de validación.}
+\expandafter\def\csname figcap@capacity\endcsname{Accuracy de train (discontinua) y de validación (continua) de las 12 arquitecturas probadas según su número de parámetros, una línea por número de capas ocultas.}
+\expandafter\def\csname figcap@regularisation\endcsname{Curva de validación: accuracy de train (discontinua) y de validación (continua) según la tasa de dropout (media de 3 semillas).}
+\expandafter\def\csname figcap@imbalance\endcsname{Tratamiento del desbalance: mean recall de validación (barras, media y desviación típica de 3 semillas) y de train (trazo discontinuo).}
+\expandafter\def\csname figcap@augmentation_curves\endcsname{Accuracy de train (discontinua, con augmentation) y de validación (continua) por época; media de 3 semillas, banda = mínimo y máximo.}
+\expandafter\def\csname figcap@progress\endcsname{Mean recall y accuracy de validación tras cada fase (desde la fase 4, media de 3 semillas).}
+\expandafter\def\csname figcap@ablation\endcsname{Ablación: mean recall de validación al quitar cada ingrediente del modelo combinado (barras, 3 semillas) y de train (trazo discontinuo).}
+\expandafter\def\csname figcap@per_class_recall\endcsname{Recall de validación por clase: baseline frente al modelo final (media de 3 semillas).}
+\expandafter\def\csname figcap@confusion\endcsname{Matriz de confusión de validación del modelo final (semilla 1), normalizada por filas.}

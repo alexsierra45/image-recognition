@@ -1,0 +1,114 @@
+% ============================================================
+% DECISIONES (~1 min cada una). Hipótesis -> evidencia -> resultado -> decisión.
+% Fuentes: EXP-002, EXP-005, EXP-006, EXP-013, EXP-014, EXP-015 (LOGBOOK.md).
+% ============================================================
+
+\begin{frame}{Normalizar y reducir la resolución}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: con tantas entradas, sobra varianza
+        \item \textbf{Evidencia}: a \res{res224-res} píxeles también cae train: casi todas las ReLU mueren
+        \item \textbf{Resultado}: \texttt{Rescaling} +\res{gain-normalisation}~pp; \res{phase2-res}~$\times$~\res{phase2-res}, +\res{gain-resolution}~pp
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{Entrada de \res{phase2-res}~$\times$~\res{phase2-res}: el mayor salto del plan.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/resolution_sweep.png}{Barrido de resolución}
+        \caption{\footnotesize \figcaption{resolution_sweep}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{La caída con la resolución es de optimización, no de sobreajuste; aun con la mejor lr para cada tamaño, 16 gana.}
+\end{frame}
+
+\begin{frame}{Profundidad antes que anchura}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: más capacidad, mejor validación
+        \item \textbf{Evidencia}: train sube hasta \res{big3layer-train-acc}; validación se estanca
+        \item \textbf{Resultado}: \res{phase3-hidden} empata con la red mayor (\res{phase3-mean-recall})
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{\res{phase3-hidden}, con \res{phase3-params} parámetros.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/capacity.png}{Curva de capacidad}
+        \caption{\footnotesize \figcaption{capacity}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Leer la curva de capacidad: la separación entre train y validación crece con los parámetros.}
+\end{frame}
+
+\begin{frame}{La regularización clásica no ayuda}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: la brecha train-val es sobreajuste
+        \item \textbf{Evidencia}: con dropout o L2, train y validación bajan juntas
+        \item \textbf{Resultado}: BatchNorm permite subir la lr a \res{phase6-lr}: +\res{gain-bn}~pp
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{BatchNorm, sin dropout ni L2: el límite es el sesgo del modelo.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/regularisation.png}{Curva de validación del dropout}
+        \caption{\footnotesize \figcaption{regularisation}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Ruido entre semillas de \res{seed-noise-pp}~pp: por eso se decide con tres semillas. Batch \res{phase5-batch}: épocas \res{speedup-batch256} veces más rápidas.}
+\end{frame}
+
+\begin{frame}{Tratar el desbalance}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: las clases grandes dominan la pérdida
+        \item \textbf{Evidencia}: pesos de clase o sobremuestreo, +\res{gain-imbalance}~pp
+        \item \textbf{Resultado}: los pesos inversos bajan la accuracy a \res{cw-inverse-val-acc}
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{Pesos con raíz cuadrada: mismo mean recall, accuracy \res{phase7-val-acc}.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/imbalance.png}{Tratamiento del desbalance}
+        \caption{\footnotesize \figcaption{imbalance}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Las cuatro técnicas empatan; se elige la que no sacrifica accuracy.}
+\end{frame}
+
+\begin{frame}{Augmentation con las simetrías del cuadrado}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item \textbf{Hipótesis}: en imágenes aéreas no hay un ``arriba'': volteos y rotaciones de 90$^\circ$ (D4) conservan la etiqueta
+        \item \textbf{Evidencia}: train baja de \res{no-aug-train-acc} a \res{phase8-train-acc}; validación sube
+        \item \textbf{Resultado}: +\res{gain-d4}~pp; brillo y contraste empeoran
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{Augmentation D4, solo en train.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth]{figures/augmentation_curves.png}{Curvas con y sin augmentation}
+        \caption{\footnotesize \figcaption{augmentation_curves}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Es la invarianza que le faltaba al MLP: deja de memorizar la orientación.}
+\end{frame}
