@@ -93,6 +93,24 @@ def phase3():
         run('EXP-006_h%s' % tag, 'EXP-006', 3, 'hidden %s' % tag, dict(PHASE3_BASE, hidden=hidden))
 
 
+# EXP-006: plateau at ~0.56-0.57 above ~200k params; 256-256-256-256 ties the best (0.572) with 3.6x fewer
+# parameters than 1024-512-256 and a much smaller train-val gap.
+PHASE4_BASE = dict(PHASE3_BASE, hidden=[256, 256, 256, 256])
+
+PHASE4_ACTS = [('leaky0.1', {'activation': 'leaky_relu', 'leaky_alpha': 0.1}),     # he_normal
+               ('leaky0.3', {'activation': 'leaky_relu', 'leaky_alpha': 0.3}),     # he_normal
+               ('elu', {'activation': 'elu'}),                                    # he_normal
+               ('gelu', {'activation': 'gelu'}),                                  # he_normal
+               ('selu', {'activation': 'selu'}),                                  # lecun_normal, AlphaDropout if dropout
+               ('tanh', {'activation': 'tanh'})]                                  # glorot_uniform
+
+
+def phase4():
+    # Only the hidden activation changes; the ReLU point is the phase-3 winner itself (same config, same seed).
+    for tag, change in PHASE4_ACTS:
+        run('EXP-007_%s' % tag, 'EXP-007', 4, 'activation %s' % tag, dict(PHASE4_BASE, **change))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)

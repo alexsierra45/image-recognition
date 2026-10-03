@@ -157,6 +157,17 @@ def predict_probs(model, x, idx, batch_size=256):
     return np.concatenate(out)
 
 
+def inactive_units(model, x, idx):
+    """Fraction of units of the first hidden Dense layer whose pre-activation is <= 0 for every validation image
+    (for ReLU: dead units, which get no gradient). None if the model has no hidden layer."""
+    dense = [l for l in model.layers if isinstance(l, layers.Dense)]
+    if len(dense) < 2:
+        return None
+    sub = keras.Model(model.inputs, dense[0].output)
+    pre = predict_probs(sub, x, np.sort(idx))
+    return float((pre.max(0) <= 0).mean())
+
+
 def classification_metrics(y_true, probs):
     y_pred = probs.argmax(1)
     cm = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.int64)
@@ -301,6 +312,7 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
         model.load_weights(model_path)
     val = classification_metrics(y[va], predict_probs(model, x, va))
     trn = classification_metrics(y[tr], predict_probs(model, x, tr))
+    val['inactive_units'] = inactive_units(model, x, va)
 
     row = {'id': run_id, 'exp_id': exp_id, 'phase': phase, 'change': change, 'params': model.count_params(),
            'actual_epochs': len(vals), 'best_epoch': best + 1, 'train_acc': round(trn['acc'], 4),

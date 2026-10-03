@@ -19,11 +19,11 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 3: arquitectura (EXP-006) |
-| Mejor experimento | `EXP-005_r16`: 16×16 `/255` → `Dense(256, relu)` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
-| Mejor val accuracy / mean recall | 0,600 / 0,549 (min recall 0,182; split estratificado, no comparable con EXP-000) |
+| Fase en curso | Fase 4: activaciones (EXP-007) |
+| Mejor experimento | `EXP-006_h256-256-256-256`: 16×16 `/255` → 4 × `Dense(256, relu, he_normal)` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
+| Mejor val accuracy / mean recall | 0,604 / 0,572 (min recall 0,294; split estratificado, no comparable con EXP-000) |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | Brecha train-val moderada (≈ 6 pp de mean recall). La lr óptima depende del número de entradas (EXP-005): reajustarla si cambia la resolución |
+| Diagnóstico | La validación se estanca en ~0,57 mientras train sube con la capacidad (sobreajuste por encima de ~200 k parámetros; brecha de 20 pp en el modelo elegido). La lr óptima depende del número de entradas (EXP-005) |
 | Próximo paso | Fases 2 → 9 del plan (DEC-006) |
 
 ## Índice de experimentos
@@ -38,7 +38,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-003 | 2026-10-03 | 1 | Callbacks ES 10 / RLR 4, 60 épocas; métrica vigilada (mejor: `val_mean_recall`) | CHG-008 | 0,413 | 0,382 | `EXP-003_val_mean_recall` | ejecutado |
 | EXP-004 | 2026-10-03 | 1 | Estandarización por canal en lugar de `/255` | EXP-003 | 0,367 | 0,344 | `EXP-004` | ejecutado (descartado) |
 | EXP-005 | 2026-10-03 | 2 | Resolución de entrada (8–224) con `Dense(256)`, y rejilla resolución × lr | EXP-003 | 0,600 | 0,549 | `EXP-005_r16` | ejecutado |
-| EXP-006 | 2026-10-03 | 3 | Profundidad y anchura de las capas ocultas (16×16) | EXP-005_r16 | | | `EXP-006_h*` | en ejecución |
+| EXP-006 | 2026-10-03 | 3 | Profundidad y anchura de las capas ocultas (16×16) | EXP-005_r16 | 0,604 | 0,572 | `EXP-006_h256-256-256-256` | ejecutado |
+| EXP-007 | 2026-10-03 | 4 | Activación de las capas ocultas | EXP-006_h256-256-256-256 | | | `EXP-007_*` | en ejecución |
 
 ---
 
@@ -131,17 +132,46 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - A lr = 1e-3, la **métrica de train baja con la resolución, igual que la de validación**: 0,609 (16) → 0,469 (64) → 0,133 (224). A 224, la pérdida de train se queda en ≈ 2,28 desde la época 2 (≈ la entropía de las frecuencias de clase) y la accuracy en ≈ 0,21 (clase mayoritaria: 19 %): la red ha colapsado a la distribución a priori.
   - Recall por clase en `EXP-005_r16`: Small car 0,83 · Cargo plane 0,77 · Building 0,76 · Excavator 0,67 · Fishing vessel 0,62 · Shipping container 0,59 · Pylon 0,58 · Storage tank 0,52 · Bus 0,45 · Motorboat 0,45 · Dump truck 0,44 · Truck 0,27 · Helipad 0,18.
 - **Conclusión:**
-  - **Se confirma que conviene reducir mucho la resolución, pero no por el motivo previsto.** A lr fija, el empeoramiento con la resolución es sobre todo un **problema de optimización** (subajuste: train y val bajan juntas), no de varianza. Con Adam, cada peso se mueve ≈ lr por paso [R4 §2.1], así que una preactivación se mueve ≈ lr · Σ|x_i|, que crece con el número de entradas. A 224, unos primeros pasos de ese tamaño son compatibles con dejar muertas casi todas las ReLU (hipótesis, no medida; se comprueba en la fase 4) [R8 §6.3.1]. La lr óptima cae ≈ ×3 cada vez que se dobla el lado (×4 entradas): 16 → 1e-3, 32 → 3e-4, 64 → 1e-4.
+  - **Se confirma que conviene reducir mucho la resolución, pero no por el motivo previsto.** A lr fija, el empeoramiento con la resolución es sobre todo un **problema de optimización** (subajuste: train y val bajan juntas), no de varianza. Con Adam, cada peso se mueve ≈ lr por paso [R4 §2.1], así que una preactivación se mueve ≈ lr · Σ|x_i|, que crece con el número de entradas. Pasos de ese tamaño dejan muertas las ReLU, que ya no reciben gradiente [R8 §6.3.1]. **Medido** con los modelos guardados (unidades de la capa oculta que no se activan con ninguna imagen de validación): **28 % a 16×16, 74 % a 64, 79 % a 112 y 93 % a 224** (activación media: 20,9 %, 3,1 %, 1,1 % y 0,1 %). La lr óptima cae ≈ ×3 cada vez que se dobla el lado (×4 entradas): 16 → 1e-3, 32 → 3e-4, 64 → 1e-4.
   - Comparando cada resolución con su mejor lr, **16×16 sigue ganando** (0,549 frente a 0,524 de 32×32 y 0,510 de 64×64), con el modelo más pequeño y las épocas más rápidas. 8×8 pierde detalle (0,499). La diferencia 16 frente a 32 (2,5 pp) es moderada con una sola semilla.
   - **Se elige 16×16 con lr = 1e-3** como base de las fases siguientes; 32×32 con lr = 3e-4 queda como segundo candidato, a revisar en la fase 9.
   - La primera capa oculta (IDEA-002) ya aporta: a 224, la regresión softmax de EXP-003 daba 0,382, y a 16×16 con `Dense(256)` se llega a 0,549 (dos factores a la vez; no se atribuye por separado).
 - **Siguiente paso:** fase 3, la arquitectura (EXP-006).
 
 ### EXP-006: Profundidad y anchura de la red (fase 3)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-005_r16` · **Estado:** en ejecución · **Idea:** IDEA-002
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-005_r16` · **Estado:** ejecutado · **Idea:** IDEA-002 (probada)
 - **Hipótesis:** con 768 entradas, ensanchar o añadir capas aumenta la capacidad; mientras la brecha train-val sea pequeña (≈ 6 pp en la base), más capacidad debería mejorar la validación hasta que empiece el sobreajuste.
 - **Cambio:** solo las capas ocultas: 1 capa (64, 128, 256, 512, 1024), 2 capas (256-128, 512-128, 512-256, 1024-256), 3 en embudo (512-256-128, 1024-512-256) y una estrecha y profunda (256-256-256-256) para comparar con presupuestos de parámetros parecidos.
-- **Fundamento:** [R3; R8 §6.4.1]: con una capa basta en teoría, pero la profundidad puede representar algunas funciones con exponencialmente menos unidades [R8 §6.4.1]. Capacidad frente a generalización [R8 §5.2].
+- **Fundamento:** con una capa basta en teoría [R3], pero la profundidad puede representar algunas funciones con exponencialmente menos unidades [R8 §6.4.1]. Capacidad frente a generalización [R8 §5.2].
+- **Resultados** (ids `EXP-006_h<capas>`; "inactivas" = unidades de la 1.ª capa oculta muertas en validación, CHG-009):
+
+| Capas ocultas | Parámetros | train acc | val acc | train mean recall | **val mean recall** | min recall | Inactivas |
+|---|---|---|---|---|---|---|---|
+| 64 | 50 061 | 0,573 | 0,526 | 0,507 | 0,468 | 0,091 | 31 % |
+| 128 | 100 109 | 0,611 | 0,569 | 0,558 | 0,514 | 0,182 | 31 % |
+| 256 | 200 205 | 0,661 | 0,600 | 0,609 | 0,549 | 0,182 | 28 % |
+| 512 | 400 397 | 0,671 | 0,595 | 0,629 | 0,543 | 0,182 | 27 % |
+| 1024 | 800 781 | 0,698 | 0,602 | 0,659 | 0,562 | 0,272 | 25 % |
+| 256-128 | 231 437 | 0,717 | 0,599 | 0,674 | 0,565 | 0,244 | 23 % |
+| 512-128 | 461 069 | 0,723 | 0,605 | 0,684 | 0,560 | 0,182 | 23 % |
+| 512-256 | 528 397 | 0,649 | 0,590 | 0,602 | 0,548 | 0,182 | 20 % |
+| 1024-256 | 1 053 197 | 0,755 | 0,610 | 0,716 | 0,561 | 0,182 | 25 % |
+| 512-256-128 | 559 629 | 0,789 | 0,603 | 0,762 | 0,568 | 0,312 | 25 % |
+| 1024-512-256 | 1 446 925 | 0,976 | 0,596 | 0,968 | 0,572 | 0,281 | 33 % |
+| **256-256-256-256** | 397 581 | 0,796 | 0,604 | 0,777 | 0,572 | 0,294 | 34 % |
+
+- **Conclusión:**
+  - **Se confirma en parte.** Más capacidad ayuda hasta ~200 k parámetros. A partir de ahí la validación se estanca en 0,56–0,57 (todas dentro de ~1 pp, no concluyente con una semilla), mientras **train sigue subiendo** (accuracy 0,66 → 0,98): la capacidad extra se gasta en memorizar. Es el paso del buen ajuste al **sobreajuste**, que tratará la fase 6.
+  - Con el mismo presupuesto (~400 k), **la red estrecha y profunda gana a la ancha**: 256×4 da 0,572 y una capa de 512 da 0,543 (+2,9 pp), en línea con [R8 §6.4.1].
+  - **Se elige 256-256-256-256**: empata en lo más alto con 1024-512-256 con 3,6 veces menos parámetros, mucha menos brecha (train acc 0,80 frente a 0,98) y el mejor min recall (0,294). La elección es por simplicidad, no por rendimiento.
+  - Entre el 20 % y el 34 % de las ReLU de la primera capa están muertas en todas las arquitecturas: lo pone a prueba la fase 4.
+- **Siguiente paso:** fase 4, las activaciones (EXP-007).
+
+### EXP-007: Función de activación de las capas ocultas (fase 4)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-006_h256-256-256-256` (ReLU + He) · **Estado:** en ejecución
+- **Hipótesis:** con un 34 % de ReLU muertas en la primera capa, las activaciones que dejan pasar gradiente para entradas negativas (LeakyReLU, ELU, GELU, SELU) deberían aprovechar mejor la red. tanh, con saturación en los dos lados, se espera peor.
+- **Cambio:** solo la activación de las capas ocultas, cada una con su inicializador recomendado: LeakyReLU (α = 0,1 y 0,3), ELU y GELU con `he_normal`; SELU con `lecun_normal`; tanh con `glorot_uniform`.
+- **Fundamento:** LeakyReLU [R21], ELU [R22], GELU [R23], SELU con `lecun_normal` (red autonormalizante) [R24], Glorot para activaciones simétricas [R25], He para la familia ReLU [R2]. ReLU muertas [R8 §6.3.1].
 - **Resultados:** *pendiente*.
 
 ---
@@ -203,6 +233,9 @@ No cambia el modelo: cambia de dónde salen los píxeles y añade la maquinaria 
 ### CHG-008: Se quita el ReLU tras `Flatten` y se usa `keras.Input` (2026-10-03)
 Desde la fase 1, los modelos empiezan con `keras.Input(shape=(res, res, 3))`, lo que elimina el warning de Keras 3 por `input_shape`, y no llevan el `Activation('relu')` tras `Flatten`. Resuelve ISS-001. **Verificado con un run** (`CHG-008` en `experiments.csv`, base EXP-002): métricas idénticas a EXP-002 (val acc 0,418, mean recall 0,365, mismas épocas), como se esperaba, porque ReLU(x) = x para x ≥ 0.
 
+### CHG-009: Fracción de unidades inactivas en cada run (2026-10-03)
+`experiment_utils.inactive_units`: fracción de unidades de la primera capa oculta cuya preactivación es ≤ 0 para todas las imágenes de validación (con ReLU, unidades muertas, que no reciben gradiente [R8 §6.3.1]). `run_experiment` la guarda en `history/<id>.json` (`val.inactive_units`) desde la fase 4; no se añade al CSV para no cambiar sus columnas con la fase 3 escribiendo en él. Comprobado con `EXP-005_r16`: 0,281, igual que la medida manual de EXP-005. Las medidas de EXP-005 y EXP-006 se calculan aparte, con los modelos guardados.
+
 ---
 
 ## Incidencias (ISS)
@@ -237,7 +270,7 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Éxito:** la pérdida inicial ≈ ln 13 ≈ 2,56 y una convergencia más rápida que en EXP-000.
 - **Evidencia de EXP-000:** pérdida de ~3 000 durante las 20 épocas, val acc oscilando ±5 pp y dos clases frecuentes que nunca se predicen. Es lo esperable con logits saturados (análisis en la conclusión de EXP-000). Es el cambio de mayor impacto esperado. Además de lo anterior, comprobar que la val acc deja de oscilar (σ entre épocas ≪ 0,048).
 
-### IDEA-002: Añadir capas ocultas reales (MLP) e inicialización He · prioridad alta
+### IDEA-002: Añadir capas ocultas reales (MLP) e inicialización He · probada → EXP-005, EXP-006
 - **Qué:** `Flatten → Dense(n) → ReLU → … → Dense(13) → softmax`, con `kernel_initializer='he_normal'`.
 - **Por qué:** sin capa oculta el modelo es lineal. Un MLP con una sola capa oculta ya es un aproximador universal [R3; R8 §6.4.1]. Para ReLU, la inicialización He conserva la varianza de las activaciones entre capas [R2]; `glorot_uniform` (la de Keras por defecto) está pensada para activaciones simétricas.
 - **Cuidado:** con 150 528 entradas, una capa de 512 neuronas tiene ≈ 77 M de parámetros frente a 16 871 imágenes de train: hay alto riesgo de overfitting. En float32, entre pesos, gradientes y los tres estados de Adam con AMSGrad, ocupa ≈ 5 × 308 MB ≈ 1,5 GB, que caben en los 6 GB de la GPU (CHG-003). Combinar con IDEA-006 e IDEA-007.
@@ -346,6 +379,11 @@ El usuario aporta un plan de mejora de la ffNN en 9 fases y pide ejecutarlo junt
 - **[R18]** Cawley, Talbot (2010). *On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation*. JMLR 11.
 - **[R19]** Gonzalez, Woods (2018). *Digital Image Processing*, 4.ª ed. Pearson. (cap. 4: muestreo, aliasing y filtrado paso bajo antes de submuestrear)
 - **[R20]** TensorFlow. *tf.config.experimental.enable_op_determinism* (documentación de la API). https://www.tensorflow.org/api_docs/python/tf/config/experimental/enable_op_determinism
+- **[R21]** Maas, Hannun, Ng (2013). *Rectifier Nonlinearities Improve Neural Network Acoustic Models*. ICML Workshop on Deep Learning for Audio, Speech and Language Processing. (LeakyReLU)
+- **[R22]** Clevert, Unterthiner, Hochreiter (2016). *Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)*. ICLR.
+- **[R23]** Hendrycks, Gimpel (2016). *Gaussian Error Linear Units (GELUs)*. arXiv:1606.08415.
+- **[R24]** Klambauer, Unterthiner, Mayr, Hochreiter (2017). *Self-Normalizing Neural Networks*. NeurIPS. (SELU, `lecun_normal`, AlphaDropout)
+- **[R25]** Glorot, Bengio (2010). *Understanding the difficulty of training deep feedforward neural networks*. AISTATS.
 
 ---
 

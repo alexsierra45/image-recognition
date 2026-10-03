@@ -1,0 +1,13 @@
+==== phase3 ====
+EXP-006_h64                  hidden 64                                params=50061     ep=20/30 train_acc=0.573 val_acc=0.526 mean_recall=0.467 min_rec=0.091 241s
+EXP-006_h128                 hidden 128                               params=100109    ep=20/30 train_acc=0.611 val_acc=0.569 mean_recall=0.515 min_rec=0.182 219s
+EXP-006_h256                 hidden 256                               params=200205    ep=26/36 train_acc=0.661 val_acc=0.599 mean_recall=0.549 min_rec=0.182 247s
+EXP-006_h512                 hidden 512                               params=400397    ep=20/30 train_acc=0.671 val_acc=0.595 mean_recall=0.543 min_rec=0.182 209s
+EXP-006_h1024                hidden 1024                              params=800781    ep=21/31 train_acc=0.698 val_acc=0.602 mean_recall=0.562 min_rec=0.271 221s
+EXP-006_h256-128             hidden 256-128                           params=231437    ep=29/39 train_acc=0.717 val_acc=0.599 mean_recall=0.565 min_rec=0.244 308s
+EXP-006_h512-128             hidden 512-128                           params=461069    ep=23/33 train_acc=0.723 val_acc=0.605 mean_recall=0.560 min_rec=0.182 263s
+EXP-006_h512-256             hidden 512-256                           params=528397    ep=14/24 train_acc=0.649 val_acc=0.590 mean_recall=0.548 min_rec=0.182 193s
+EXP-006_h1024-256            hidden 1024-256                          params=1053197   ep=27/37 train_acc=0.755 val_acc=0.610 mean_recall=0.561 min_rec=0.182 327s
+EXP-006_h512-256-128         hidden 512-256-128                       params=559629    ep=28/38 train_acc=0.789 val_acc=0.603 mean_recall=0.568 min_rec=0.312 351s
+EXP-006_h1024-512-256        hidden 1024-512-256                      params=1446925   ep=41/51 train_acc=0.976 val_acc=0.596 mean_recall=0.572 min_rec=0.281 507s
+EXP-006_h256-256-256-256     hidden 256-256-256-256                   params=397581    ep=21/31 train_acc=0.796 val_acc=0.604 mean_recall=0.572 min_rec=0.294 333s
