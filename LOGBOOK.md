@@ -48,6 +48,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-013 | 2026-10-03 | 6 | Regularización: dropout, L2, BatchNorm (3 semillas); gana BN con lr ×3 | EXP-010_bs256_sqrt_60ep | 0,612 ± 0,005 | 0,590 ± 0,009 | `EXP-013_bn_before_lr3x*` | ejecutado |
 | EXP-014 | 2026-10-03 | 7 | Desbalance: class weights y sobremuestreo (3 semillas) | EXP-013_bn_before_lr3x | 0,614 ± 0,011 | 0,622 ± 0,005 | `EXP-014_cw_sqrt*` | ejecutado |
 | EXP-015 | 2026-10-03 | 8 | Data augmentation D4 y fotométrica (3 semillas) | EXP-014_cw_sqrt | 0,625 ± 0,003 | 0,656 ± 0,006 | `EXP-015_d4*` | ejecutado |
+| EXP-016 | 2026-10-03 | 9 | Ajuste fino y revisión (lr, dropout, anchura, resolución 32, batch 16) | EXP-015_d4 | | | `EXP-016_*` | en ejecución |
+| EXP-017 | 2026-10-03 | 9 | Ablación del modelo combinado | EXP-015_d4 | | | `EXP-017_*` | en ejecución |
 
 ---
 
@@ -403,6 +405,19 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - **Se elige D4 sin augmentation fotométrica**, con paciencia 15 / 6.
   - La referencia con paciencia 15/6 (0,615 ± 0,007) es igual, dentro del ruido, a la base con paciencia 10/4 (0,622 ± 0,005): el cambio de paciencia por sí solo no influye.
 - **Siguiente paso:** fase 9, combinación, ajuste fino, ablación y modelo final (EXP-016 en adelante).
+
+### EXP-016: Ajuste fino y revisión de decisiones con el modelo combinado (fase 9)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` (= combinación de todas las fases; 3 semillas: 0,656 ± 0,006) · **Estado:** en ejecución
+- **Por qué:** el plan se ejecutó de forma acumulativa (cada fase parte de la ganadora de la anterior), así que la combinación ya es `EXP-015_d4` y no empeora nada. Pero la augmentation cambia el régimen (menos sobreajuste), y algunas decisiones tomadas antes pueden cambiar de signo: una red más ancha o una resolución mayor (más detalle para Truck, la clase más difícil) podrían aprovecharse ahora; algo de dropout también.
+- **Cambio** (cada uno por separado, 3 semillas): lr ×0,5 y ×2 (ajuste fino); dropout 0,1; capas 512×4; resolución 32×32 (Truck, segundo candidato de EXP-005); batch 16 con lr = 3,6e-3·√(16/256) = 9e-4 (IDEA-011).
+- **Fundamento:** [R26 §3.1.1] (ajustar la lr alrededor del óptimo); interacción entre regularización implícita y explícita [R8 §7.4, §7.12]; IDEA-011 [R30].
+- **Resultados:** *pendiente*.
+
+### EXP-017: Ablación del modelo combinado (fase 9)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-015_d4` · **Estado:** en ejecución
+- **Por qué:** cuantificar cuánto aporta cada ingrediente dentro del modelo final, porque las ganancias medidas en cada fase pueden no sumarse.
+- **Cambio** (quitando uno cada vez, 3 semillas): sin D4 (`EXP-015_none_patience15`, ya ejecutado); sin `class_weight`; sin BN (y lr de vuelta a 1,2e-3, la de antes de BN); ReLU en lugar de LeakyReLU(0,3); una sola capa de 256; Adam con β₁ = 0,9.
+- **Resultados:** *pendiente*.
 
 ---
 

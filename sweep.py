@@ -301,6 +301,45 @@ def phase8():
             run(seeded('EXP-015_%s' % tag, seed), 'EXP-015', 8, 'augmentation %s' % tag, dict(b, seed=seed, augment=ops))
 
 
+
+# EXP-015 (3 seeds): D4 augmentation 0.656 +- 0.006 vs 0.615 +- 0.007 without; photometric jitter hurts.
+FINAL_BASE = dict(PHASE8_BASE, es_patience=15, rlr_patience=6, augment=['flip', 'rot90'])
+# Reference with seeds 1-3: EXP-015_d4[_seed2|_seed3].
+
+
+def phase9_tune():
+    # Fine-tuning around the combined model and re-checks of earlier choices that augmentation may have changed.
+    lr = FINAL_BASE['optimizer']['lr']
+    variants = [('lr_x0.5', merge_cfg(FINAL_BASE, optimizer={'lr': lr / 2})),
+                ('lr_x2', merge_cfg(FINAL_BASE, optimizer={'lr': lr * 2})),
+                ('dropout0.1', dict(FINAL_BASE, dropout=0.1)),
+                ('hidden_512x4', dict(FINAL_BASE, hidden=[512] * 4)),
+                ('res32', dict(FINAL_BASE, res=32))]
+    for seed in SEEDS:
+        for tag, cfg in variants:
+            run(seeded('EXP-016_%s' % tag, seed), 'EXP-016', 9, tag, dict(cfg, seed=seed))
+
+
+def phase9_batch16():
+    # IDEA-011: small batch on the final configuration (lr rescaled with the square-root rule). ~10 min per run.
+    lr = FINAL_BASE['optimizer']['lr'] * (16 / 256) ** 0.5
+    for seed in SEEDS:
+        run(seeded('EXP-016_batch16', seed), 'EXP-016', 9, 'batch 16, lr %.2g' % lr,
+            dict(merge_cfg(FINAL_BASE, optimizer={'lr': lr}, batch_size=16), seed=seed))
+
+
+def phase9_ablation():
+    # Remove one ingredient at a time from the combined model (no D4 = EXP-015_none_patience15, already run).
+    variants = [('no_class_weight', dict(FINAL_BASE, class_weight=None)),
+                ('no_bn', merge_cfg(dict(FINAL_BASE, bn=None), optimizer={'lr': FINAL_BASE['optimizer']['lr'] / 3})),
+                ('relu', dict(FINAL_BASE, activation='relu')),
+                ('one_layer_256', dict(FINAL_BASE, hidden=[256])),
+                ('adam_beta1_0.9', merge_cfg(FINAL_BASE, optimizer={'beta_1': 0.9}))]
+    for seed in SEEDS:
+        for tag, cfg in variants:
+            run(seeded('EXP-017_%s' % tag, seed), 'EXP-017', 9, 'ablation: %s' % tag, dict(cfg, seed=seed))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)

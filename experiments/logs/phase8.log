@@ -1,0 +1,19 @@
+==== phase8 ====
+EXP-015_none_patience15      no augmentation, patience 15/6           params=400653    ep=32/47 train_acc=0.871 val_acc=0.601 mean_recall=0.608 min_rec=0.321 44s
+EXP-015_flip                 augmentation flip                        params=400653    ep=63/78 train_acc=0.693 val_acc=0.617 mean_recall=0.647 min_rec=0.176 72s
+EXP-015_rot90                augmentation rot90                       params=400653    ep=44/59 train_acc=0.678 val_acc=0.620 mean_recall=0.643 min_rec=0.176 64s
+EXP-015_d4                   augmentation d4                          params=400653    ep=57/72 train_acc=0.688 val_acc=0.623 mean_recall=0.659 min_rec=0.167 76s
+EXP-015_color                augmentation color                       params=400653    ep=34/49 train_acc=0.839 val_acc=0.602 mean_recall=0.594 min_rec=0.353 54s
+EXP-015_d4_color             augmentation d4_color                    params=400653    ep=43/58 train_acc=0.625 val_acc=0.594 mean_recall=0.611 min_rec=0.131 67s
+EXP-015_none_patience15_seed2 no augmentation, patience 15/6           params=400653    ep=32/47 train_acc=0.847 val_acc=0.599 mean_recall=0.615 min_rec=0.276 47s
+EXP-015_flip_seed2           augmentation flip                        params=400653    ep=47/62 train_acc=0.682 val_acc=0.620 mean_recall=0.643 min_rec=0.140 62s
+EXP-015_rot90_seed2          augmentation rot90                       params=400653    ep=51/66 train_acc=0.698 val_acc=0.639 mean_recall=0.670 min_rec=0.235 68s
+EXP-015_d4_seed2             augmentation d4                          params=400653    ep=47/62 train_acc=0.694 val_acc=0.628 mean_recall=0.660 min_rec=0.195 68s
+EXP-015_color_seed2          augmentation color                       params=400653    ep=40/55 train_acc=0.801 val_acc=0.591 mean_recall=0.605 min_rec=0.262 59s
+EXP-015_d4_color_seed2       augmentation d4_color                    params=400653    ep=53/68 train_acc=0.633 val_acc=0.605 mean_recall=0.624 min_rec=0.145 81s
+EXP-015_none_patience15_seed3 no augmentation, patience 15/6           params=400653    ep=23/38 train_acc=0.793 val_acc=0.619 mean_recall=0.622 min_rec=0.267 41s
+EXP-015_flip_seed3           augmentation flip                        params=400653    ep=58/73 train_acc=0.746 val_acc=0.630 mean_recall=0.650 min_rec=0.213 72s
+EXP-015_rot90_seed3          augmentation rot90                       params=400653    ep=37/52 train_acc=0.675 val_acc=0.628 mean_recall=0.647 min_rec=0.195 53s
+EXP-015_d4_seed3             augmentation d4                          params=400653    ep=50/65 train_acc=0.700 val_acc=0.623 mean_recall=0.649 min_rec=0.195 72s
+EXP-015_color_seed3          augmentation color                       params=400653    ep=27/42 train_acc=0.723 val_acc=0.588 mean_recall=0.588 min_rec=0.222 45s
+EXP-015_d4_color_seed3       augmentation d4_color                    params=400653    ep=44/59 train_acc=0.641 val_acc=0.598 mean_recall=0.622 min_rec=0.131 72s
