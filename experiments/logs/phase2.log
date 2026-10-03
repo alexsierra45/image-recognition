@@ -1,0 +1,24 @@
+==== phase2 ====
+EXP-005_r32                  resolution 32x32, Dense(256)             params=790029    ep=22/32 train_acc=0.620 val_acc=0.566 mean_recall=0.497 min_rec=0.091 252s
+EXP-005_r64                  resolution 64x64, Dense(256)             params=3149325   ep=14/24 train_acc=0.543 val_acc=0.505 mean_recall=0.427 min_rec=0.000 205s
+EXP-005_r112                 resolution 112x112, Dense(256)           params=9637389   ep=29/39 train_acc=0.463 val_acc=0.445 mean_recall=0.325 min_rec=0.000 650s
+EXP-005_r224                 resolution 224x224, Dense(256)           params=38538765  ep=28/38 train_acc=0.315 val_acc=0.307 mean_recall=0.129 min_rec=0.000 2089s
+==== phase2 ====
+skip EXP-005_r32
+skip EXP-005_r64
+skip EXP-005_r112
+skip EXP-005_r224
+EXP-005_r16                  resolution 16x16, Dense(256)             params=200205    ep=26/36 train_acc=0.661 val_acc=0.599 mean_recall=0.549 min_rec=0.182 279s
+EXP-005_r48                  resolution 48x48, Dense(256)             params=1773069   ep=21/31 train_acc=0.587 val_acc=0.541 mean_recall=0.469 min_rec=0.091 238s
+==== phase2 ====
+EXP-005_r8                   resolution 8x8, Dense(256)               params=52749     ep=20/30 train_acc=0.583 val_acc=0.533 mean_recall=0.499 min_rec=0.182 213s
+EXP-005_r24                  resolution 24x24, Dense(256)             params=445965    ep=20/30 train_acc=0.642 val_acc=0.585 mean_recall=0.535 min_rec=0.182 210s
+EXP-005_r16_lr1e-4           resolution 16x16, Dense(256), lr 1e-4    params=200205    ep=21/31 train_acc=0.489 val_acc=0.465 mean_recall=0.342 min_rec=0.000 218s
+EXP-005_r32_lr1e-4           resolution 32x32, Dense(256), lr 1e-4    params=790029    ep=20/30 train_acc=0.604 val_acc=0.557 mean_recall=0.474 min_rec=0.000 224s
+EXP-005_r64_lr1e-4           resolution 64x64, Dense(256), lr 1e-4    params=3149325   ep=20/30 train_acc=0.641 val_acc=0.577 mean_recall=0.510 min_rec=0.091 260s
+==== phase2 ====
+EXP-005_r16_lr3e-3           resolution 16x16, Dense(256), lr 3e-3    params=200205    ep=20/30 train_acc=0.596 val_acc=0.550 mean_recall=0.510 min_rec=0.182 212s
+EXP-005_r16_lr3e-4           resolution 16x16, Dense(256), lr 3e-4    params=200205    ep=24/34 train_acc=0.612 val_acc=0.574 mean_recall=0.511 min_rec=0.182 238s
+EXP-005_r32_lr3e-4           resolution 32x32, Dense(256), lr 3e-4    params=790029    ep=20/30 train_acc=0.646 val_acc=0.580 mean_recall=0.524 min_rec=0.182 218s
+EXP-005_r64_lr3e-4           resolution 64x64, Dense(256), lr 3e-4    params=3149325   ep=21/31 train_acc=0.586 val_acc=0.543 mean_recall=0.463 min_rec=0.091 266s
+EXP-005_r64_lr3e-5           resolution 64x64, Dense(256), lr 3e-5    params=3149325   ep=14/24 train_acc=0.540 val_acc=0.498 mean_recall=0.395 min_rec=0.000 208s

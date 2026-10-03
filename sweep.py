@@ -9,7 +9,15 @@ import sys
 
 import pandas as pd
 
-from experiment_utils import CSV_PATH, run_experiment
+from experiment_utils import CSV_PATH, DEFAULT_CFG, run_experiment
+
+
+def merge_cfg(base, **changes):
+    """dict(base, **changes), but 'optimizer' is merged into the default optimizer instead of replacing it."""
+    cfg = dict(base, **changes)
+    if 'optimizer' in changes:
+        cfg['optimizer'] = dict(DEFAULT_CFG['optimizer'], **base.get('optimizer', {}), **changes['optimizer'])
+    return cfg
 
 # Phase 0 (EXP-001): the assignment's model, raw pixels, original callbacks (ReduceLROnPlateau patience 10,
 # EarlyStopping patience 40, checkpoint on val_accuracy), 20 epochs. Only seed + stratified split are new.
@@ -57,6 +65,32 @@ def phase2():
     # Input resolution, same small MLP for every size: Flatten -> Dense(256, relu, he_normal) -> Dense(13).
     for res in [32, 64, 112, 224]:
         run('EXP-005_r%d' % res, 'EXP-005', 2, 'resolution %dx%d, Dense(256)' % (res, res), dict(PHASE2_BASE, res=res))
+    # The best size (32) was at the edge of the grid: bracket it.
+    for res in [16, 48, 8, 24]:
+        run('EXP-005_r%d' % res, 'EXP-005', 2, 'resolution %dx%d, Dense(256)' % (res, res), dict(PHASE2_BASE, res=res))
+    # Robustness: train accuracy also falls with resolution at lr 1e-3 (optimisation, not only variance).
+    # Does the ranking hold at lr 1e-4?
+    # It does not (64 wins at 1e-4, 16 at 1e-3): compare each resolution at its own best lr (small joint grid).
+    for res, lr in [(16, 1e-4), (32, 1e-4), (64, 1e-4), (16, 3e-3), (16, 3e-4), (32, 3e-4), (64, 3e-4), (64, 3e-5)]:
+        tag = '%.0e' % lr
+        tag = tag.replace('e-0', 'e-')
+        run('EXP-005_r%d_lr%s' % (res, tag), 'EXP-005', 2, 'resolution %dx%d, Dense(256), lr %s' % (res, res, tag),
+            merge_cfg(PHASE2_BASE, res=res, optimizer={'lr': lr}))
+
+
+# EXP-005: best resolution 16x16 at lr 1e-3 (each size compared at its best lr). Second candidate: 32x32 at lr 3e-4.
+PHASE3_BASE = dict(PHASE2_BASE, res=16)
+
+PHASE3_ARCHS = [[64], [128], [256], [512], [1024],                      # 1 hidden layer
+                [256, 128], [512, 128], [512, 256], [1024, 256],         # 2 hidden layers
+                [512, 256, 128], [1024, 512, 256],                       # 3 hidden layers (funnel)
+                [256, 256, 256, 256]]                                    # narrow and deep
+
+
+def phase3():
+    for hidden in PHASE3_ARCHS:
+        tag = '-'.join(map(str, hidden))
+        run('EXP-006_h%s' % tag, 'EXP-006', 3, 'hidden %s' % tag, dict(PHASE3_BASE, hidden=hidden))
 
 
 if __name__ == '__main__':

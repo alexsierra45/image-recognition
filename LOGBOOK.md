@@ -19,11 +19,11 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 |---|---|
 | Etapa del curso | ffNN (red feedforward), plan de mejora en 9 fases (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Fase en curso | Fase 2: resolución de entrada (EXP-005) |
-| Mejor experimento | EXP-003 (`val_mean_recall`): regresión softmax sobre píxeles `/255`, callbacks ajustados |
-| Mejor val accuracy / mean recall | 0,413 / 0,382 (min recall 0,199; split estratificado, no comparable con EXP-000) |
+| Fase en curso | Fase 3: arquitectura (EXP-006) |
+| Mejor experimento | `EXP-005_r16`: 16×16 `/255` → `Dense(256, relu)` → `Dense(13)`, Adam lr = 1e-3, callbacks ajustados |
+| Mejor val accuracy / mean recall | 0,600 / 0,549 (min recall 0,182; split estratificado, no comparable con EXP-000) |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | Modelo lineal con brecha train-val de ~15 pp. La lr = 1e-3 es alta para 150 528 entradas: la pérdida solo baja de verdad cuando ReduceLROnPlateau reduce la lr (EXP-003, EXP-004) |
+| Diagnóstico | Brecha train-val moderada (≈ 6 pp de mean recall). La lr óptima depende del número de entradas (EXP-005): reajustarla si cambia la resolución |
 | Próximo paso | Fases 2 → 9 del plan (DEC-006) |
 
 ## Índice de experimentos
@@ -37,7 +37,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-002 | 2026-10-03 | 1 | `Rescaling(1/255)` | EXP-001 | 0,418 | 0,365 | `EXP-002` | ejecutado |
 | EXP-003 | 2026-10-03 | 1 | Callbacks ES 10 / RLR 4, 60 épocas; métrica vigilada (mejor: `val_mean_recall`) | CHG-008 | 0,413 | 0,382 | `EXP-003_val_mean_recall` | ejecutado |
 | EXP-004 | 2026-10-03 | 1 | Estandarización por canal en lugar de `/255` | EXP-003 | 0,367 | 0,344 | `EXP-004` | ejecutado (descartado) |
-| EXP-005 | 2026-10-03 | 2 | Resolución de entrada 32/64/112/224 con `Dense(256)` | EXP-003 | | | `EXP-005_r*` | en ejecución |
+| EXP-005 | 2026-10-03 | 2 | Resolución de entrada (8–224) con `Dense(256)`, y rejilla resolución × lr | EXP-003 | 0,600 | 0,549 | `EXP-005_r16` | ejecutado |
+| EXP-006 | 2026-10-03 | 3 | Profundidad y anchura de las capas ocultas (16×16) | EXP-005_r16 | | | `EXP-006_h*` | en ejecución |
 
 ---
 
@@ -112,10 +113,35 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Siguiente paso:** fase 2, la resolución de entrada (EXP-005).
 
 ### EXP-005: Resolución de entrada (fase 2)
-- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-003 (`val_mean_recall`) + una capa oculta `Dense(256, relu, he_normal)` · **Estado:** en ejecución · **Idea:** IDEA-006 (y primera prueba de IDEA-002)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** EXP-003 (`val_mean_recall`) + una capa oculta `Dense(256, relu, he_normal)` · **Estado:** ejecutado · **Idea:** IDEA-006 (probada; primera prueba de IDEA-002)
 - **Hipótesis:** a 224×224 la primera capa tiene 150 528 × 256 ≈ 38,5 M de pesos para 16 871 imágenes: mucha varianza. Reducir la imagen (con promedio por área, CHG-007) divide los parámetros de la primera capa por 4 (112), 12 (64) o 49 (32) a cambio de perder detalle fino (Small car, Pylon). Se espera un óptimo en 32–64.
-- **Cambio:** solo la resolución de entrada (32, 64, 112, 224), con la misma arquitectura `Flatten → Dense(256) → Dense(13)` en todas.
+- **Cambio:** solo la resolución de entrada, con la misma arquitectura `Flatten → Dense(256) → Dense(13)` en todas. Rejilla del plan: 32, 64, 112, 224. Ampliada a 8, 16, 24 y 48 porque el óptimo caía en el borde. Además, una rejilla conjunta resolución × lr (16, 32 y 64 con 3–4 lr cada una), porque la accuracy de train también caía con la resolución (ver conclusión).
 - **Fundamento:** compromiso sesgo-varianza: menos parámetros libres por ejemplo reducen la varianza del estimador [R8 §5.4]. Un MLP con capa oculta es un aproximador universal [R3; R8 §6.4.1]; He init para ReLU [R2]. El submuestreo por área es un filtro paso bajo, que evita el aliasing [R19, cap. 4].
+- **Resultados** (mean recall de validación; ids `EXP-005_r<res>[_lr<lr>]` en `experiments.csv`):
+
+| lr \ resolución | 8 | 16 | 24 | 32 | 48 | 64 | 112 | 224 |
+|---|---|---|---|---|---|---|---|---|
+| 3e-3 | | 0,510 | | | | | | |
+| **1e-3** | 0,499 | **0,549** | 0,535 | 0,497 | 0,469 | 0,427 | 0,325 | 0,129 |
+| 3e-4 | | 0,511 | | **0,524** | | 0,463 | | |
+| 1e-4 | | 0,342 | | 0,474 | | **0,510** | | |
+| 3e-5 | | | | | | 0,395 | | |
+
+  - Mejor run: **`EXP-005_r16`** (16×16, lr = 1e-3, 200 205 parámetros): **val acc 0,600 · mean recall 0,549 · min recall 0,182** (Helipad: 2 de 11) · train acc 0,661, train mean recall 0,609 · mejor época 26 de 36 · 279 s (7,8 s por época).
+  - A lr = 1e-3, la **métrica de train baja con la resolución, igual que la de validación**: 0,609 (16) → 0,469 (64) → 0,133 (224). A 224, la pérdida de train se queda en ≈ 2,28 desde la época 2 (≈ la entropía de las frecuencias de clase) y la accuracy en ≈ 0,21 (clase mayoritaria: 19 %): la red ha colapsado a la distribución a priori.
+  - Recall por clase en `EXP-005_r16`: Small car 0,83 · Cargo plane 0,77 · Building 0,76 · Excavator 0,67 · Fishing vessel 0,62 · Shipping container 0,59 · Pylon 0,58 · Storage tank 0,52 · Bus 0,45 · Motorboat 0,45 · Dump truck 0,44 · Truck 0,27 · Helipad 0,18.
+- **Conclusión:**
+  - **Se confirma que conviene reducir mucho la resolución, pero no por el motivo previsto.** A lr fija, el empeoramiento con la resolución es sobre todo un **problema de optimización** (subajuste: train y val bajan juntas), no de varianza. Con Adam, cada peso se mueve ≈ lr por paso [R4 §2.1], así que una preactivación se mueve ≈ lr · Σ|x_i|, que crece con el número de entradas. A 224, unos primeros pasos de ese tamaño son compatibles con dejar muertas casi todas las ReLU (hipótesis, no medida; se comprueba en la fase 4) [R8 §6.3.1]. La lr óptima cae ≈ ×3 cada vez que se dobla el lado (×4 entradas): 16 → 1e-3, 32 → 3e-4, 64 → 1e-4.
+  - Comparando cada resolución con su mejor lr, **16×16 sigue ganando** (0,549 frente a 0,524 de 32×32 y 0,510 de 64×64), con el modelo más pequeño y las épocas más rápidas. 8×8 pierde detalle (0,499). La diferencia 16 frente a 32 (2,5 pp) es moderada con una sola semilla.
+  - **Se elige 16×16 con lr = 1e-3** como base de las fases siguientes; 32×32 con lr = 3e-4 queda como segundo candidato, a revisar en la fase 9.
+  - La primera capa oculta (IDEA-002) ya aporta: a 224, la regresión softmax de EXP-003 daba 0,382, y a 16×16 con `Dense(256)` se llega a 0,549 (dos factores a la vez; no se atribuye por separado).
+- **Siguiente paso:** fase 3, la arquitectura (EXP-006).
+
+### EXP-006: Profundidad y anchura de la red (fase 3)
+- **Fecha:** 2026-10-03 · **Etapa:** ffNN · **Base:** `EXP-005_r16` · **Estado:** en ejecución · **Idea:** IDEA-002
+- **Hipótesis:** con 768 entradas, ensanchar o añadir capas aumenta la capacidad; mientras la brecha train-val sea pequeña (≈ 6 pp en la base), más capacidad debería mejorar la validación hasta que empiece el sobreajuste.
+- **Cambio:** solo las capas ocultas: 1 capa (64, 128, 256, 512, 1024), 2 capas (256-128, 512-128, 512-256, 1024-256), 3 en embudo (512-256-128, 1024-512-256) y una estrecha y profunda (256-256-256-256) para comparar con presupuestos de parámetros parecidos.
+- **Fundamento:** [R3; R8 §6.4.1]: con una capa basta en teoría, pero la profundidad puede representar algunas funciones con exponencialmente menos unidades [R8 §6.4.1]. Capacidad frente a generalización [R8 §5.2].
 - **Resultados:** *pendiente*.
 
 ---
@@ -231,7 +257,7 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Por qué:** el desbalance es de 32:1 (Building 3 594 frente a Helipad 111). Sin corregirlo, la pérdida está dominada por las clases frecuentes. En CNNs, el oversampling suele ser la estrategia más robusta [R10]. La métrica guía debe ser el mean recall (balanced accuracy), no la accuracy.
 - **Evidencia de EXP-000:** Helipad (minoritaria) tiene recall 0, pero también Truck, que es la 3.ª clase más frecuente. No todo es desbalance: aplicar esta idea después de IDEA-001 para no confundir los dos efectos.
 
-### IDEA-006: Reducir la resolución de entrada para la ffNN · prioridad media
+### IDEA-006: Reducir la resolución de entrada para la ffNN · probada → EXP-005
 - **Qué:** redimensionar a 64×64 o 32×32 antes de `Flatten`.
 - **Por qué:** divide la dimensión de entrada por ≈ 12 o ≈ 49, y con ella los parámetros de la primera capa: menos varianza (mejor relación datos/parámetros) y menos cálculo por paso. Esto último importa poco ahora que hay GPU (CHG-003) y que la carga de imágenes domina el tiempo por paso (ISS-005), porque el redimensionado se hace después de leer cada imagen. **Coste:** se pierde detalle en objetos pequeños (Small car, Pylon).
 

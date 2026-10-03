@@ -48,6 +48,26 @@ def load_results(exp_ids=None, phase=None):
     return df.reset_index(drop=True)
 
 
+def expand_config(df):
+    """Adds columns parsed from the JSON config: res, lr, optimizer, batch_size, hidden, family (# hidden layers),
+    activation, dropout, l2, bn, gap (train - val mean recall), gap_acc (train - val accuracy)."""
+    df = df.copy()
+    cfgs = [json.loads(c) for c in df['config']]
+    df['res'] = [c['res'] for c in cfgs]
+    df['lr'] = [c['optimizer']['lr'] for c in cfgs]
+    df['optimizer'] = [c['optimizer']['name'] for c in cfgs]
+    df['batch_size'] = [c['batch_size'] for c in cfgs]
+    df['hidden'] = ['-'.join(map(str, c['hidden'])) or 'none' for c in cfgs]
+    df['family'] = ['%d hidden' % len(c['hidden']) for c in cfgs]
+    df['activation'] = [c['activation'] for c in cfgs]
+    df['dropout'] = [c['dropout'] for c in cfgs]
+    df['l2'] = [c['l2'] for c in cfgs]
+    df['bn'] = [c['bn'] or 'none' for c in cfgs]
+    df['gap'] = df['train_mean_recall'] - df['mean_recall']
+    df['gap_acc'] = df['train_acc'] - df['val_acc']
+    return df
+
+
 def _save(fig, name):
     os.makedirs(PLOTS_DIR, exist_ok=True)
     if name:
