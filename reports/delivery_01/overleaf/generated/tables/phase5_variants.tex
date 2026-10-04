@@ -1,0 +1,26 @@
+% >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
+\begin{tabular}{clcccc}
+\toprule
+Paso & Variante & Épocas máx. & Semillas & Mean recall & s/época \\
+\midrule
+5.1 & Adam, lr 3e-4 (mejor Adam) & 20 & 1 & 0,535 & 10,54 \\
+5.1 & Adam, lr 3e-3 (peor Adam) & 20 & 1 & 0,480 & 10,69 \\
+5.1 & SGD + momentum 0,9, lr 1e-2 & 20 & 1 & 0,582 & 7,41 \\
+5.2 & SGD sin momentum & 20 & 1 & 0,459 & 6,58 \\
+5.2 & SGD + momentum 0,99 & 20 & 1 & 0,451 & 7,72 \\
+5.2 & SGD + Nesterov 0,95 & 20 & 1 & 0,572 & 7,69 \\
+5.2 & RMSprop, lr 3e-4 & 20 & 1 & 0,562 & 8,18 \\
+5.2 & SGD + momentum 0,9, lr 1e-2 & 20 & 3 & 0,565 $\pm$ 0,018 & 7,19 \\
+5.2 & Adam, lr 3e-4, $\beta_1$ = 0,95 & 20 & 3 & 0,571 $\pm$ 0,009 & 10,39 \\
+5.3 & Batch 64, lr $\times$2 (regla de la raíz) & 20 & 1 & 0,571 & 2,52 \\
+5.3 & Batch 256, lr $\times$4 (regla de la raíz) & 20 & 1 & 0,574 & 0,68 \\
+5.3 & Batch 256, lr $\times$16 (regla lineal) & 20 & 1 & 0,565 & 0,66 \\
+5.3 & Batch 256, lr $\times$4, hasta 60 épocas (final) & 60 & 3 & 0,578 $\pm$ 0,007 & 0,63 \\
+5.4 & Coseno & 60 & 1 & 0,570 & 0,65 \\
+5.4 & Exponencial & 60 & 1 & 0,554 & 0,63 \\
+5.4 & Warmup + plateau, lr $\times$2 & 60 & 3 & 0,584 $\pm$ 0,028 & 0,67 \\
+5.5 & Sin clipnorm & 60 & 3 & 0,565 $\pm$ 0,032 & 0,62 \\
+5.5 & Sin AMSGrad & 60 & 3 & 0,572 $\pm$ 0,006 & 0,72 \\
+5.5 & AdamW, weight decay 1e-3 & 60 & 3 & 0,579 $\pm$ 0,023 & 0,76 \\
+\bottomrule
+\end{tabular}

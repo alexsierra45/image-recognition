@@ -3,9 +3,9 @@
 Se diseña y entrena una red neuronal densa (ffNN) que clasifica recortes de imágenes aéreas de xView~\cite{xview} en
 \res{n-classes} clases. Partiendo del modelo del enunciado, que en la práctica es una regresión logística sobre los
 píxeles (\emph{mean recall} de validación \res{baseline-mean-recall}), se eligen la resolución de entrada, la
-arquitectura, la activación, el algoritmo de optimización y los parámetros de entrenamiento cambiando un solo factor
-en cada experimento. El conjunto de validación decide tanto los hiperparámetros como el punto de parada
-(\emph{EarlyStopping} sobre el \emph{mean recall}). El modelo final, una red de \res{final-hidden} unidades sobre
-imágenes de \res{final-res}~$\times$~\res{final-res} entrenada con Adam, alcanza un \emph{mean recall} de
-\res{best-mean-recall}~$\pm$~\res{best-mean-recall-std} y una \emph{accuracy} de
+arquitectura, la activación, el algoritmo de optimización y los parámetros de entrenamiento avanzando por fases, cada
+una a partir del ganador de la anterior. El conjunto de validación decide tanto los hiperparámetros como el punto de
+parada (\emph{EarlyStopping} sobre el \emph{mean recall}), por lo que las cifras son algo optimistas. El modelo final,
+una red de \res{final-hidden} unidades sobre imágenes de \res{final-res}~$\times$~\res{final-res} entrenada con Adam,
+alcanza un \emph{mean recall} de \res{best-mean-recall}~$\pm$~\res{best-mean-recall-std} y una \emph{accuracy} de
 \res{best-val-acc}~$\pm$~\res{best-val-acc-std} (\res{final-seeds} semillas).

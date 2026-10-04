@@ -13,16 +13,18 @@ Text in Spanish is in `overleaf/sections/`; numbers come from `generated/results
 
 - **Compilation.** No LaTeX locally: `check_bundle.py` checks references, macros, `\safegraphics`/`\safetable`
   targets, environments, packages, pdfLaTeX-unsafe characters, pending `\todoslot` (none) and speaker-note minutes
-  (10 frames, 10 min). First real compilation in Overleaf (pdfLaTeX); check the report length there (~5 pages
-  estimated; the template's `\parskip` may add some).
+  (11 frames, 11,5 min). First real compilation in Overleaf (pdfLaTeX); check the report length there.
+- **Length (CHG-018, user's request for more detail on phases 0-5):** report ~9,5 pages estimated (template target
+  4-6) and 11 slides with 11,5 min of notes (target 8-10 frames, ~10 min). `check_bundle.py` warns; trimming is the
+  user's call (candidates: the phase-5 table, the phase-1 standardisation paragraph, smaller figures).
 - **Template additions** (outside the template's own files): `generated/results_macros.tex` loads
   `generated/figure_captions.tex` (`\figcaption{id}`); figures are `figures/<id>.png` (DEC-007). Tables are labelled
   "Cuadro" by babel spanish, so the text says "Cuadro~\ref{...}" (for "Tabla": option `es-tabla`).
-- **References:** the report's bibliography is a `thebibliography` at the end of `report_06_conclusions.tex`. All
-  references come from LOGBOOK.md ("Referencias externas"), written from memory and **not verified** against the
-  sources (see the conversation of 2026-10-03; LOGBOOK cites [R31] and [R32] without listing them).
-- `prediction.zip` in the project root (made by the user at 15:53) contains the predictions of EXP-018; the current
-  `prediction.json` is from the delivery-1 model (EXP-010).
+- **References:** the report's bibliography is a `thebibliography` at the end of `report_06_conclusions.tex` (19
+  entries since CHG-018). All come from LOGBOOK.md ("Referencias externas"), written from memory and **not verified**
+  against the sources. [R31] (SGDR) and [R32] (AdamW) are now listed there too.
+- `prediction.zip` in the project root (re-made by the user on 2026-10-03 at 23:33) holds a `prediction.json` identical
+  to the current one: the delivery-1 model (EXP-010, run `EXP-010_20261003-160510`).
 - **Git tag** `delivery-01`: to be created when the delivery is closed.
 
 ## Discrepancies between LOGBOOK.md and the data (the documents use the data)
@@ -34,8 +36,18 @@ Text in Spanish is in `overleaf/sections/`; numbers come from `generated/results
 
 ## Statements without a direct number in experiments/
 
-- "La mayoría de las ReLU queda inactiva" a 224×224 (report, phase 2; slide "Reducir la resolución"). Measured in
-  EXP-005 (93 % at 224×224) with the saved models, but only recorded in LOGBOOK.md, not in `history/*.json`.
+- Inactive units of phase 2: now in `history/EXP-005_*.json` (`val.inactive_units`, CHG-017), measured on the saved
+  models with the function used by every later run. No longer a LOGBOOK-only statement.
+- "Un paso puede desplazar un logit miles de unidades" (baseline; slide note): estimate from EXP-000 in LOGBOOK.md,
+  lr · number of inputs · mean pixel ≈ 1e-3 · 150 528 · 62 ≈ 9 300. The mean pixel is not in `experiments/`.
+- "Las entradas estandarizadas, de mayor magnitud media" (phase 1): LOGBOOK EXP-004 (mean |x| ≈ 0,8 vs 0,24); the
+  number is not in `experiments/`, so the text gives no value. The loss of the first epoch (60,2 vs 13,6) is a macro.
+- "La learning rate óptima baja unas tres veces cada vez que se dobla el lado" (phase 2): the grid values themselves
+  (1e-3, 3e-4, 1e-4 are macros); "tres veces" is their ratio.
+- "Nesterov no da una ventaja consistente" (phase 5.2): EXP-009 table (0,559 with 0,9 vs 0,582 without; 0,572 with
+  0,95 vs 0,508 without). Qualitative in the text; the 0,95 Nesterov row is in the phase-5 table.
+- Counts written as words ("doce arquitecturas", "seis alternativas", "cinco pasos"): number of runs in
+  `experiments.csv` (EXP-006: 12; EXP-007: 6 + base; phase 5: 5.1-5.5).
 - "Cada época volvía a leer los TIF y esa lectura dominaba el tiempo" (report and slide of the baseline): from
   ISS-005 / CHG-003 / CHG-007 in LOGBOOK.md. No timing of EXP-000 is in `experiments/`.
 - "El notebook reproduce exactamente la semilla 1": run `EXP-010_20261003-160510` in `experiments/runs.csv` vs
@@ -54,8 +66,11 @@ goes through `\res{}`.
 
 - Same style as the experiment plots (`plot_theme.py`), English labels, PNG at 200 dpi (DEC-007). Captions in
   Spanish. Class names as in the dataset. Selection criteria in `figure_log.md`.
-- `class_distribution` and `normalisation` are used only in the slides. `normalisation` shows the training loss only:
-  the validation loss of `EpochMetrics` is capped at ~16 (ISS-007).
+- Report and slides show the same 9 figures in the same order (DEC-010, updated by CHG-018): class_distribution,
+  normalisation, resolution_sweep, capacity, activation, lr_sweep, progress, stopping, per_class_recall.
+  `normalisation` shows the training loss only: the validation loss of `EpochMetrics` is capped at ~16 (ISS-007).
+- `activation` (phase 4, two panels): left, inactive units of every phase-2 run by resolution and lr (CHG-017);
+  right, the 7 activations of EXP-007 (LeakyReLU 0,3 with its 3 seeds) with the inactive units of each model.
 - Slide captions are the short `caption_slides_es`; `check_bundle.py` estimates that each fits in 2 lines, but only the
   Overleaf compilation confirms it. Check every slide once there.
 
@@ -64,3 +79,8 @@ goes through `\res{}`.
 - No previous delivery: the "entrega anterior → ahora" comparison starts with delivery 2.
 - EXP-000 (original split) is excluded from every table and figure; the baseline is EXP-001.
 - `hyperparameter_sweep.ipynb` still shows all 9 phases (it is the full record of the sweep).
+- **User edits (2026-10-04, CHG-018):** the six report sections edited by hand in `overleaf/sections/` became the
+  drafts before being extended, so they are kept. Their `% TODO` comments are resolved with data (see CHG-018). One
+  sentence was corrected: "no se separó el efecto de la activación del de la inicialización" (phase 4). The ReLU base
+  (`EXP-006_h256-256-256-256`) already used `he_normal` (its config has `init: None`, which `build_model` maps to
+  `he_normal` for ReLU), so between ReLU and LeakyReLU only the activation changes.

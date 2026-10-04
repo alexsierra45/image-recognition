@@ -5,5 +5,5 @@
     \safegraphics[width=0.8\textwidth,height=0.62\textheight,keepaspectratio]{figures/progress.png}{Mean recall de validación tras cada fase}
     \caption{\footnotesize Mean recall de validación: de \res{baseline-mean-recall} a \res{best-mean-recall} ($\times$\res{gain-total-ratio}). Fases 4 y 5: media de \res{final-seeds} semillas.}
   \end{figure}
-  \speakernote{1}{Los saltos: normalización (fase 1) y resolución (fase 2); después, ganancias pequeñas, cerca del ruido.}
+  \speakernote{1}{Los saltos: normalización y callbacks (fase 1, +\res{gain-phase1}~pp) y resolución (fase 2, +\res{gain-resolution}~pp); después, ganancias pequeñas, del orden del ruido. La fase 5 cuesta unos \res{cost-batch256}~pp frente a la 4 a cambio de épocas \res{speedup-batch256} veces más rápidas.}
 \end{frame}

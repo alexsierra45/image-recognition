@@ -1,28 +1,46 @@
-% Fuentes: EXP-002..EXP-010; plan de fases (DEC-006, DEC-008).
+% Fuentes: EXP-002..EXP-012, CHG-017; plan de fases (DEC-006, DEC-008).
 \section{Conclusiones y siguientes pasos}
 \begin{itemize}
-  \item \textbf{Lo que más aportó:} normalizar la entrada (+\res{gain-normalisation}~pp), reducirla a
-  \res{final-res}~$\times$~\res{final-res} (+\res{gain-resolution}~pp) y apilar capas en lugar de ensanchar una sola
-  (+\res{gain-depth}~pp).
-  \item \textbf{Validación y parada:} con callbacks sobre el \emph{mean recall} de validación, la propia validación
-  reduce la \emph{learning rate}, decide cuándo parar y qué época se conserva.
+  \item \textbf{Lo que más aportó:} reducir la entrada a \res{final-res}~$\times$~\res{final-res}
+  (+\res{gain-resolution}~pp) y, antes, normalizarla y dejar que la validación gobierne los \emph{callbacks} (fase~1:
+  de \res{baseline-mean-recall} a \res{phase1-mean-recall}; la normalización sola, +\res{gain-normalisation}~pp).
+  Apilar capas en lugar de ensanchar una sola dio +\res{gain-depth}~pp, pero con una semilla y dentro del ruido.
+  \item \textbf{Diagnóstico:} medir las unidades inactivas explicó la caída con la resolución (el paso de Adam crece con
+  la \emph{learning rate} y con el número de entradas, y deja ReLU muertas) y motivó LeakyReLU, que las elimina
+  (+\res{gain-activation}~pp, del orden del ruido).
+  \item \textbf{Validación y parada:} con \emph{callbacks} sobre el \emph{mean recall} de validación, la propia
+  validación reduce la \emph{learning rate}, decide cuándo parar y qué época se conserva.
   \item \textbf{Optimización:} Adam y SGD con momentum empatan dentro del ruido entre semillas; un batch de
-  \res{final-batch} cuesta unos \res{cost-batch256}~pp frente a uno de \res{phase4-batch}, pero hace la exploración
-  \res{speedup-batch256} veces más rápida.
-  \item \textbf{Límite:} con más capacidad solo crece la memorización; una red densa sobre píxeles no tiene
-  invarianzas espaciales~\cite{goodfellow}, y los vehículos siguen confundiéndose.
+  \res{final-batch} cuesta unos \res{cost-batch256}~pp frente a uno de \res{phase4-batch}, menos que el ruido, y hace
+  la exploración \res{speedup-batch256} veces más rápida.
+  \item \textbf{Límite:} con más capacidad solo crece la brecha entre train y validación; una red densa sobre píxeles
+  no tiene invarianzas espaciales~\cite{goodfellow}, y los vehículos siguen siendo las clases más difíciles.
   \item \textbf{Siguientes pasos:} regularización, tratamiento del desbalance de clases y \emph{data augmentation}
   sobre este modelo, y después redes convolucionales.
 \end{itemize}
 
-Todas las cifras proceden de \texttt{experiments/experiments.csv}; el razonamiento de cada decisión está en la
-bitácora del proyecto.
+Todas las cifras proceden de \texttt{experiments/} (\texttt{experiments.csv} y el historial de cada run); el
+razonamiento de cada decisión está en la bitácora del proyecto.
 
 \newpage
-\begin{thebibliography}{9}\small
+\begin{thebibliography}{99}\small
 \bibitem{xview} D. Lam et al. \emph{xView: Objects in Context in Overhead Imagery}. arXiv:1802.07856, 2018.
-\bibitem{lecun} Y. LeCun, L. Bottou, G. Orr, K.-R. Müller. \emph{Efficient BackProp}. En \emph{Neural Networks: Tricks of the Trade}, Springer, 1998.
-\bibitem{goodfellow} I. Goodfellow, Y. Bengio, A. Courville. \emph{Deep Learning}. MIT Press, 2016.
+\bibitem{kingma} D. P. Kingma, J. Ba. \emph{Adam: A Method for Stochastic Optimization}. ICLR, 2015.
 \bibitem{bouthillier} X. Bouthillier et al. \emph{Accounting for Variance in Machine Learning Benchmarks}. MLSys, 2021.
+\bibitem{lecun} Y. LeCun, L. Bottou, G. Orr, K.-R. Müller. \emph{Efficient BackProp}. En \emph{Neural Networks: Tricks of the Trade}, Springer, 1998.
+\bibitem{he} K. He, X. Zhang, S. Ren, J. Sun. \emph{Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification}. ICCV, 2015.
+\bibitem{gonzalez} R. C. Gonzalez, R. E. Woods. \emph{Digital Image Processing}, 4.\textsuperscript{a} ed. Pearson, 2018.
+\bibitem{goodfellow} I. Goodfellow, Y. Bengio, A. Courville. \emph{Deep Learning}. MIT Press, 2016.
+\bibitem{maas} A. L. Maas, A. Y. Hannun, A. Y. Ng. \emph{Rectifier Nonlinearities Improve Neural Network Acoustic Models}. ICML Workshop on Deep Learning for Audio, Speech and Language Processing, 2013.
+\bibitem{clevert} D.-A. Clevert, T. Unterthiner, S. Hochreiter. \emph{Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)}. ICLR, 2016.
+\bibitem{gelu} D. Hendrycks, K. Gimpel. \emph{Gaussian Error Linear Units (GELUs)}. arXiv:1606.08415, 2016.
+\bibitem{selu} G. Klambauer, T. Unterthiner, A. Mayr, S. Hochreiter. \emph{Self-Normalizing Neural Networks}. NeurIPS, 2017.
+\bibitem{glorot} X. Glorot, Y. Bengio. \emph{Understanding the Difficulty of Training Deep Feedforward Neural Networks}. AISTATS, 2010.
+\bibitem{sutskever} I. Sutskever, J. Martens, G. Dahl, G. Hinton. \emph{On the Importance of Initialization and Momentum in Deep Learning}. ICML, 2013.
+\bibitem{keskar} N. S. Keskar et al. \emph{On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima}. ICLR, 2017.
+\bibitem{malladi} S. Malladi, K. Lyu, A. Panigrahi, S. Arora. \emph{On the SDEs and Scaling Rules for Adaptive Gradient Algorithms}. NeurIPS, 2022.
+\bibitem{goyal} P. Goyal et al. \emph{Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}. arXiv:1706.02677, 2017.
+\bibitem{sgdr} I. Loshchilov, F. Hutter. \emph{SGDR: Stochastic Gradient Descent with Warm Restarts}. ICLR, 2017.
+\bibitem{adamw} I. Loshchilov, F. Hutter. \emph{Decoupled Weight Decay Regularization}. ICLR, 2019.
 \bibitem{cawley} G. Cawley, N. Talbot. \emph{On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation}. JMLR 11, 2010.
 \end{thebibliography}

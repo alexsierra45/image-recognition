@@ -21,7 +21,7 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
 | Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015 |
-| Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrena ahora `ffNN_example.ipynb` (CHG-013) |
+| Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrena ahora `ffNN_example.ipynb` (CHG-013). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
 | Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
@@ -151,6 +151,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - Comparando cada resolución con su mejor lr, **16×16 sigue ganando** (0,549 frente a 0,524 de 32×32 y 0,510 de 64×64), con el modelo más pequeño y las épocas más rápidas. 8×8 pierde detalle (0,499). La diferencia 16 frente a 32 (2,5 pp) es moderada con una sola semilla.
   - **Se elige 16×16 con lr = 1e-3** como base de las fases siguientes; 32×32 con lr = 3e-4 queda como segundo candidato, a revisar en la fase 9.
   - La primera capa oculta (IDEA-002) ya aporta: a 224, la regresión softmax de EXP-003 daba 0,382, y a 16×16 con `Dense(256)` se llega a 0,549 (dos factores a la vez; no se atribuye por separado).
+  - *Añadido con CHG-017 (2026-10-04):* las unidades inactivas de los 16 runs, medidas con los modelos guardados, ya están en `history/EXP-005_*.json` (`val.inactive_units`). Confirman las cifras de arriba y muestran que **la fracción crece también con la lr**: a 16×16, 5 % (1e-4), 13 % (3e-4), 28 % (1e-3) y 59 % (3e-3); a 64×64, 17 % (3e-5), 32 % (1e-4), 54 % (3e-4) y 74 % (1e-3). Con la mejor lr de cada tamaño queda en un nivel parecido: 28 % (16, 1e-3), 25 % (32, 3e-4) y 32 % (64, 1e-4). Encaja con que lo que mata las ReLU es el tamaño del paso en la preactivación, ≈ lr · Σ|x_i| [R4 §2.1; R8 §6.3.1]. Ordenadas por lr × número de entradas, las 16 medidas crecen de forma monótona; es una observación sobre estos runs, no una ley comprobada.
+  - *Corrección (ISS-008):* a 224×224 el colapso a la distribución a priori dura unas 11 épocas (pérdida de train 2,27–2,32, accuracy 0,21–0,22). Después se recupera en parte: la pérdida baja a 2,03 y la accuracy de train llega a 0,315 al final del run.
 - **Siguiente paso:** fase 3, la arquitectura (EXP-006).
 
 ### EXP-006: Profundidad y anchura de la red (fase 3)
@@ -630,6 +632,45 @@ Por DEC-010. El informe usaba 7 figuras y las slides 8, en distinto orden: `clas
 - **`check_bundle.py`** (funciones nuevas, sin cambiar las existentes): error si una figura está en un documento y no en el otro, o si el orden difiere; en el informe, error si un flotante tiene más de 2 imágenes o una figura no se cita con `\ref`, y aviso si dos imágenes comparten pie.
 - Plantilla (`reports/template/README.md`): reglas añadidas.
 
+### CHG-017: Unidades inactivas de la fase 2 en los historiales (2026-10-04)
+`tools/backfill_inactive_units.py` añade `val.inactive_units` (la medida de CHG-009, con la misma función `experiment_utils.inactive_units`) al historial de los runs anteriores a CHG-009, calculada con el modelo guardado de cada run (`experiments/models/<id>.keras`). No cambia nada más del historial. Se aplicó a los 16 runs de EXP-005, los únicos de las fases 0-5 sin la medida (EXP-001 a EXP-004 no tienen capa oculta).
+- **Comprobación:** recalculada con el script, la de `EXP-006_h256-256-256-256` da 0,3359375, igual que la guardada por `run_experiment`. La de `EXP-005_r16` (0,2812) coincide con la medida manual de EXP-005.
+- **Por qué:** el informe de la entrega 1 decía "posiblemente por ReLU inactivas (no medido)" porque la medida de EXP-005 solo estaba en esta bitácora y no en `experiments/`. Ahora es evidencia, y la figura de la fase 4 la usa (CHG-018).
+- **Resultado** (anotado en EXP-005): la fracción crece con la resolución y con la lr; con la mejor lr de cada tamaño queda en un 25-32 %. Fundamento: ReLU muertas [R8 §6.3.1]; paso de Adam ≈ lr por peso [R4 §2.1].
+
+### CHG-018: Entrega 1 ampliada: más detalle de las fases 0-5, LeakyReLU con figura y slides en el orden del informe (2026-10-04)
+A petición del usuario: ajustar las slides a sus cambios en el informe, explicar la elección de LeakyReLU con una gráfica del experimento y contar mucho más de lo que se hizo en las fases 0-5.
+- **Ediciones del usuario adoptadas:** el usuario editó a mano las seis secciones del informe en `overleaf/sections/`. Esas versiones pasan a ser los borradores (`drafts/`) antes de ampliarlas, así que no se pierde ninguna edición. Sus cambios: la fase 1 separa en dos decisiones la normalización y los callbacks; el análisis de la parada pasa al resultado final; se marcan las decisiones tomadas con una semilla y dentro del ruido; la fase 5 indica que cambia a la vez β₁, el batch y la escala de la lr; se matiza el optimismo de las cifras.
+- **Sus TODO, resueltos con datos:**
+  - Pie de `class_distribution`: es el conjunto etiquetado completo, no solo train. Corregidos el pie y el eje.
+  - `gain-normalisation`: es EXP-002 − EXP-001, y solo cambia `Rescaling`. Se añade `gain-phase1` para la fase completa.
+  - Método de reducción: promedio por área, `tf.image.resize(method='area')`, un filtro paso bajo [R19].
+  - Bajadas de la lr del modelo final: son tres, en las épocas 20, 25 y 29 (macros `stop-lr-drops`, `stop-later-lr-drops`).
+  - "Truck probablemente se confunde": ahora con la media de las matrices de confusión de las 3 semillas: Small car 0,213, Bus 0,119, Dump truck 0,109.
+  - "ReLU inactivas (no medido)": medido (CHG-017).
+  - **Corregida** una frase del usuario en la fase 4, "no se separó el efecto de la activación del de la inicialización": la base ReLU (EXP-006) ya usaba `he_normal`, así que entre ReLU y LeakyReLU solo cambia la activación.
+- **Informe ampliado:**
+  - Fase 0: semilla y split.
+  - Fase 1: el porqué de la pérdida desbordada (paso de Adam ≈ η·Σ|xᵢ| [R4]); la estandarización por canal (EXP-004, −3,8 pp; pérdida inicial 60,2 frente a 13,6); σ de la val acc en las 10 últimas épocas (0,067 → 0,002) y las tres métricas vigiladas.
+  - Fase 2: capa oculta añadida; reducción por área; unidades inactivas (28 % → 93 %); las diez primeras épocas a 224 en la distribución a priori (pérdida 2,28 ≈ entropía de clases 2,31); la lr óptima y las inactivas con ella; 8×8 y 24×24.
+  - Fase 3: rejilla de 12 arquitecturas; inactivas en todas (20-34 %).
+  - Fase 4: subsección propia con la explicación de ReLU/LeakyReLU [R8 §6.3.1; R21], las 7 activaciones con su inicializador [R2; R24; R25] y la elección.
+  - Fase 5: tres decisiones (optimizador y lr con momentum, Nesterov, β, RMSprop y el ruido entre semillas [R27]; batch con las reglas de la raíz y lineal [R28; R29; R30]; schedules y ajustes de Adam [R28; R31; R32]). Se añade el coste del límite de 20 épocas (−7,4 pp para la misma configuración y semilla) y el cuadro `phase5_variants` con 19 variantes.
+  - Bibliografía del informe: de 5 a 19 entradas, todas de "Referencias externas".
+- **Figura nueva `activation`** (fase 4, dos paneles). Izquierda: % de unidades inactivas según la resolución, una línea por lr (los 16 runs de EXP-005; rombos, la mejor lr de cada tamaño). Derecha: mean recall de validación y de train de las 7 activaciones, con el % de inactivas de cada modelo.
+- **Slides** en el orden del informe (DEC-010): fases 1, 2, 3, 4 (frame nuevo de LeakyReLU con la figura `activation`) y 5, progreso, parada (pasa al bloque de resultados, como en el informe, con la decisión de los callbacks de la fase 1), resultado final y conclusiones. Viñetas y notas actualizadas con las matizaciones del usuario. Referencias de las slides: 6.
+- **Scripts** (compartidos con la entrega 2; `make results`, `make figures` y `make check` de la entrega 2 dan las mismas tablas y ninguna macro desaparece):
+  - `build_results.py`:
+    - `Data.runs` acepta una lista de runs, para las semillas registradas con otro id (SGD con momentum 0,9).
+    - Macros nuevas por variante: `-inactive`, `-train-mean-recall`, `-actual-epochs`, `-inputs`, `-width`, `-leaky-alpha`.
+    - Secciones opcionales en `delivery.yaml`: `history_values` (valores del historial: época concreta, mediana de las primeras épocas, σ de las últimas, mín./máx. sobre un experimento), `confusions` (proporciones de la matriz de confusión del modelo final) y `tables` (cuadros de variantes).
+    - Macro `class-entropy` y las bajadas de la lr del run de parada.
+  - `build_figures.py`: tipo `activation`; el eje de `class_distribution` dice "labelled images (train + validation)".
+- **`make bundle D=01`:** 0 errores y 3 avisos.
+  - Informe estimado en ~9,5 páginas (la plantilla pide 4-6).
+  - Slides: 11 frames con 11,5 min de notas (la plantilla pide 8-10 frames y unos 10 min).
+  - Se deja así porque el usuario pidió más detalle. Recortar o no lo decide el usuario.
+
 ---
 
 ## Incidencias (ISS)
@@ -656,6 +697,9 @@ Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<no
 
 ### ISS-007: La `val_loss` de `EpochMetrics` no es comparable con la pérdida de train cuando la softmax se satura · abierta (menor)
 `experiment_utils.classification_metrics` recorta las probabilidades a 1e-7 antes del logaritmo, así que la `val_loss` de cada época no puede superar −ln(1e-7) ≈ 16,1. La pérdida de train la calcula Keras sin ese tope (desde los logits). En EXP-001 la pérdida de train es ~3 300 y la de validación ~10: la diferencia es del cálculo, no del modelo. Con la softmax no saturada (desde EXP-002) el efecto es pequeño, y ninguna decisión usó `val_loss` salvo EXP-003_val_loss (vigilar la pérdida), cuyo efecto no se puede separar. **Detectado** al dibujar la figura de normalización de la entrega 1, que por eso muestra solo la pérdida de train. **Resolución propuesta:** calcular la `val_loss` con `keras.losses.categorical_crossentropy` sobre las mismas predicciones (afecta solo a runs futuros).
+
+### ISS-008: EXP-005 describía como permanente el colapso a 224×224 · resuelta (→ corrección en EXP-005)
+EXP-005 decía que a 224×224 "la pérdida de train se queda en ≈ 2,28 desde la época 2 y la accuracy en ≈ 0,21". El historial (`history/EXP-005_r224.json`) muestra que eso dura unas 11 épocas: después la pérdida baja a 2,03 y la train acc llega a 0,315 (el valor de `experiments.csv`). **Detectado** al redactar la fase 2 de la entrega 1 (CHG-018), que ahora habla de "las diez primeras épocas" con la mediana de esas épocas. La conclusión (problema de optimización, no de varianza) no cambia.
 
 ---
 
@@ -774,6 +818,7 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 
 ### DEC-010: El informe y las slides cuentan la misma historia (2026-10-03)
 **Decisión del usuario.** Las slides se presentan guiándose por el informe: los dos documentos usan **las mismas figuras, en el mismo orden**. En el informe, para optimizar el espacio, dos figuras **relacionadas** pueden compartir fila (máximo 2, cada una con su pie y su número); figuras sin relación nunca van juntas. Cada figura se cita en el texto. `check_bundle.py` lo comprueba (CHG-016).
+*Actualización (CHG-018, por las ediciones del usuario en el informe):* el análisis de la parada va en el resultado final, no en la fase 1, así que la normalización va sola. Las filas compartidas quedan en resolución + capacidad (fases 2-3). Orden común: class_distribution, normalisation, resolution_sweep, capacity, activation, lr_sweep, progress, stopping, per_class_recall.
 
 ---
 
@@ -809,6 +854,8 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R28]** Goyal et al. (2017). *Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour*. arXiv:1706.02677. (regla lineal de la lr con el batch y warmup)
 - **[R29]** Malladi, Lyu, Panigrahi, Arora (2022). *On the SDEs and Scaling Rules for Adaptive Gradient Algorithms*. NeurIPS. (regla de la raíz cuadrada para Adam/RMSprop)
 - **[R30]** Keskar et al. (2017). *On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima*. ICLR.
+- **[R31]** Loshchilov, Hutter (2017). *SGDR: Stochastic Gradient Descent with Warm Restarts*. ICLR. (schedule coseno; citada desde EXP-011, añadida a la lista en CHG-018)
+- **[R32]** Loshchilov, Hutter (2019). *Decoupled Weight Decay Regularization*. ICLR. (AdamW; citada desde EXP-012, añadida a la lista en CHG-018)
 
 ---
 

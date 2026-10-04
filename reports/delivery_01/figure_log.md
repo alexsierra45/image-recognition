@@ -20,6 +20,11 @@
 - Included: EXP-006_h64, EXP-006_h128, EXP-006_h256, EXP-006_h512, EXP-006_h1024, EXP-006_h256-128, EXP-006_h512-128, EXP-006_h512-256, EXP-006_h1024-256, EXP-006_h512-256-128, EXP-006_h1024-512-256, EXP-006_h256-256-256-256
 - Omitted: none
 
+## activation (activation)
+- Criterion: left: every run of EXP-005 (inactive units measured on the saved models); right: the activations listed in figure_specs.yaml, every seed of each
+- Included: EXP-005_r112, EXP-005_r16, EXP-005_r16_lr1e-4, EXP-005_r16_lr3e-3, EXP-005_r16_lr3e-4, EXP-005_r224, EXP-005_r24, EXP-005_r32, EXP-005_r32_lr1e-4, EXP-005_r32_lr3e-4, EXP-005_r48, EXP-005_r64, EXP-005_r64_lr1e-4, EXP-005_r64_lr3e-4, EXP-005_r64_lr3e-5, EXP-005_r8, EXP-006_h256-256-256-256, EXP-007_leaky0.1, EXP-007_leaky0.3, EXP-007_leaky0.3_seed2, EXP-007_leaky0.3_seed3, EXP-007_elu, EXP-007_gelu, EXP-007_selu, EXP-007_tanh
+- Omitted: none
+
 ## lr_sweep (group_sweep)
 - Criterion: every run of EXP-008 (seed 1), one line per optimizer.name
 - Included: EXP-008_adam_lr1e-2, EXP-008_adam_lr1e-3, EXP-008_adam_lr1e-4, EXP-008_adam_lr3e-3, EXP-008_adam_lr3e-4, EXP-008_sgdm_lr1e-1, EXP-008_sgdm_lr1e-2, EXP-008_sgdm_lr1e-3

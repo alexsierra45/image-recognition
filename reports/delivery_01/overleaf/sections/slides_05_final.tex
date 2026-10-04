@@ -1,4 +1,27 @@
-% Resultado final (~1 min). Fuentes: EXP-010.
+% Punto de parada y resultado final (~1 min cada uno), en el orden del informe (report_05_final): progreso (slides_04),
+% parada, recall por clase. Fuentes: EXP-003 (decisión de los callbacks), EXP-010, CHG-013.
+\begin{frame}{Cuándo parar: lo decide la validación}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.42\textwidth}
+      \begin{itemize}
+        \item Hasta la época \res{stop-last-joint-epoch}, train y validación evolucionan en paralelo
+        \item Al estancarse la validación, la lr baja $\times$0,1: mejor época (\res{stop-best-epoch})
+        \item Después solo mejora train (\res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}); las dos bajadas siguientes de la lr no mueven la validación
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{Callbacks sobre el mean recall (fase 1): EarlyStopping para en la época \res{stop-epoch} y recupera la \res{stop-best-epoch}.}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/stopping.png}{Punto de parada}
+        \caption{\footnotesize \figcaptionshort{stopping}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Modelo final, semilla 1 (la del notebook). Bajadas de lr en las épocas \res{stop-lr-drops}. La brecha train-val pasa de \res{stop-gap-best}~pp en la mejor época a \res{stop-gap-end}~pp al parar. EarlyStopping con paciencia \res{final-es-patience} y ReduceLROnPlateau con \res{final-rlr-patience}; en el baseline no podían actuar. Las semillas 2 y 3 siguen el mismo patrón.}
+\end{frame}
+
 \begin{frame}{Resultado final}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.35\textwidth}
@@ -16,5 +39,5 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Modelo: \res{final-res}~$\times$~\res{final-res}, \res{final-hidden} con LeakyReLU, Adam y batch \res{final-batch}. Truck se confunde con Small car, Bus y Dump truck.}
+  \speakernote{1}{Modelo: \res{final-res}~$\times$~\res{final-res}, \res{final-hidden} con LeakyReLU, Adam y batch \res{final-batch} (\res{final-params} parámetros). Truck va a Small car (\res{final-conf-truck-small-car}), Bus (\res{final-conf-truck-bus}) y Dump truck (\res{final-conf-truck-dump-truck}). Las cifras son algo optimistas: la validación eligió los hiperparámetros y la época.}
 \end{frame}

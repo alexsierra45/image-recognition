@@ -6,8 +6,8 @@
 - id: class_distribution
   type: class_distribution
   layout: half
-  caption_es: "Imágenes por clase en el conjunto de entrenamiento."
-  caption_slides_es: "Imágenes por clase (train)."
+  caption_es: "Imágenes por clase en el conjunto etiquetado completo (entrenamiento y validación)."
+  caption_slides_es: "Imágenes por clase en el conjunto etiquetado completo."
 
 - id: normalisation
   type: learning_curves
@@ -41,6 +41,23 @@
   layout: half
   caption_es: "Accuracy de train (discontinua) y validación (continua) de 12 arquitecturas según sus parámetros."
   caption_slides_es: "Accuracy según los parámetros (12 arquitecturas)."
+
+- id: activation
+  type: activation
+  select:
+    sweep_exp: EXP-005                  # left panel: inactive units of every phase-2 run (CHG-017)
+    variants:                           # right panel: every activation of EXP-007 and its base
+      - {variant: EXP-006_h256-256-256-256, label: "ReLU", role: baseline}
+      - {variant: EXP-007_leaky0.1, label: "LeakyReLU 0.1"}
+      - {variant: EXP-007_leaky0.3, label: "LeakyReLU 0.3", role: chosen}
+      - {variant: EXP-007_elu, label: "ELU"}
+      - {variant: EXP-007_gelu, label: "GELU"}
+      - {variant: EXP-007_selu, label: "SELU"}
+      - {variant: EXP-007_tanh, label: "tanh"}
+  options: {title_left: "Phase 2 (ReLU): inactive units", title_right: "Phase 4: activation of the hidden layers"}
+  layout: full
+  caption_es: "Izquierda: porcentaje de unidades de la capa oculta que no se activan con ninguna imagen de validación (con ReLU, unidades muertas), según la resolución y la learning rate (los 16 runs de la fase 2; rombos: la mejor lr de cada tamaño). Derecha: mean recall de validación (relleno) y de train (hueco) de las 7 activaciones de la fase 4, con el porcentaje de unidades inactivas de la primera capa de cada modelo; sombreada, la elegida (media de 3 semillas)."
+  caption_slides_es: "Izq.: ReLU inactivas (fase 2). Dcha.: activaciones (fase 4)."
 
 - id: lr_sweep
   type: group_sweep

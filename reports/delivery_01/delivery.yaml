@@ -20,6 +20,7 @@ format:                          # decimals per kind of value (Spanish decimal c
   pp: 1                          # differences in percentage points
   seconds: 1
   ratio: 1
+  pct: 0                         # percentages (inactive units)
 
 # Winner of each phase (the configuration kept for the next phase), from LOGBOOK.md.
 phases:
@@ -32,27 +33,117 @@ phases:
 
 # Other variants quoted in the text (key -> variant).
 variants:
+  # phase 1
   normalisation: EXP-002
+  standardise: EXP-004
   monitor-loss: EXP-003_val_loss
   monitor-acc: EXP-003_val_accuracy
+  # phase 2 (one hidden layer of 256; lr 1e-3 unless the key says otherwise)
+  res8: EXP-005_r8
+  res24: EXP-005_r24
+  res32: EXP-005_r32
+  res64: EXP-005_r64
   res224: EXP-005_r224
   res32-lr3e-4: EXP-005_r32_lr3e-4
   res64-lr1e-4: EXP-005_r64_lr1e-4
+  res16-lr3e-3: EXP-005_r16_lr3e-3
+  res16-lr1e-4: EXP-005_r16_lr1e-4
+  # phase 3
+  onelayer64: EXP-006_h64
   onelayer512: EXP-006_h512
+  onelayer1024: EXP-006_h1024
   big3layer: EXP-006_h1024-512-256
-  sgd-m09: EXP-008_sgdm_lr1e-2
+  # phase 4 (the ReLU base is phase3)
+  leaky01: EXP-007_leaky0.1
+  elu: EXP-007_elu
+  gelu: EXP-007_gelu
+  selu: EXP-007_selu
+  tanh: EXP-007_tanh
+  # phase 5.1 (<= 20 epochs)
+  adam-lr1e-3-20ep: EXP-008_adam_lr1e-3
+  adam-lr3e-3: EXP-008_adam_lr3e-3
   adam-lr3e-4: EXP-008_adam_lr3e-4
+  sgd-m09: EXP-008_sgdm_lr1e-2
+  sgd-lr1e-3: EXP-008_sgdm_lr1e-3
+  sgd-lr1e-1: EXP-008_sgdm_lr1e-1
+  # phase 5.2 (<= 20 epochs)
+  sgd-m0: EXP-009_sgd_m0.0
+  sgd-m099: EXP-009_sgd_m0.99
+  sgd-m095-nesterov: EXP-009_sgd_m0.95_nesterov
+  sgd-m09-seeds: [EXP-008_sgdm_lr1e-2, EXP-009_sgd_m0.9_seed2, EXP-009_sgd_m0.9_seed3]   # seed 1 has another id
   adam-b1: EXP-009_adam_b1_0.95
+  adam-b2: EXP-009_adam_b2_0.99
+  rmsprop: EXP-009_rmsprop_lr3e-4
+  # phase 5.3 (<= 20 epochs, except final)
+  batch32: EXP-010_bs32_sqrt
+  batch64: EXP-010_bs64_sqrt
+  batch256-20ep: EXP-010_bs256_sqrt
+  batch256-linear: EXP-010_bs256_linear
   batch16-phase4: EXP-007_leaky0.3
+  phase4-seed1: [EXP-007_leaky0.3]                 # seed 1 only (60 epochs), vs the same config with <= 20 epochs
+  # phases 5.4 and 5.5 (60 epochs; base = final)
+  cosine: EXP-011_cosine
+  exponential: EXP-011_exponential
+  warmup-plateau: EXP-011_warmup_plateau_2x
+  no-clipnorm: EXP-012_no_clipnorm
+  no-amsgrad: EXP-012_no_amsgrad
+  adamw: EXP-012_adamw_wd1e-3
 
 # Differences quoted in the text: key = a - b (in percentage points of the metric).
 deltas:
-  - {key: gain-normalisation, a: normalisation, b: phase0, metric: mean_recall}
+  - {key: gain-normalisation, a: normalisation, b: phase0, metric: mean_recall}   # EXP-002 - EXP-001: only Rescaling changes
+  - {key: gain-phase1, a: phase1, b: phase0, metric: mean_recall}
+  - {key: gain-standardise, a: standardise, b: phase1, metric: mean_recall}       # EXP-004 - EXP-003 (same callbacks)
   - {key: gain-resolution, a: phase2, b: phase1, metric: mean_recall}
   - {key: gain-depth, a: phase3, b: phase2, metric: mean_recall}
+  - {key: gain-activation, a: phase4, b: phase3, metric: mean_recall}
   - {key: gain-total, a: final, b: phase0, metric: mean_recall}
   - {key: gain-total-acc, a: final, b: phase0, metric: val_acc}
   - {key: cost-batch256, a: batch16-phase4, b: final, metric: mean_recall}
+  - {key: cost-20ep, a: phase4-seed1, b: adam-lr1e-3-20ep, metric: mean_recall}   # same config and seed, 60 vs 20 epochs
+
+# Single values from the history of a run (op: at | median_first | std_last | min / max over the runs of a prefix).
+history_values:
+  - {key: baseline-loss-first, run: EXP-001, field: history.loss, op: at, epoch: 1, decimals: 0}
+  - {key: norm-loss-first, run: EXP-002, field: history.loss, op: at, epoch: 1, decimals: 1}
+  - {key: std-loss-first, run: EXP-004, field: history.loss, op: at, epoch: 1, decimals: 1}
+  - {key: norm-valacc-std-last10, run: EXP-002, field: history.val_accuracy, op: std_last, n: 10, decimals: 3}
+  - {key: phase1-valacc-std-last10, run: EXP-003_val_mean_recall, field: history.val_accuracy, op: std_last, n: 10, decimals: 3}
+  - {key: res224-loss-first10, run: EXP-005_r224, field: history.loss, op: median_first, n: 10, decimals: 2}
+  - {key: res224-acc-first10, run: EXP-005_r224, field: history.accuracy, op: median_first, n: 10, decimals: 2}
+  - {key: arch-inactive-min, prefix: EXP-006_, field: val.inactive_units, op: min, scale: 100, decimals: 0}
+  - {key: arch-inactive-max, prefix: EXP-006_, field: val.inactive_units, op: max, scale: 100, decimals: 0}
+
+# Confusions of the final model quoted in the text (share of the actual class, mean over seeds): final-conf-<actual>-<pred>.
+confusions:
+  - {actual: Truck, pred: Small car}
+  - {actual: Truck, pred: Bus}
+  - {actual: Truck, pred: Dump truck}
+
+# Tables of variants (generated/tables/<name>.tex; mean +- std over the seeds of each variant).
+tables:
+  - name: phase5_variants
+    columns: [step, label, cap, seeds, mean_recall, s_per_epoch]
+    rows:
+      - {step: "5.1", label: "Adam, lr 3e-4 (mejor Adam)", variant: EXP-008_adam_lr3e-4}
+      - {step: "5.1", label: "Adam, lr 3e-3 (peor Adam)", variant: EXP-008_adam_lr3e-3}
+      - {step: "5.1", label: "SGD + momentum 0,9, lr 1e-2", variant: EXP-008_sgdm_lr1e-2}
+      - {step: "5.2", label: "SGD sin momentum", variant: EXP-009_sgd_m0.0}
+      - {step: "5.2", label: "SGD + momentum 0,99", variant: EXP-009_sgd_m0.99}
+      - {step: "5.2", label: "SGD + Nesterov 0,95", variant: EXP-009_sgd_m0.95_nesterov}
+      - {step: "5.2", label: "RMSprop, lr 3e-4", variant: EXP-009_rmsprop_lr3e-4}
+      - {step: "5.2", label: "SGD + momentum 0,9, lr 1e-2", variant: [EXP-008_sgdm_lr1e-2, EXP-009_sgd_m0.9_seed2, EXP-009_sgd_m0.9_seed3]}
+      - {step: "5.2", label: "Adam, lr 3e-4, β₁ = 0,95", variant: EXP-009_adam_b1_0.95}
+      - {step: "5.3", label: "Batch 64, lr ×2 (regla de la raíz)", variant: EXP-010_bs64_sqrt}
+      - {step: "5.3", label: "Batch 256, lr ×4 (regla de la raíz)", variant: EXP-010_bs256_sqrt}
+      - {step: "5.3", label: "Batch 256, lr ×16 (regla lineal)", variant: EXP-010_bs256_linear}
+      - {step: "5.3", label: "Batch 256, lr ×4, hasta 60 épocas (final)", variant: EXP-010_bs256_sqrt_60ep}
+      - {step: "5.4", label: "Coseno", variant: EXP-011_cosine}
+      - {step: "5.4", label: "Exponencial", variant: EXP-011_exponential}
+      - {step: "5.4", label: "Warmup + plateau, lr ×2", variant: EXP-011_warmup_plateau_2x}
+      - {step: "5.5", label: "Sin clipnorm", variant: EXP-012_no_clipnorm}
+      - {step: "5.5", label: "Sin AMSGrad", variant: EXP-012_no_amsgrad}
+      - {step: "5.5", label: "AdamW, weight decay 1e-3", variant: EXP-012_adamw_wd1e-3}
 
 # Ratios quoted in the text: key = a / b.
 ratios:

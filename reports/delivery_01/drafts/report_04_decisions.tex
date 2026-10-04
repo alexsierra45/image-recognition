@@ -1,9 +1,11 @@
-% Fuentes: LOGBOOK.md EXP-002..EXP-010, DEC-006.
+% Fuentes: LOGBOOK.md EXP-002..EXP-012, CHG-017 (unidades inactivas de la fase 2), DEC-006.
 \section{Decisiones y resultados por fase}
-Cada experimento cambia un solo factor respecto al ganador de la fase anterior, y se elige por el \emph{mean recall}
-de validación. Medido con varias semillas, el ruido entre ejecuciones es de unos \res{seed-noise-pp}~pp; por eso las
+Cada fase parte del ganador de la anterior y se centra en un aspecto (normalización, resolución, arquitectura,
+activación, optimización); cuando una fase cambia algo más, se indica. Se elige por el \emph{mean recall} de
+validación. Medido con varias semillas, el ruido entre ejecuciones es de unos \res{seed-noise-pp}~pp; por eso las
 últimas decisiones se toman con la media de \res{final-seeds} semillas, y las diferencias menores que ese ruido no se
-consideran concluyentes~\cite{bouthillier}. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada fase.
+consideran concluyentes~\cite{bouthillier}. Las fases 1 a 3 usan una sola semilla, así que sus decisiones que caen
+dentro de ese ruido se señalan como tales. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada fase.
 
 \begin{table}[h]
   \centering\small
@@ -14,65 +16,97 @@ consideran concluyentes~\cite{bouthillier}. El Cuadro~\ref{tab:phases} resume lo
 \end{table}
 
 \subsection{Normalización y punto de parada (fase 1)}
-\decisionpoint{con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura~\cite{lecun}; y unos callbacks
-que no actúan dejan sin usar la información de validación.}
-{la pérdida de entrenamiento del baseline se queda en torno a \res{baseline-train-loss} durante todo el entrenamiento
-(Figura~\ref{fig:normalisation}), y la \emph{learning rate} no cambia nunca.}
-{escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} baja la pérdida dos órdenes de magnitud
-(Figura~\ref{fig:normalisation}) y sube el \emph{mean recall} \res{gain-normalisation}~pp.
-Con paciencias acordes a la duración del entrenamiento, \emph{ReduceLROnPlateau} reduce la \emph{learning rate} al
-estancarse la validación, desaparecen las oscilaciones y ninguna clase queda sin predecir (recall mínimo
-\res{phase1-min-recall}). Vigilar el \emph{mean recall} dio el mejor resultado (\res{phase1-mean-recall}, frente a
-\res{monitor-loss-mean-recall} vigilando la pérdida y \res{monitor-acc-mean-recall} vigilando la \emph{accuracy};
-una sola semilla, diferencia pequeña), y es además la métrica de decisión.}
-{\texttt{Rescaling} dentro del modelo; \emph{EarlyStopping} y \emph{ReduceLROnPlateau} sobre el \emph{mean recall}
-de validación, y se conserva la mejor época.}
+\decisionpoint{Con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura; normalizar la entrada es
+práctica estándar~\cite{lecun}.}
+{La pérdida de entrenamiento del baseline se queda en torno a \res{baseline-train-loss} durante todo el entrenamiento
+(Figura~\ref{fig:normalisation}).}
+{Escalar la entrada a $[0, 1]$ con una capa \texttt{Rescaling} baja la pérdida dos órdenes de magnitud
+(Figura~\ref{fig:normalisation}, EXP-002) y sube el \emph{mean recall} \res{gain-normalisation}~pp; solo cambia la
+escala, con los mismos \emph{callbacks} y épocas que el baseline. Sin embargo, la pérdida de la primera época aún es
+\res{norm-loss-first} y sigue por encima de $\ln K$ hasta que baja la \emph{learning rate}: el entrenamiento aún no
+está bien condicionado. Centrar además la entrada (estandarización por canal con la media y la varianza de train,
+EXP-004), que en teoría condiciona mejor el problema~\cite{lecun}, empeora: \emph{mean recall}
+\res{standardise-mean-recall} (\res{gain-standardise}~pp frente a escalar, con los mismos \emph{callbacks}) y pérdida
+de \res{std-loss-first} en la primera época. Como el paso de Adam en un logit crece con $\sum_i |x_i|$, las entradas
+estandarizadas, de mayor magnitud media, saturan antes la softmax; con esta \emph{learning rate}, centrar no compensa.}
+{\texttt{Rescaling} dentro del modelo, de modo que train, validación y test reciben el mismo preprocesado.}
 
-\textbf{Punto de parada.} En el modelo final (Figura~\ref{fig:stopping}, semilla~1) se ve cómo decide la validación: hasta la época
-\res{stop-last-joint-epoch} train y validación suben juntas; al estancarse la validación, \emph{ReduceLROnPlateau}
-divide la \emph{learning rate} por 10 y llega la mejor época (\res{stop-best-epoch}); después solo mejora train
-(\emph{accuracy} \res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}, con validación en
-\res{stop-val-acc-best} $\rightarrow$ \res{stop-val-acc-end}), así que \emph{EarlyStopping} (paciencia
-\res{final-es-patience}) para en la época \res{stop-epoch} y se conserva la \res{stop-best-epoch}.
+\decisionpoint{Con las paciencias del enunciado, \emph{EarlyStopping} y \emph{ReduceLROnPlateau} casi no actúan en
+\res{baseline-epochs-cap} épocas, así que la validación no decide ni la \emph{learning rate} ni el punto de parada.}
+{En el baseline la \emph{learning rate} no cambia nunca y la \emph{accuracy} oscila entre épocas.}
+{Con paciencias acordes a la duración del entrenamiento (EXP-003: \res{phase1-es-patience} épocas para parar y
+\res{phase1-rlr-patience} para dividir la \emph{learning rate} por 10, con hasta \res{phase1-epochs-cap} épocas),
+\emph{ReduceLROnPlateau} reduce la \emph{learning rate} al estancarse la validación, desaparecen las oscilaciones (la
+desviación típica de la \emph{accuracy} de validación en las 10 últimas épocas baja de \res{norm-valacc-std-last10} a
+\res{phase1-valacc-std-last10}) y ninguna clase queda sin predecir (recall mínimo \res{phase1-min-recall}). Se probaron
+tres métricas vigiladas. Vigilar el \emph{mean recall} da \res{phase1-mean-recall}, frente a
+\res{monitor-loss-mean-recall} vigilando la pérdida (que alarga el entrenamiento a \res{monitor-loss-actual-epochs}
+épocas) y \res{monitor-acc-mean-recall} vigilando la \emph{accuracy}, que para en la época
+\res{monitor-acc-actual-epochs} tras un máximo temprano y ruidoso (época \res{monitor-acc-best-epoch}). Con una sola
+semilla y una diferencia menor que el ruido entre ejecuciones, no es concluyente.}
+{\emph{EarlyStopping} y \emph{ReduceLROnPlateau} sobre el \emph{mean recall} de validación, por coherencia con la
+métrica objetivo, y se conserva la mejor época. En la Sección~\ref{sec:final} se ve cómo actúan en el modelo final.}
 
 \begin{figure}[!htbp]
   \centering
-  \begin{minipage}[t]{0.485\linewidth}
-    \centering
-    \safegraphics[width=\linewidth]{figures/normalisation.png}{Pérdida con y sin escalado}
-    \caption{\figcaption{normalisation}}
-    \label{fig:normalisation}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.485\linewidth}
-    \centering
-    \safegraphics[width=\linewidth]{figures/stopping.png}{Punto de parada}
-    \caption{\figcaption{stopping}}
-    \label{fig:stopping}
-  \end{minipage}
+  \safegraphics[width=0.5\linewidth]{figures/normalisation.png}{Pérdida con y sin escalado}
+  \caption{\figcaption{normalisation}}
+  \label{fig:normalisation}
 \end{figure}
 
 \subsection{Resolución de entrada (fase 2)}
-\decisionpoint{a \res{res224-res}~$\times$~\res{res224-res}, una capa oculta (\res{res224-hidden}) tiene
-\res{res224-params} parámetros para \res{n-train} imágenes: demasiada varianza.}
-{al subir la resolución baja también el \emph{mean recall} de train (Figura~\ref{fig:resolution}) y la \emph{accuracy}
-de train (\res{res224-train-acc} a \res{res224-res} píxeles):
-es un problema de optimización, porque la mayoría de las ReLU queda inactiva.}
-{el máximo está en \res{phase2-res}~$\times$~\res{phase2-res}, con un \emph{mean recall} de \res{phase2-mean-recall}
+Esta fase añade una capa oculta (\res{phase2-hidden}; ReLU, inicialización de He~\cite{he}), la misma en
+todas las resoluciones, y cambia solo el tamaño de la entrada: de \res{res8-res} a \res{res224-res} píxeles de lado con
+\emph{learning rate} \res{phase2-lr}, y una rejilla de resolución por \emph{learning rate} en \res{phase2-res},
+\res{res32-res} y \res{res64-res}. Las imágenes se reducen promediando por área (\texttt{tf.image.resize} con
+\texttt{method='area'}), un filtro paso bajo que evita el \emph{aliasing}~\cite{gonzalez}.
+
+\decisionpoint{A \res{res224-res}~$\times$~\res{res224-res}, una capa oculta (\res{res224-hidden}) tiene
+\res{res224-params} parámetros para \res{n-train} imágenes, lo que sugiere sobreajuste (demasiada varianza).}
+{Al subir la resolución baja también el \emph{mean recall} de train (Figura~\ref{fig:resolution}) y la
+\emph{accuracy} de train (\res{res224-train-acc} a \res{res224-res} píxeles). Eso descarta el sobreajuste como causa
+principal: es un problema de optimización. Como en la fase~1, un paso de Adam mueve la preactivación de una unidad
+hasta $\eta \sum_i |x_i|$, que crece con el número de entradas (\res{res224-inputs} a \res{res224-res} píxeles frente a
+\res{phase2-inputs} a \res{phase2-res}). Con pasos así, muchas ReLU quedan con la preactivación negativa para todas las
+imágenes y dejan de recibir gradiente (unidades muertas)~\cite{goodfellow}. Medido con los modelos guardados, la
+fracción de unidades de la capa oculta que no se activan con ninguna imagen de validación pasa del
+\res{phase2-inactive}\,\% a \res{phase2-res} píxeles al \res{res224-inactive}\,\% a \res{res224-res}
+(Figura~\ref{fig:activation}, izquierda). A \res{res224-res} píxeles, en las diez primeras épocas la pérdida de train
+se queda en \res{res224-loss-first10} (mediana), casi la entropía de las frecuencias de clase (\res{class-entropy}),
+con una \emph{accuracy} de train de \res{res224-acc-first10}, apenas por encima de la clase mayoritaria
+(\res{majority-acc}): la red solo ha aprendido la distribución a priori.}
+{El máximo está en \res{phase2-res}~$\times$~\res{phase2-res}, con un \emph{mean recall} de \res{phase2-mean-recall}
 (+\res{gain-resolution}~pp sobre la fase~1), y se mantiene aunque cada resolución use su mejor \emph{learning rate}
 (\res{res32-lr3e-4-mean-recall} a \res{res32-lr3e-4-res} y \res{res64-lr1e-4-mean-recall} a \res{res64-lr1e-4-res};
-Figura~\ref{fig:resolution}).}
-{entrada de \res{phase2-res}~$\times$~\res{phase2-res}, el mayor salto individual.}
+Figura~\ref{fig:resolution}). Esa \emph{learning rate} óptima baja unas tres veces cada vez que se dobla el lado
+(\res{phase2-lr}, \res{res32-lr3e-4-lr} y \res{res64-lr1e-4-lr}), y con ella la fracción de unidades inactivas es
+parecida en los tres tamaños (\res{phase2-inactive}, \res{res32-lr3e-4-inactive} y \res{res64-lr1e-4-inactive}\,\%;
+rombos de la Figura~\ref{fig:activation}): lo que cuenta es el tamaño del paso, que crece con la \emph{learning rate} y
+con el número de entradas. Las resoluciones vecinas (\res{res24-mean-recall} a \res{res24-res}~$\times$~\res{res24-res})
+quedan dentro del ruido; la ventaja clara es frente a resoluciones altas. Por debajo, \res{res8-res}~$\times$~\res{res8-res}
+pierde detalle (\res{res8-mean-recall}).}
+{Entrada de \res{phase2-res}~$\times$~\res{phase2-res}, el mayor salto individual y la opción más barata entre las
+equivalentes.}
 
-\subsection{Arquitectura y activación (fases 3 y 4)}
-\decisionpoint{más capacidad (más anchura o más capas) debería mejorar la validación mientras no haya sobreajuste.}
-{con más parámetros la validación se estanca y train sigue subiendo (Figura~\ref{fig:capacity}): la red de
-\res{big3layer-n-hidden} capas (\res{big3layer-hidden}) llega a una \emph{accuracy} de train de
-\res{big3layer-train-acc} con el mismo \emph{mean recall} (\res{big3layer-mean-recall}) que \res{phase3-hidden}.}
-{\res{phase3-hidden} (\res{phase3-mean-recall}, +\res{gain-depth}~pp sobre una sola capa) empata con la red mayor con
-muchos menos parámetros (\res{phase3-params} frente a \res{big3layer-params}), y con el mismo presupuesto supera a una
-sola capa ancha (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}). LeakyReLU eliminó las ReLU muertas y llegó a
-\res{phase4-mean-recall}.}
-{\res{phase3-hidden} con LeakyReLU e inicialización de He.}
+\subsection{Arquitectura (fase 3)}
+Sobre la entrada de \res{phase2-res}~$\times$~\res{phase2-res} se prueban doce arquitecturas: una capa de
+\res{onelayer64-width} a \res{onelayer1024-width} unidades, dos capas, tres en embudo y una red estrecha y profunda de
+\res{phase3-hidden}, de \res{onelayer64-params} a \res{big3layer-params} parámetros.
+
+\decisionpoint{Más capacidad (más anchura o más capas) debería mejorar la validación mientras no haya sobreajuste.}
+{Hasta los \res{phase2-params} parámetros de la red de la fase~2 la validación mejora (\res{onelayer64-mean-recall} con
+una capa de \res{onelayer64-width} unidades). Con más parámetros la validación se estanca y train sigue subiendo
+(Figura~\ref{fig:capacity}): la red de \res{big3layer-n-hidden} capas (\res{big3layer-hidden}) llega a una
+\emph{accuracy} de train de \res{big3layer-train-acc} con el mismo \emph{mean recall} (\res{big3layer-mean-recall}) que
+\res{phase3-hidden}. La capacidad extra se gasta en memorizar.}
+{\res{phase3-hidden} (\res{phase3-mean-recall}, +\res{gain-depth}~pp sobre una sola capa; una semilla, dentro del
+ruido) empata con la red mayor con muchos menos parámetros (\res{phase3-params} frente a \res{big3layer-params}) y
+mucha menos brecha (\emph{accuracy} de train \res{phase3-train-acc}), y con un presupuesto similar supera a una sola
+capa ancha (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}), como cabe esperar de la profundidad~\cite{goodfellow}.}
+{\res{phase3-hidden}: misma validación que la red mayor con una fracción de los parámetros.}
+
+En todas las arquitecturas, entre el \res{arch-inactive-min} y el \res{arch-inactive-max}\,\% de las ReLU de la primera
+capa oculta están muertas (\res{phase3-inactive}\,\% en la elegida): es el punto de partida de la fase~4.
 
 \begin{figure}[!htbp]
   \centering
@@ -90,19 +124,57 @@ sola capa ancha (\res{onelayer512-hidden}: \res{onelayer512-mean-recall}). Leaky
   \end{minipage}
 \end{figure}
 
+\subsection{Función de activación: LeakyReLU (fase 4)}
+ReLU, $f(z) = \max(0, z)$, tiene derivada nula para $z < 0$: si la preactivación de una unidad es negativa para todas
+las entradas, la unidad no recibe gradiente y ya no se recupera~\cite{goodfellow}. LeakyReLU~\cite{maas} conserva una
+pendiente pequeña en la parte negativa, $f(z) = z$ si $z > 0$ y $f(z) = \alpha z$ si no, así que toda unidad sigue
+recibiendo gradiente; es igual de barata que ReLU y sigue siendo lineal a trozos. ELU~\cite{clevert}, GELU~\cite{gelu}
+y SELU~\cite{selu} también tienen gradiente para $z < 0$, con formas suaves; tanh satura por los dos lados~\cite{glorot}.
+
+\decisionpoint{Las ReLU pueden quedar inactivas (muertas) y frenar el aprendizaje; una activación con gradiente para
+$z < 0$ debería aprovechar mejor la red.}
+{En el modelo de la fase~3, el \res{phase3-inactive}\,\% de las unidades de la primera capa oculta no se activan con
+ninguna imagen de validación, y en la fase~2 esa fracción crecía con la resolución y con la \emph{learning rate}
+(Figura~\ref{fig:activation}, izquierda).}
+{Se prueban seis alternativas, cada una con su inicialización recomendada: la de He para la familia ReLU~\cite{he},
+la de LeCun para SELU~\cite{selu} y la de Glorot para tanh~\cite{glorot}. ReLU ya usaba la de He, así que entre ReLU y
+LeakyReLU solo cambia la activación. Todas eliminan las unidades inactivas (Figura~\ref{fig:activation}, derecha: del
+\res{phase3-inactive}\,\% con ReLU al \res{gelu-inactive}\,\% o menos), pero eso no basta: LeakyReLU con $\alpha$ =
+\res{leaky01-leaky-alpha} queda por debajo de ReLU (\res{leaky01-mean-recall}). Con $\alpha$ = \res{phase4-leaky-alpha},
+el \emph{mean recall} sube de \res{phase3-mean-recall} a \res{phase4-mean-recall}~$\pm$~\res{phase4-mean-recall-std}
+(+\res{gain-activation}~pp; 3 semillas frente a una: comparación orientativa, del orden del ruido). ELU, GELU y SELU
+llegan a un \emph{mean recall} de train de \res{selu-train-mean-recall} a \res{gelu-train-mean-recall} sin mejorar la
+validación: memorizan con más facilidad. tanh es la peor (\res{tanh-mean-recall}).}
+{LeakyReLU con $\alpha$ = \res{phase4-leaky-alpha} e inicialización de He: ninguna unidad inactiva, la mejor validación
+y menos memorización que ELU, GELU o SELU.}
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=\linewidth]{figures/activation.png}{Unidades inactivas y activaciones}
+  \caption{\figcaption{activation}}
+  \label{fig:activation}
+\end{figure}
+
 \subsection{Algoritmo de optimización y parámetros de entrenamiento (fase 5)}
-\decisionpoint{la \emph{learning rate} es el hiperparámetro más influyente, y el optimizador y el batch fijan el coste
-de cada experimento.}
-{con hasta \res{adam-lr3e-4-epochs-cap} épocas, Adam es casi insensible a la \emph{learning rate}
+La fase~5 se hace en cinco pasos sobre el modelo de la fase~4 (Cuadro~\ref{tab:phase5}). Para abaratar la exploración,
+los pasos 5.1 a 5.3 entrenan hasta \res{adam-lr3e-4-epochs-cap} épocas, lo que penaliza a las configuraciones que
+convergen despacio: la de la fase~4 pierde \res{cost-20ep}~pp con ese límite (\res{adam-lr1e-3-20ep-mean-recall} frente
+a \res{phase4-seed1-mean-recall} con la misma semilla). Esos pasos miden, por tanto, también la velocidad de
+convergencia.
+
+\decisionpoint{El optimizador y su \emph{learning rate} determinan el resultado.}
+{Con hasta \res{adam-lr3e-4-epochs-cap} épocas, Adam es casi insensible a la \emph{learning rate}
 (mejor \res{adam-lr3e-4-mean-recall}) y SGD con momentum tiene un óptimo marcado (\res{sgd-m09-mean-recall} a
-\res{sgd-m09-lr}; Figura~\ref{fig:lr}). Repetidos con \res{final-seeds} semillas, los dos finalistas
-empatan dentro del ruido.}
-{Adam con $\beta_1$ = \res{final-beta1} y un batch de \res{final-batch} (\emph{learning rate} \res{final-lr}, escalada
-con la raíz del batch) hace cada época \res{speedup-batch256} veces más rápida que con batch \res{phase4-batch}, a
-cambio de unos \res{cost-batch256}~pp. Ningún \emph{schedule} ni otro ajuste del optimizador mejoró a
-\emph{ReduceLROnPlateau}.}
-{Adam con AMSGrad, $\beta_1$ = \res{final-beta1}, batch \res{final-batch}: la menor varianza entre semillas y la
-rapidez permiten decidir con varias semillas.}
+\res{sgd-m09-lr}; Figura~\ref{fig:lr}). El momentum es imprescindible para SGD: sin él se queda en
+\res{sgd-m0-mean-recall}, y con momentum 0,99 empeora (\res{sgd-m099-mean-recall}) porque la \emph{learning rate} efectiva,
+$\eta/(1-m)$, se vuelve demasiado grande~\cite{sutskever}; Nesterov no da una ventaja consistente. En Adam,
+$\beta_1$ = \res{adam-b1-beta1} mejora a los valores por defecto, y RMSprop queda parecido (\res{rmsprop-mean-recall}).}
+{Repetidos con \res{final-seeds} semillas, los dos finalistas empatan dentro del ruido (SGD:
+\res{sgd-m09-seeds-mean-recall}~$\pm$~\res{sgd-m09-seeds-mean-recall-std}; Adam:
+\res{adam-b1-mean-recall}~$\pm$~\res{adam-b1-mean-recall-std}). Es la primera medida del ruido entre semillas, y obliga
+a leer con cautela las diferencias pequeñas de las fases anteriores, medidas con una sola semilla.}
+{Adam con $\beta_1$ = \res{final-beta1}: empata con SGD con la mitad de desviación entre semillas y es casi insensible
+a la \emph{learning rate}, lo que facilita reescalarla con el batch.}
 
 \begin{figure}[!htbp]
   \centering
@@ -111,3 +183,39 @@ rapidez permiten decidir con varias semillas.}
   \label{fig:lr}
 \end{figure}
 
+\decisionpoint{El batch fija el coste de cada experimento: los batches grandes aprovechan mejor la GPU pero dan menos
+actualizaciones por época, y el ruido de los pequeños puede regularizar~\cite{keskar}.}
+{De \res{phase4-batch} a \res{final-batch} imágenes por batch, reescalando la \emph{learning rate} con la raíz del
+aumento de batch (propuesta para optimizadores adaptativos~\cite{malladi}) o linealmente (la regla de SGD~\cite{goyal}),
+todas las variantes quedan entre \res{batch32-mean-recall} y \res{batch256-20ep-mean-recall}, dentro del ruido
+(Cuadro~\ref{tab:phase5}).}
+{Adam con $\beta_1$ = \res{final-beta1} y un batch de \res{final-batch} (\emph{learning rate} \res{final-lr},
+escalada con la raíz del batch) hace cada época \res{speedup-batch256} veces más rápida que con batch
+\res{phase4-batch}, a cambio de unos \res{cost-batch256}~pp, menos que el ruido entre ejecuciones. Frente a la fase~4, el modelo
+final cambia a la vez $\beta_1$, el batch y la escala de la \emph{learning rate}.}
+{Adam con AMSGrad, $\beta_1$ = \res{final-beta1}, batch \res{final-batch}. La configuración con batch
+\res{phase4-batch} queda ligeramente por encima (\res{phase4-mean-recall}), pero la diferencia es menor que el ruido y
+el batch grande permite explorar y repetir con varias semillas: con \res{final-s-per-epoch}~s por época, desde aquí se
+entrena hasta \res{final-epochs-cap} épocas y cada decisión se toma con \res{final-seeds} semillas.}
+
+\decisionpoint{Un decaimiento suave de la \emph{learning rate} (coseno~\cite{sgdr}) o un \emph{warmup}~\cite{goyal}
+podrían mejorar a \emph{ReduceLROnPlateau}; \texttt{clipnorm} y AMSGrad venían del enunciado sin justificar, y el
+\emph{weight decay} desacoplado de AdamW~\cite{adamw} regulariza de otro modo que la L2 dentro de Adam.}
+{Cada variante sobre el modelo anterior, con \res{final-seeds} semillas en los finalistas (pasos 5.4 y 5.5 del
+Cuadro~\ref{tab:phase5}).}
+{En las pruebas realizadas, nada mejora más allá del ruido: el coseno da \res{cosine-mean-recall} y el decaimiento
+exponencial \res{exponential-mean-recall} (una semilla); el \emph{warmup} con la \emph{learning rate} doble da
+\res{warmup-plateau-mean-recall}~$\pm$~\res{warmup-plateau-mean-recall-std}, con mucha más variación entre semillas.
+Quitar \texttt{clipnorm} no cambia la media pero dispara la desviación (\res{no-clipnorm-mean-recall-std} frente a
+\res{final-mean-recall-std}); sin AMSGrad (\res{no-amsgrad-mean-recall}) o con AdamW (\res{adamw-mean-recall}), lo
+mismo que el modelo anterior.}
+{Se mantienen \emph{ReduceLROnPlateau}, AMSGrad y \texttt{clipnorm}: la opción más simple y estable.}
+
+\begin{table}[!htbp]
+  \centering\small
+  \safetable{generated/tables/phase5_variants}
+  \caption{Variantes de la fase 5 (validación; media $\pm$ desviación típica cuando hay varias semillas). Pasos 5.1 a
+  5.3: hasta \res{adam-lr3e-4-epochs-cap} épocas, y batch \res{phase4-batch} salvo en 5.3; pasos 5.4 y 5.5: cambios
+  sobre el modelo final, hasta \res{final-epochs-cap} épocas.}
+  \label{tab:phase5}
+\end{table}

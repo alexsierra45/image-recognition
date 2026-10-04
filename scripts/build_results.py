@@ -97,10 +97,22 @@ class Data:
             self.rows = {r['id']: r for r in csv.DictReader(ifs)}
 
     def runs(self, variant):
+        """Run ids of a variant (the id itself + its _seedN repetitions), or an explicit list of run ids (for seed
+        repetitions logged under another id, e.g. [EXP-008_sgdm_lr1e-2, EXP-009_sgd_m0.9_seed2, ...])."""
+        if isinstance(variant, list):
+            missing = [i for i in variant if i not in self.rows]
+            if missing:
+                raise KeyError('runs %s not in experiments.csv' % missing)
+            return list(variant)
         ids = [i for i in self.rows if i == variant or re.fullmatch(re.escape(variant) + r'_seed\d+', i)]
         if not ids:
             raise KeyError('variant %s not in experiments.csv' % variant)
         return sorted(ids)
+
+    def inactive(self, variant):
+        """Mean over the runs of val.inactive_units (CHG-009), or None if a run has no value."""
+        vals = [self.history(r)['val'].get('inactive_units') for r in self.runs(variant)]
+        return None if any(v is None for v in vals) else sum(vals) / len(vals)
 
     def stat(self, variant, col):
         vals = [float(self.rows[i][col]) for i in self.runs(variant)]
@@ -155,6 +167,73 @@ def pm(data, variant, col, d, ds):
     return num(m, d) if n == 1 else '%s $\\pm$ %s' % (num(m, d), num(s, ds))
 
 
+def join_es(items):
+    items = [str(i) for i in items]
+    return items[0] if len(items) == 1 else ', '.join(items[:-1]) + ' y ' + items[-1]
+
+
+TABLE_COLUMNS = {   # column id -> (header, alignment)
+    'step': ('Paso', 'c'), 'label': ('Variante', 'l'), 'seeds': ('Semillas', 'c'), 'mean_recall': ('Mean recall', 'c'),
+    'val_acc': ('Accuracy', 'c'), 'train_acc': ('Accuracy train', 'c'), 'train_mean_recall': ('Mean recall train', 'c'),
+    'min_recall': ('Recall mín.', 'c'), 's_per_epoch': ('s/época', 'c'), 'epochs': ('Mejor época / épocas', 'c'),
+    'inactive': ('Inactivas (\\%)', 'c'), 'params': ('Parámetros', 'r'), 'cap': ('Épocas máx.', 'c')}
+
+
+def write_variant_tables(data, cfg, fmt, out):
+    """delivery.yaml `tables`: one row per variant (mean +- std over its seeds), columns from TABLE_COLUMNS."""
+    for t in cfg.get('tables', []):
+        cols = t['columns']
+        rows = []
+        for r in t['rows']:
+            v = r['variant']
+            cells = []
+            for c in cols:
+                if c == 'step':
+                    cells.append(tex(r.get('step', '')))
+                elif c == 'label':
+                    cells.append(tex(r['label']))
+                elif c == 'seeds':
+                    cells.append(str(len(data.runs(v))))
+                elif c == 'epochs':
+                    cells.append('%s / %s' % (num(data.stat(v, 'best_epoch')[0], 0), num(data.stat(v, 'actual_epochs')[0], 0)))
+                elif c == 'inactive':
+                    cells.append(num(100 * data.inactive(v), fmt.get('pct', 0)) if data.inactive(v) is not None else '--')
+                elif c == 'params':
+                    cells.append(thousands(data.stat(v, 'params')[0]))
+                elif c == 'cap':
+                    cells.append(str(json.loads(data.rows[data.runs(v)[0]]['config'])['epochs']))
+                elif c == 's_per_epoch':
+                    cells.append(num(data.stat(v, c)[0], 2))
+                else:
+                    cells.append(pm(data, v, c, fmt['metric'], fmt['std']))
+            rows.append(cells)
+        table(os.path.join(out, 'tables', t['name'] + '.tex'), [TABLE_COLUMNS[c][0] for c in cols], rows,
+              t.get('align', ''.join(TABLE_COLUMNS[c][1] for c in cols)))
+
+
+def history_value(data, spec):
+    """delivery.yaml `history_values`: one number from the history of a run, or over the runs of an experiment.
+    op: at (epoch, 1-based) | median_first (n epochs) | std_last (n epochs) | min / max of a val.* field over the runs
+    whose id starts with `prefix`."""
+    op, field = spec['op'], spec['field']
+    if op in ('min', 'max'):
+        runs = sorted(r for r in data.rows if r.startswith(spec['prefix']))
+        vals = [data.history(r)['val'].get(field.split('.', 1)[1]) for r in runs]
+        vals = [v for v in vals if v is not None]
+        return (min if op == 'min' else max)(vals), {'runs': runs}
+    h = data.history(spec['run'])['history'][field.split('.', 1)[1]]
+    if op == 'at':
+        return h[spec['epoch'] - 1], {'epoch': spec['epoch']}
+    if op == 'median_first':
+        s = sorted(h[:spec['n']])
+        return (s[(len(s) - 1) // 2] + s[len(s) // 2]) / 2, {'epochs': '1-%d' % spec['n']}
+    if op == 'std_last':
+        s = h[-spec['n']:]
+        m = sum(s) / len(s)
+        return math.sqrt(sum((x - m) ** 2 for x in s) / (len(s) - 1)), {'epochs': 'last %d' % spec['n']}
+    raise ValueError(op)
+
+
 def write_ablation(data, cfg, variants, fmt, out):
     """Ablation table: each row removes one ingredient from the combined model (cfg['ablation_base'] key)."""
     base_key = cfg.get('ablation_base', 'phase8')
@@ -185,11 +264,15 @@ def main(delivery_dir):
         src = {'source': 'experiments.csv', 'variant': var, 'runs': data.runs(var)}
         for col, name, d in [('mean_recall', 'mean-recall', fmt['metric']), ('val_acc', 'val-acc', fmt['metric']),
                              ('min_recall', 'min-recall', fmt['metric']), ('train_acc', 'train-acc', fmt['metric']),
-                             ('s_per_epoch', 's-per-epoch', fmt['seconds'])]:
+                             ('train_mean_recall', 'train-mean-recall', fmt['metric']),
+                             ('s_per_epoch', 's-per-epoch', fmt['seconds']), ('actual_epochs', 'actual-epochs', 0)]:
             m, s, n = data.stat(var, col)
             M.add('%s-%s' % (key, name), num(m, d), dict(src, column=col, stat='mean'))
-            if n > 1 and col != 's_per_epoch':
+            if n > 1 and col not in ('s_per_epoch', 'actual_epochs'):
                 M.add('%s-%s-std' % (key, name), num(s, fmt['std']), dict(src, column=col, stat='std'))
+        if data.inactive(var) is not None:   # % of units of the 1st hidden layer never active on validation (CHG-009)
+            M.add('%s-inactive' % key, num(100 * data.inactive(var), fmt.get('pct', 0)),
+                  dict(src, source='history/*.json', field='val.inactive_units', stat='mean x 100'))
         tr_m, _, _ = data.stat(var, 'train_acc')
         va_m, _, _ = data.stat(var, 'val_acc')
         M.add('%s-gap-acc' % key, num(100 * (tr_m - va_m), fmt['pp']), dict(src, formula='100*(train_acc-val_acc)', stat='mean'))
@@ -198,13 +281,17 @@ def main(delivery_dir):
         M.add('%s-seeds' % key, str(n), dict(src, column='id', stat='count'))
         c = json.loads(data.rows[data.runs(var)[0]]['config'])
         M.add('%s-res' % key, str(c['res']), dict(src, column='config.res'))
+        M.add('%s-inputs' % key, thousands(3 * c['res'] ** 2), dict(src, column='config.res', formula='3 * res^2'))
         M.add('%s-lr' % key, sci(c['optimizer']['lr']), dict(src, column='config.optimizer.lr'))
         M.add('%s-batch' % key, str(c['batch_size']), dict(src, column='config.batch_size'))
         M.add('%s-hidden' % key, hidden_tex(c['hidden']), dict(src, column='config.hidden'))
         M.add('%s-n-hidden' % key, str(len(c['hidden'])), dict(src, column='config.hidden'))
+        M.add('%s-width' % key, str(c['hidden'][0]) if c['hidden'] else '0', dict(src, column='config.hidden[0]'))
         for ck, name in [('epochs', 'epochs-cap'), ('es_patience', 'es-patience'), ('rlr_patience', 'rlr-patience')]:
             M.add('%s-%s' % (key, name), str(c[ck]), dict(src, column='config.' + ck))
         M.add('%s-beta1' % key, num(c['optimizer']['beta_1'], 2), dict(src, column='config.optimizer.beta_1'))
+        if c['activation'] == 'leaky_relu':
+            M.add('%s-leaky-alpha' % key, num(c.get('leaky_alpha', 0.1), 1), dict(src, column='config.leaky_alpha'))
         M.add('%s-dropout' % key, num(c['dropout'], 1), dict(src, column='config.dropout'))
         M.add('%s-l2' % key, sci(c['l2']) if c['l2'] else '0', dict(src, column='config.l2'))
         m, _, _ = data.stat(var, 'best_epoch')
@@ -220,6 +307,17 @@ def main(delivery_dir):
         b, _, _ = data.stat(variants[r['b']], r['metric'])
         M.add(r['key'], num(a / b, fmt['ratio']), {'source': 'experiments.csv', 'formula': '%s/%s' % (r['a'], r['b']),
                                                    'column': r['metric'], 'variants': [variants[r['a']], variants[r['b']]]})
+    for hv in cfg.get('history_values', []):
+        v, extra = history_value(data, hv)
+        M.add(hv['key'], num(hv.get('scale', 1) * v, hv.get('decimals', fmt['metric'])),
+              dict({'source': 'history/*.json', 'field': hv['field'], 'op': hv['op'], 'run': hv.get('run', hv.get('prefix'))}, **extra))
+    for cf in cfg.get('confusions', []):   # share of the true class predicted as another one (final model, mean over seeds)
+        hs = [data.history(r) for r in data.runs(variants['final'])]
+        names = hs[0]['class_names']
+        t, p = names.index(cf['actual']), names.index(cf['pred'])
+        share = sum(h['val']['cm'][t][p] / sum(h['val']['cm'][t]) for h in hs) / len(hs)
+        M.add('final-conf-%s-%s' % tuple(n.lower().replace(' ', '-') for n in (cf['actual'], cf['pred'])), num(share, fmt['metric']),
+              {'source': 'history/*.json', 'variant': variants['final'], 'field': 'val.cm', 'stat': 'row share, mean over seeds'})
 
     # Seed noise: pooled standard deviation of the mean recall over every variant with >= 3 seeds
     groups = {}
@@ -249,7 +347,9 @@ def main(delivery_dir):
                     ('class-min-name', small, 'xview_ann_train.json'), ('class-min-count', thousands(counts[small]), 'xview_ann_train.json'),
                     ('imbalance-ratio', num(counts[big] / counts[small], 0), 'xview_ann_train.json'),
                     ('chance-mean-recall', num(1 / len(counts), fmt['metric']), '1 / number of classes'),
-                    ('majority-acc', num(counts[big] / sum(counts.values()), fmt['metric']), 'largest class share')]:
+                    ('majority-acc', num(counts[big] / sum(counts.values()), fmt['metric']), 'largest class share'),
+                    ('class-entropy', num(-sum(c / sum(counts.values()) * math.log(c / sum(counts.values())) for c in counts.values()), 2),
+                     'entropy (nats) of the class frequencies = cross-entropy of a model that predicts the priors')]:
         M.add(k, v, {'source': s})
     n_test = len([f for f in os.listdir(os.path.join(ROOT, 'xview_recognition', 'xview_test')) if f.lower().endswith('.tif')])
     M.add('valid-share', num(100 * n_valid / sum(counts.values()), 0), {'source': 'validation / images, %'})
@@ -293,6 +393,7 @@ def main(delivery_dir):
           'Recall de validación; el modelo final es la media de %d semillas.' % data.stat(variants['final'], 'mean_recall')[2])
     if cfg.get('ablation'):
         write_ablation(data, cfg, variants, fmt, out)
+    write_variant_tables(data, cfg, fmt, out)
 
     # Keys used by the template (aliases of the final model and run count)
     for a, b in [('best-mean-recall', 'final-mean-recall'), ('best-mean-recall-std', 'final-mean-recall-std'),
@@ -334,6 +435,10 @@ def main(delivery_dir):
         M.add('stop-epoch', str(len(H['accuracy'])), dict(src, field='len(history)'))
         M.add('stop-last-joint-epoch', str(drops[0] - 1), dict(src, field='last epoch before the first lr reduction'))
         M.add('stop-first-lr-drop', str(drops[0]), dict(src, field='first epoch with the reduced lr'))
+        M.add('stop-n-lr-drops', str(len(drops)), dict(src, field='number of lr reductions'))
+        M.add('stop-lr-drops', join_es(drops), dict(src, field='epochs with a reduced lr (first epoch of each)'))
+        if len(drops) > 1:
+            M.add('stop-later-lr-drops', join_es(drops[1:]), dict(src, field='lr reductions after the first one'))
         for name, i in [('best', b - 1), ('end', len(H['accuracy']) - 1)]:
             M.add('stop-train-acc-%s' % name, num(H['accuracy'][i], fmt['metric']), dict(src, field='history.accuracy[%d]' % i))
             M.add('stop-val-acc-%s' % name, num(H['val_accuracy'][i], fmt['metric']), dict(src, field='history.val_accuracy[%d]' % i))

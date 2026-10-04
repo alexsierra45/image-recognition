@@ -1,15 +1,16 @@
-% DECISIONES (~1 min cada una). Hipótesis -> evidencia -> resultado -> decisión.
+% DECISIONES (~1 min cada una), en el orden del informe (report_04_decisions): fases 1, 2, 3, 4 y 5.
+% Hipótesis -> evidencia -> resultado -> decisión.
 % Regla: las viñetas solo afirman lo que se ve en la figura de la diapositiva; el resto va a la nota del orador.
 % Figuras con altura máxima y pie corto (\figcaptionshort) para que figura + pie quepan en el frame.
-% Fuentes: EXP-001..EXP-003, EXP-005, EXP-006, EXP-008..EXP-010 (LOGBOOK.md).
+% Fuentes: EXP-002..EXP-012, CHG-017 (LOGBOOK.md).
 
-\begin{frame}{Normalizar la entrada}
+\begin{frame}{Fase 1: normalizar la entrada}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
       \begin{itemize}
         \item \textbf{Hipótesis}: con píxeles en $[0, 255]$ los logits son enormes y la softmax se satura
         \item \textbf{Evidencia}: con píxeles crudos la pérdida de train no baja de $\sim$\res{baseline-train-loss}
-        \item \textbf{Resultado}: con \texttt{Rescaling(1/255)} es dos órdenes de magnitud menor y baja al reducir la lr
+        \item \textbf{Resultado}: con \texttt{Rescaling(1/255)} es dos órdenes de magnitud menor, pero sigue por encima de $\ln K$ hasta que baja la lr
       \end{itemize}
       \vspace{0.2cm}
       \decisionblock{\texttt{Rescaling(1/255)} dentro del modelo: +\res{gain-normalisation}~pp de mean recall.}
@@ -22,37 +23,15 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Lo razonable sería $\ln 13 \approx$ \res{chance-loss}. Al estar dentro del modelo, train, validación y test reciben el mismo preprocesado. La caída final de la curva naranja es ReduceLROnPlateau actuando.}
+  \speakernote{1}{Lo razonable sería $\ln 13 \approx$ \res{chance-loss}; en la primera época con Rescaling aún es \res{norm-loss-first}. La caída final de la curva naranja es ReduceLROnPlateau actuando. Estandarizar por canal (EXP-004) empeora (\res{gain-standardise}~pp; pérdida inicial \res{std-loss-first}): el paso de Adam en un logit crece con $\sum_i |x_i|$. Segunda decisión de la fase: callbacks con paciencias \res{phase1-es-patience}/\res{phase1-rlr-patience} sobre el mean recall de validación (frente a pérdida o accuracy: \res{monitor-loss-mean-recall} y \res{monitor-acc-mean-recall}, una semilla); la oscilación de la accuracy de validación baja de \res{norm-valacc-std-last10} a \res{phase1-valacc-std-last10}. Cómo actúan se ve en el modelo final.}
 \end{frame}
 
-\begin{frame}{Cuándo parar: lo decide la validación}
+\begin{frame}{Fase 2: reducir la resolución de entrada}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
       \begin{itemize}
-        \item Hasta la época \res{stop-last-joint-epoch}, train y validación suben juntas
-        \item Al estancarse la validación, la lr baja $\times$0,1: último salto, mejor época (\res{stop-best-epoch})
-        \item Después solo mejora train (\res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}); validación, plana: memoriza
-      \end{itemize}
-      \vspace{0.2cm}
-      \decisionblock{EarlyStopping (paciencia \res{final-es-patience}) sobre el mean recall: para en la época \res{stop-epoch} y recupera la \res{stop-best-epoch}.}
-    \end{column}
-    \begin{column}{0.55\textwidth}
-      \begin{figure}
-        \centering
-        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/stopping.png}{Punto de parada}
-        \caption{\footnotesize \figcaptionshort{stopping}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-  \speakernote{1}{La brecha train-val pasa de \res{stop-gap-best}~pp en la mejor época a \res{stop-gap-end}~pp al parar. Las dos bajadas de lr posteriores ya no cambian nada. En el baseline los callbacks no podían actuar (paciencias \res{baseline-es-patience} y \res{baseline-rlr-patience} con \res{baseline-epochs-cap} épocas). Se vigila el mean recall porque es la métrica de decisión; vigilar la pérdida o la accuracy dio algo menos (una semilla). Las semillas 2 y 3 siguen el mismo patrón.}
-\end{frame}
-
-\begin{frame}{Reducir la resolución de entrada}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.42\textwidth}
-      \begin{itemize}
-        \item \textbf{Hipótesis}: a \res{res224-res}~$\times$~\res{res224-res} sobran parámetros y varianza
-        \item \textbf{Evidencia}: al subir la resolución cae también train: no es sobreajuste
+        \item \textbf{Hipótesis}: a \res{res224-res}~$\times$~\res{res224-res} hay demasiados parámetros: sobreajuste
+        \item \textbf{Evidencia}: al subir la resolución cae también train: no es sobreajuste sino optimización
         \item \textbf{Resultado}: máximo en \res{phase2-res}~$\times$~\res{phase2-res}, también con la mejor lr de cada tamaño (rombos)
       \end{itemize}
       \vspace{0.2cm}
@@ -66,19 +45,19 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{La caída es de optimización: a \res{res224-res} píxeles casi todas las ReLU de la capa oculta quedan inactivas (medido con los modelos guardados). Todas las curvas con una capa oculta de 256.}
+  \speakernote{1}{Todas con una capa oculta de \res{phase2-width} unidades (ReLU, He) y reducción por promedio de área (sin aliasing). La causa de la caída: el paso de Adam en una preactivación crece con el número de entradas y mata ReLU; se mide en la fase 4 (\res{phase2-inactive}\,\% de inactivas a \res{phase2-res}, \res{res224-inactive}\,\% a \res{res224-res}). A \res{res224-res} la red pasa las primeras épocas en la distribución a priori. \res{res24-res}~$\times$~\res{res24-res} (\res{res24-mean-recall}) queda dentro del ruido.}
 \end{frame}
 
-\begin{frame}{Arquitectura: más capacidad no generaliza más}
+\begin{frame}{Fase 3: más capacidad no generaliza más}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
       \begin{itemize}
         \item \textbf{Hipótesis}: más capacidad, mejor validación
         \item \textbf{Evidencia}: train sube hasta \res{big3layer-train-acc}; validación se queda en $\sim$\res{phase3-val-acc}
-        \item \textbf{Resultado}: por encima de $\sim 2\cdot 10^5$ parámetros la validación ya no mejora
+        \item \textbf{Resultado}: más allá de \res{phase2-params} parámetros la validación ya no mejora
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{\res{phase3-hidden} (\res{phase3-params} parámetros), con LeakyReLU.}
+      \decisionblock{\res{phase3-hidden} (\res{phase3-params} parámetros): igual que la red mayor, con menos brecha.}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
@@ -88,14 +67,35 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{En mean recall, \res{phase3-hidden} da \res{phase3-mean-recall}, lo mismo que la red mayor (\res{big3layer-hidden}) con muchos menos parámetros, y más que una sola capa de 512 (\res{onelayer512-mean-recall}). La fase 4 cambió la activación a LeakyReLU, que evita las ReLU muertas (\res{phase4-mean-recall}).}
+  \speakernote{1}{En mean recall, \res{phase3-hidden} da \res{phase3-mean-recall}, lo mismo que la red mayor (\res{big3layer-hidden}) con muchos menos parámetros, y más que una sola capa de 512 (\res{onelayer512-mean-recall}); una semilla, dentro del ruido. En todas las arquitecturas, entre el \res{arch-inactive-min} y el \res{arch-inactive-max}\,\% de las ReLU de la primera capa están muertas: de ahí la fase 4.}
 \end{frame}
 
-\begin{frame}{Optimizador y learning rate}
+\begin{frame}{Fase 4: LeakyReLU contra las ReLU muertas}
+  \begin{figure}
+    \centering
+    \safegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{figures/activation.png}{Unidades inactivas y activaciones}
+    \caption{\footnotesize \figcaptionshort{activation}}
+  \end{figure}
+  \vspace{-0.3cm}
+  \begin{columns}[t,onlytextwidth]
+    \begin{column}{0.54\textwidth}
+      \begin{itemize}\small
+        \item \textbf{Evidencia} (izq.): las ReLU inactivas crecen con la resolución y con la lr
+        \item \textbf{Resultado} (dcha.): todas las alternativas las eliminan; LeakyReLU 0,3 es la mejor en validación
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      \decisionblock{LeakyReLU ($\alpha$ = \res{phase4-leaky-alpha}) con He: \res{phase4-mean-recall} ($\pm$ \res{phase4-mean-recall-std}).}
+    \end{column}
+  \end{columns}
+  \speakernote{1,5}{ReLU tiene derivada nula para $z<0$: una unidad negativa con todas las imágenes no recibe gradiente y no se recupera. LeakyReLU, $\alpha z$ para $z<0$, siempre tiene gradiente. Con la mejor lr de cada tamaño (rombos) la fracción de inactivas es parecida: lo que cuenta es el tamaño del paso. ReLU ya usaba He, así que solo cambia la activación. LeakyReLU 0,1 queda por debajo de ReLU (\res{leaky01-mean-recall}): quitar las muertas no basta, y +\res{gain-activation}~pp es del orden del ruido. ELU, GELU y SELU memorizan (train hasta \res{gelu-train-mean-recall}) sin mejorar validación; tanh, la peor.}
+\end{frame}
+
+\begin{frame}{Fase 5: optimizador, learning rate y batch}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
       \begin{itemize}
-        \item \textbf{Hipótesis}: la learning rate es el hiperparámetro clave
+        \item \textbf{Hipótesis}: el optimizador y su learning rate determinan el resultado
         \item \textbf{Evidencia}: Adam apenas cambia entre $10^{-4}$ y $10^{-2}$
         \item \textbf{Resultado}: SGD + momentum tiene un óptimo marcado en \res{sgd-m09-lr}
       \end{itemize}
@@ -110,5 +110,5 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Con una semilla SGD parece mejor, pero repetidos con \res{final-seeds} semillas Adam y SGD empatan (ruido de \res{seed-noise-pp}~pp); Adam tiene menos varianza. El batch \res{final-batch} hace las épocas \res{speedup-batch256} veces más rápidas a cambio de unos \res{cost-batch256}~pp frente a batch \res{phase4-batch}.}
+  \speakernote{1}{Runs de hasta \res{adam-lr3e-4-epochs-cap} épocas (miden también la velocidad de convergencia). Sin momentum SGD se queda en \res{sgd-m0-mean-recall}; con 0,99, \res{sgd-m099-mean-recall}. Con \res{final-seeds} semillas Adam y SGD empatan (\res{adam-b1-mean-recall} $\pm$ \res{adam-b1-mean-recall-std} frente a \res{sgd-m09-seeds-mean-recall} $\pm$ \res{sgd-m09-seeds-mean-recall-std}); Adam tiene la mitad de varianza. Batch \res{final-batch}: épocas \res{speedup-batch256} veces más rápidas por unos \res{cost-batch256}~pp, menos que el ruido. Schedules, sin clipnorm, sin AMSGrad o AdamW: nada mejora más allá del ruido.}
 \end{frame}

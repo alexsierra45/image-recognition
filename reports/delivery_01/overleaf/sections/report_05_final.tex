@@ -1,12 +1,13 @@
-% Fuentes: EXP-010 (EXP-010_bs256_sqrt_60ep, 3 semillas), CHG-013; experiments.csv / history.
+% Fuentes: EXP-010 (EXP-010_bs256_sqrt_60ep, 3 semillas), CHG-013; experiments.csv / history (lr, matrices de confusión).
 \section{Resultado final}
 \label{sec:final}
 El modelo final (EXP-010) es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $\rightarrow$ \res{final-hidden}
-[\texttt{Dense} $\rightarrow$ LeakyReLU] $\rightarrow$ softmax sobre imágenes de \res{final-res}~$\times$~\res{final-res}
-(\res{final-params} parámetros), entrenado con Adam ($\beta_1$ = \res{final-beta1}, \emph{learning rate}
-\res{final-lr}) y batch de \res{final-batch}. El Cuadro~\ref{tab:final} compara el modelo final con el baseline: el
-\emph{mean recall} se multiplica por \res{gain-total-ratio} y la \emph{accuracy} sube \res{gain-total-acc}~pp
-(Figura~\ref{fig:progress}). El notebook de la entrega reproduce exactamente el entrenamiento de la semilla~1.
+[\texttt{Dense} $\rightarrow$ LeakyReLU] $\rightarrow$ softmax sobre imágenes de
+\res{final-res}~$\times$~\res{final-res} (\res{final-params} parámetros), entrenado con Adam ($\beta_1$ =
+\res{final-beta1}, \emph{learning rate} \res{final-lr}) y batch de \res{final-batch}. El Cuadro~\ref{tab:final}
+compara el modelo final con el baseline: el \emph{mean recall} se multiplica por \res{gain-total-ratio} y la
+\emph{accuracy} sube \res{gain-total-acc}~pp (Figura~\ref{fig:progress}). El notebook de la entrega reproduce
+exactamente el entrenamiento de la semilla~1.
 
 \begin{table}[h]
   \centering\small
@@ -22,11 +23,33 @@ El modelo final (EXP-010) es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $
   \label{fig:progress}
 \end{figure}
 
+\textbf{Punto de parada.} La Figura~\ref{fig:stopping} (semilla~1) muestra cómo decide la validación: hasta la época
+\res{stop-last-joint-epoch} train y validación evolucionan en paralelo; al estancarse la validación,
+\emph{ReduceLROnPlateau} divide la \emph{learning rate} por 10 y llega la mejor época (\res{stop-best-epoch}).
+Después, la \emph{accuracy} de train sigue subiendo (\res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end})
+mientras la de validación se estanca (\res{stop-val-acc-best} $\rightarrow$ \res{stop-val-acc-end}); las dos
+bajadas siguientes de la \emph{learning rate} (épocas \res{stop-later-lr-drops}) no la mejoran, así que
+\emph{EarlyStopping} (paciencia \res{final-es-patience}) para en la época \res{stop-epoch} y se conserva la
+\res{stop-best-epoch}. La brecha entre train y validación pasa de \res{stop-gap-best} a \res{stop-gap-end}~pp entre la
+mejor época y la parada: seguir entrenando solo habría servido para memorizar.
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=0.6\linewidth]{figures/stopping.png}{Punto de parada}
+  \caption{\figcaption{stopping}}
+  \label{fig:stopping}
+\end{figure}
+
 Todas las clases mejoran respecto al baseline (Figura~\ref{fig:final}), aunque de forma muy desigual. La más difícil
-sigue siendo \res{final-worst-class} (recall \res{final-worst-recall}), que se confunde con los otros vehículos. Entre
-train y validación queda una brecha (\emph{accuracy} \res{final-train-acc} frente a \res{final-val-acc}). La mejor
-época y cada decisión se eligieron con el mismo conjunto de validación con el que se miden, así que todas las cifras son
-algo optimistas~\cite{cawley}.
+sigue siendo \res{final-worst-class} (recall \res{final-worst-recall}), que se confunde con los otros vehículos:
+de sus imágenes de validación, una proporción de \res{final-conf-truck-small-car} se clasifica como Small car,
+\res{final-conf-truck-bus} como Bus y \res{final-conf-truck-dump-truck} como Dump truck (media de las matrices de
+confusión de las \res{final-seeds} semillas). Entre train y validación queda una brecha (\emph{accuracy} \res{final-train-acc} frente a \res{final-val-acc}).
+
+La mejor época y cada decisión se eligieron con el mismo conjunto de validación con el que se miden, así que todas
+las cifras son algo optimistas~\cite{cawley}. Además, la desviación típica entre semillas solo recoge la variabilidad
+de la inicialización y del orden de los datos, no la del \emph{split}, que es fijo; y el recall de las clases pequeñas
+(p.\,ej.\ \res{class-min-name}, con pocas imágenes de validación) es especialmente ruidoso.
 
 \begin{figure}[!htbp]
   \centering
@@ -34,4 +57,3 @@ algo optimistas~\cite{cawley}.
   \caption{\figcaption{per_class_recall}}
   \label{fig:final}
 \end{figure}
-

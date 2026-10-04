@@ -1,15 +1,22 @@
 % Fuentes: EXP-000, EXP-001, ISS-001, ISS-002, ISS-005, CHG-007.
 \section{Punto de partida}
 El modelo del enunciado (Cuadro~\ref{tab:baseline}) aplica una ReLU a los píxeles, que no son negativos, así que
-la ReLU es la identidad y el modelo queda reducido a una regresión logística multinomial. Con el \emph{split}
-estratificado (EXP-001) se detectaron tres problemas:
+la ReLU es la identidad y el modelo queda reducido a una regresión logística multinomial. La fase~0 no cambia el
+modelo: fija la semilla (también la de las operaciones de TensorFlow, para que cada run sea reproducible) y estratifica
+el \emph{split} (EXP-001). El run original del enunciado usaba otro \emph{split}, así que no se compara con los
+siguientes. Con esta base se detectaron tres problemas:
 \begin{itemize}
-  \item \textbf{Softmax saturada.} La pérdida de entrenamiento se queda en torno a \res{baseline-train-loss} (lo
-  razonable sería $\ln K \approx$ \res{chance-loss}, con $K$ = \res{n-classes} clases), la \emph{accuracy} oscila
-  varios puntos entre épocas y algunas clases no se predicen nunca.
-  \item \textbf{Callbacks inertes.} Con \res{baseline-epochs-cap} épocas, la paciencia de \emph{EarlyStopping}
-  (\res{baseline-es-patience}) y de \emph{ReduceLROnPlateau} (\res{baseline-rlr-patience}) impedía que actuaran: la
-  validación no decidía ni la \emph{learning rate} ni el punto de parada.
+  \item \textbf{Pérdida desbordada.} La pérdida de entrenamiento se queda en torno a \res{baseline-train-loss}, muy
+  por encima de lo razonable ($\ln K \approx$ \res{chance-loss}, con $K$ = \res{n-classes} clases). Es lo esperable con
+  logits enormes y la softmax saturada; además la \emph{accuracy} oscila varios puntos entre épocas y algunas clases
+  no se predicen nunca. Adam mueve cada peso del orden de la \emph{learning rate} $\eta$ en cada paso, sea cual sea la
+  escala del gradiente~\cite{kingma}, así que un paso puede desplazar un logit hasta $\eta \sum_i |x_i|$: con
+  \res{baseline-inputs} entradas en $[0, 255]$, miles de unidades. Por eso la pérdida ya es \res{baseline-loss-first}
+  en la primera época.
+  \item \textbf{Callbacks casi inertes.} Con \res{baseline-epochs-cap} épocas, la paciencia de \emph{EarlyStopping}
+  (\res{baseline-es-patience}) era mayor que la duración del entrenamiento y la de \emph{ReduceLROnPlateau}
+  (\res{baseline-rlr-patience}) solo le dejaba actuar en la segunda mitad: la validación prácticamente no decidía ni la
+  \emph{learning rate} ni el punto de parada.
   \item \textbf{Coste.} Cada época volvía a leer los TIF del disco, y esa lectura dominaba el tiempo de
   entrenamiento. Se cachearon las imágenes una sola vez (sin cambiar el modelo); con la caché y la GPU, explorar
   muchas configuraciones pasó a ser viable.

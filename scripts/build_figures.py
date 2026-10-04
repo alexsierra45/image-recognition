@@ -79,7 +79,7 @@ def fig_class_distribution(data, spec):
     ax.set_yticklabels(names)
     for i, v in enumerate(vals):
         ax.text(v, i, ' %d' % v, va='center', fontsize=6.5, color=ps.INK2)
-    ax.set_xlabel('training images')
+    ax.set_xlabel('labelled images (train + validation)')   # counts of the whole annotations file, before the split
     ax.set_title('Images per class')
     ax.grid(axis='y', visible=False)
     return fig, {'included': 'all 13 classes (annotations file)', 'omitted': 'none', 'note': ''}
@@ -355,9 +355,83 @@ def fig_stopping(data, spec):
                  'criterion': 'seed 1 of the final model = the run reproduced by ffNN_example.ipynb', 'note': ''}
 
 
+def fig_activation(data, spec):
+    """Two panels. Left (why): % of inactive units of the hidden layer (pre-activation <= 0 on every validation image;
+    with ReLU, dead units) vs the input resolution, one line per learning rate (the runs of `sweep_exp`); hollow
+    diamonds = best lr of each size. Right (what was tried): validation mean recall per activation (filled, mean +- std
+    over seeds), training mean recall (hollow) and the inactive units of each model printed under it."""
+    sel, opt = spec['select'], spec.get('options', {})
+    fig, (a1, a2) = ps.plt.subplots(1, 2, figsize=opt.get('size', (8.4, 3.4)), gridspec_kw={'width_ratios': [1, 1.15]})
+    # left: inactive units vs resolution, by lr
+    pts = []
+    for r in data.rows:
+        if data.rows[r]['exp_id'] == sel['sweep_exp'] and data.inactive(r) is not None:
+            c = cfg_of(data, r)
+            pts.append((c['res'], c['optimizer']['lr'], 100 * data.inactive(r), float(data.rows[r]['mean_recall']), r))
+    lrs = sorted({p[1] for p in pts}, reverse=True)
+    lines = [lr for lr in lrs if sum(1 for p in pts if p[1] == lr) > 1]
+    for i, lr in enumerate(lines):
+        g = sorted(p for p in pts if p[1] == lr)
+        a1.plot([p[0] for p in g], [p[2] for p in g], marker='o', color=ps.PALETTE[[0, 2, 3, 4][i]],
+                label='lr ' + ('%.0e' % lr).replace('e-0', 'e-'))
+    single = [p for p in pts if p[1] not in lines]
+    if single:
+        a1.plot([p[0] for p in single], [p[2] for p in single], ls='none', marker='o', color=C['baseline'], label='other lr')
+    best = {}
+    for p in pts:
+        if p[0] not in best or p[3] > best[p[0]][3]:
+            best[p[0]] = p
+    multi = sorted(x for x in best if sum(1 for p in pts if p[0] == x) > 1)
+    a1.plot(multi, [best[x][2] for x in multi], ls='none', marker='D', ms=9, mfc='none', mec=ps.INK, mew=1.1,
+            label='best lr per size')
+    xs = sorted({p[0] for p in pts})
+    a1.set_xscale('log')
+    a1.set_xticks(xs)
+    a1.set_xticklabels([str(x) for x in xs])
+    a1.minorticks_off()
+    a1.set_ylim(0, 100)
+    a1.set_xlabel('input resolution (side, log)')
+    a1.set_ylabel('inactive hidden units (%)')
+    a1.set_title(opt.get('title_left', 'Phase 2 (ReLU): inactive units'))
+    a1.legend(fontsize=6.5, loc='lower right')
+    # right: activations
+    items = sel['variants']
+    x = np.arange(len(items))
+    for k, it in enumerate(items):
+        col = C['baseline'] if it.get('role') == 'baseline' else C['final']
+        m, s, n = data.stat(it['variant'], 'mean_recall')
+        a2.errorbar(k, m, yerr=None if n == 1 else s, marker='o', ms=7, color=col, ecolor=ps.INK2, capsize=3, ls='none')
+        a2.plot(k, data.stat(it['variant'], 'train_mean_recall')[0], marker='o', ms=7, mfc='white', color=col, ls='none')
+        a2.text(k, m - 0.035, '%.3f' % m, ha='center', va='top', fontsize=6.5, color=ps.INK2)
+        ina = data.inactive(it['variant'])
+        a2.text(k, opt.get('inactive_row', 0.415), '%.0f%%' % (100 * ina) if ina is not None else '--', ha='center',
+                va='center', fontsize=7, color=ps.INK, fontweight='bold' if it.get('role') == 'baseline' else 'normal')
+        if it.get('role') == 'chosen':
+            a2.axvspan(k - 0.4, k + 0.4, color=C['other'], alpha=0.35, lw=0)
+    a2.text(-0.5, opt.get('inactive_row', 0.415) + 0.035, 'inactive units of the 1st hidden layer:', ha='left', va='center',
+            fontsize=6.5, color=ps.INK2)
+    a2.plot([], [], marker='o', ms=6, color=C['final'], ls='none', label='val (mean ± std over seeds)')
+    a2.plot([], [], marker='o', ms=6, mfc='white', color=C['final'], ls='none', label='train')
+    a2.plot([], [], marker='o', ms=6, color=C['baseline'], ls='none', label='ReLU (phase 3 model)')
+    a2.set_xticks(x)
+    a2.set_xticklabels([it['label'] for it in items], rotation=30, ha='right')
+    a2.set_xlim(-0.6, len(items) - 0.4)
+    a2.set_ylim(*opt.get('ylim', (0.38, 1.05)))
+    a2.grid(axis='x', visible=False)
+    a2.set_ylabel('mean recall (macro)')
+    a2.set_title(opt.get('title_right', 'Phase 4: activation of the hidden layers'))
+    a2.legend(fontsize=6.5, loc='upper left')
+    fig.tight_layout()
+    inc = sorted(p[4] for p in pts) + [r for it in items for r in data.runs(it['variant'])]
+    return fig, {'included': inc, 'omitted': [],
+                 'criterion': 'left: every run of %s (inactive units measured on the saved models); right: the '
+                              'activations listed in figure_specs.yaml, every seed of each' % sel['sweep_exp'],
+                 'note': ''}
+
+
 TYPES = {'class_distribution': fig_class_distribution, 'sweep': fig_sweep, 'capacity': fig_capacity, 'strength': fig_strength,
          'bars': fig_bars, 'learning_curves': fig_learning_curves, 'per_class_recall': fig_per_class_recall,
-         'confusion': fig_confusion, 'group_sweep': fig_group_sweep, 'stopping': fig_stopping}
+         'confusion': fig_confusion, 'group_sweep': fig_group_sweep, 'stopping': fig_stopping, 'activation': fig_activation}
 NEEDS_CFG = {'progress': fig_progress, 'ablation': fig_ablation}
 
 

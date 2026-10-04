@@ -1,13 +1,15 @@
-% Conclusiones y siguientes pasos (~1 min). Fuentes: EXP-002..EXP-010.
+% Conclusiones y siguientes pasos (~1 min). Fuentes: EXP-002..EXP-012, CHG-017. Mismo orden que report_06_conclusions.
 \begin{frame}{Conclusiones y siguientes pasos}
   \begin{itemize}
-    \item Lo decisivo: normalizar y reducir la entrada, y profundidad antes que anchura
-    \item La validación elige los hiperparámetros y el punto de parada
-    \item Con más capacidad solo crece la memorización: el límite es el sesgo de una red densa sobre píxeles
+    \item Lo que más aportó: reducir la entrada a \res{final-res}~$\times$~\res{final-res} (+\res{gain-resolution}~pp) y, antes, normalizarla y dejar que la validación gobierne los callbacks (+\res{gain-phase1}~pp)
+    \item Medir las unidades inactivas explicó la caída con la resolución y motivó LeakyReLU
+    \item La validación elige los hiperparámetros, reduce la lr y decide el punto de parada
+    \item Adam y SGD empatan dentro del ruido; el batch \res{final-batch} hace la exploración \res{speedup-batch256} veces más rápida
+    \item Límite: con más capacidad solo crece la brecha train-validación; una red densa sobre píxeles no tiene invarianzas espaciales
   \end{itemize}
   \vspace{0.2cm}
   \begin{alertblock}{Siguientes pasos}
     Regularización, desbalance de clases y data augmentation; después, redes convolucionales.
   \end{alertblock}
-  \speakernote{1}{Cerrar con el límite del modelo y lo que viene.}
+  \speakernote{1}{Cerrar con el límite del modelo y lo que viene. Apilar capas dio +\res{gain-depth}~pp y LeakyReLU +\res{gain-activation}~pp, ambas dentro del ruido. Los vehículos siguen siendo las clases más difíciles.}
 \end{frame}

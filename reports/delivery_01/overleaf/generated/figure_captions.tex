@@ -2,14 +2,16 @@
 \renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}
 % \figcaptionshort{id}: short caption for the slides (caption_slides_es; falls back to the long one)
 \providecommand{\figcaptionshort}[1]{\ifcsname figcapshort@#1\endcsname\csname figcapshort@#1\endcsname\else\figcaption{#1}\fi}
-\expandafter\def\csname figcap@class_distribution\endcsname{Imágenes por clase en el conjunto de entrenamiento.}
-\expandafter\def\csname figcapshort@class_distribution\endcsname{Imágenes por clase (train).}
+\expandafter\def\csname figcap@class_distribution\endcsname{Imágenes por clase en el conjunto etiquetado completo (entrenamiento y validación).}
+\expandafter\def\csname figcapshort@class_distribution\endcsname{Imágenes por clase en el conjunto etiquetado completo.}
 \expandafter\def\csname figcap@normalisation\endcsname{Pérdida de train por época del baseline con píxeles crudos y escalados a [0, 1] (escala logarítmica).}
 \expandafter\def\csname figcapshort@normalisation\endcsname{Pérdida de train por época: píxeles crudos frente a escalados.}
 \expandafter\def\csname figcap@resolution_sweep\endcsname{Mean recall de validación (continua) y train (discontinua) según la resolución, con una capa de 256. Se muestran 10 de 16 runs: todas las resoluciones con lr = 1e-3 y, en las resoluciones con varias lr probadas, la de mejor mean recall de validación.}
 \expandafter\def\csname figcapshort@resolution_sweep\endcsname{Mean recall según la resolución de entrada (10 de 16 runs).}
 \expandafter\def\csname figcap@capacity\endcsname{Accuracy de train (discontinua) y validación (continua) de 12 arquitecturas según sus parámetros.}
 \expandafter\def\csname figcapshort@capacity\endcsname{Accuracy según los parámetros (12 arquitecturas).}
+\expandafter\def\csname figcap@activation\endcsname{Izquierda: porcentaje de unidades de la capa oculta que no se activan con ninguna imagen de validación (con ReLU, unidades muertas), según la resolución y la learning rate (los 16 runs de la fase 2; rombos: la mejor lr de cada tamaño). Derecha: mean recall de validación (relleno) y de train (hueco) de las 7 activaciones de la fase 4, con el porcentaje de unidades inactivas de la primera capa de cada modelo; sombreada, la elegida (media de 3 semillas).}
+\expandafter\def\csname figcapshort@activation\endcsname{Izq.: ReLU inactivas (fase 2). Dcha.: activaciones (fase 4).}
 \expandafter\def\csname figcap@lr_sweep\endcsname{Mean recall de validación (continua) y de train (discontinua) según la learning rate, para Adam y SGD con momentum (los 8 runs de la fase 5.1, entrenamientos de hasta 20 épocas).}
 \expandafter\def\csname figcapshort@lr_sweep\endcsname{Mean recall según la learning rate (8 runs, hasta 20 épocas).}
 \expandafter\def\csname figcap@stopping\endcsname{Modelo final (semilla 1): accuracy de train y validación y mean recall de validación por época. Punteado: bajadas de la lr; estrella: época conservada; cruz: parada.}

@@ -1,11 +1,13 @@
-% Punto de partida (~1 min). Fuentes: EXP-000, EXP-001, ISS-001, ISS-002, ISS-005.
+% Punto de partida (~1 min). Fuentes: EXP-000, EXP-001, ISS-001, ISS-002, ISS-005. Mismo orden que report_03_baseline.
 \begin{frame}{Punto de partida y problemas detectados}
   \begin{itemize}
     \item Baseline: \texttt{Flatten} $\rightarrow$ ReLU $\rightarrow$ \texttt{Dense} sobre píxeles en $[0, 255]$; la ReLU es la identidad, así que es una regresión logística
-    \item Mean recall en validación: \textbf{\res{baseline-mean-recall}} (accuracy \res{baseline-val-acc})
-    \item Problemas detectados: softmax saturada (pérdida $\approx$ \res{baseline-train-loss}), callbacks que no llegan a actuar y clases que nunca se predicen
+    \item Fase 0: semilla fija y \emph{split} estratificado. Mean recall en validación: \textbf{\res{baseline-mean-recall}} (accuracy \res{baseline-val-acc})
+    \item \textbf{Pérdida desbordada}: $\sim$\res{baseline-train-loss} frente a $\ln K \approx$ \res{chance-loss}; la accuracy oscila y hay clases que nunca se predicen
+    \item \textbf{Callbacks casi inertes}: paciencias de \res{baseline-es-patience} y \res{baseline-rlr-patience} épocas en un entrenamiento de \res{baseline-epochs-cap}
+    \item \textbf{Coste}: cada época releía los TIF; se cachean una vez
   \end{itemize}
-  \vspace{0.3cm}
-  \keymessage{Un factor por experimento; la validación elige cada hiperparámetro y el punto de parada.}
-  \speakernote{1}{Por qué el modelo es lineal y qué se arregla primero. Las imágenes se cachean una vez (antes se releían los TIF en cada época).}
+  \vspace{0.2cm}
+  \keymessage{Cada fase parte del ganador de la anterior; la validación elige cada hiperparámetro y el punto de parada.}
+  \speakernote{1}{Por qué el modelo es lineal. La pérdida es enorme porque Adam mueve cada peso del orden de la lr en cada paso: con \res{baseline-inputs} entradas en $[0, 255]$, un paso desplaza un logit miles de unidades (primera época: \res{baseline-loss-first}). El run original del enunciado usaba otro split y no se compara.}
 \end{frame}
