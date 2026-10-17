@@ -1,0 +1,59 @@
+16:53:00 START /home/alexsierra45/muia/vision-computer/image-recognition/ffNN_example.ipynb (33 cells) kernel=.venv/bin/python progress=/tmp/run_notebook_3z83qa39/ffNN_example.running.ipynb
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+16:53:01 cell 1 start: import tensorflow as tf
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792075981.699202    5067 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1792075981.998547    5067 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792075983.689805    5067 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+16:53:07 cell 1 done in 6s
+16:53:07 cell 2 start: import uuid
+16:53:07 cell 2 done in 0s
+16:53:07 cell 3 start: categories = {0: 'Cargo plane', 1: 'Small car', 2: 'Bus', 3: 'Truck', 
+16:53:07 cell 3 done in 0s
+16:53:07 cell 4 start: import warnings
+16:53:07 cell 4 done in 0s
+16:53:07 cell 6 start: import json
+16:53:07 cell 6 done in 0s
+16:53:07 cell 7 start: import numpy as np
+16:53:08 cell 7 done in 0s
+16:53:08 cell 9 start: from sklearn.model_selection import train_test_split
+16:53:08 cell 9 done in 0s
+16:53:08 cell 10 start: from xview_data import load_cache
+16:53:08 cell 10 done in 0s
+16:53:08 cell 12 start: # Load architecture
+I0000 00:00:1792075988.800142    5067 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 3536 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4050 Laptop GPU, pci bus id: 0000:01:00.0, compute capability: 8.9
+16:53:09 cell 12 done in 1s
+16:53:09 cell 13 start: from keras.optimizers import Adam
+16:53:09 cell 13 done in 0s
+16:53:09 cell 14 start: import os
+16:53:09 cell 14 done in 0s
+16:53:09 cell 16 start: from keras.callbacks import TerminateOnNaN, EarlyStopping, ReduceLROnP
+16:53:09 cell 16 done in 0s
+16:53:09 cell 18 start: from experiment_utils import CachedSequence
+16:53:09 cell 18 done in 0s
+16:53:09 cell 19 start: batch_size = 256
+16:53:09 cell 19 done in 0s
+16:53:09 cell 20 start: import numpy as np
+I0000 00:00:1792075989.726830    5067 generator_dataset_op.cc:213] Memory patch applied: M_TRIM_THRESHOLD=128 kb was set.
+16:54:52 cell 20 done in 103s
+16:54:52 cell 22 start: import matplotlib.pyplot as plt
+16:54:53 cell 22 done in 0s
+16:54:53 cell 23 start: import numpy as np
+16:54:53 cell 23 done in 0s
+16:54:53 cell 24 start: from sklearn.metrics import confusion_matrix
+16:54:54 cell 24 done in 1s
+16:54:54 cell 25 start: import numpy as np
+16:54:54 cell 25 done in 0s
+16:54:54 cell 26 start: import csv
+16:54:54 cell 26 done in 0s
+16:54:54 cell 28 start: import pandas as pd
+16:54:54 cell 28 done in 0s
+16:54:54 cell 30 start: import os
+16:54:54 cell 30 done in 0s
+16:54:54 cell 31 start: import numpy as np
+16:54:54 cell 31 done in 0s
+16:54:54 cell 32 start: with open("prediction.json", "w") as outfile:
+16:54:54 cell 32 done in 0s
+16:54:55 DONE: outputs written to /home/alexsierra45/muia/vision-computer/image-recognition/ffNN_example.ipynb

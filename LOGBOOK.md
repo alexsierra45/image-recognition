@@ -624,7 +624,7 @@ A petición del usuario (en Overleaf, el texto de algunas diapositivas no corres
 `reports/delivery_02/` con la plantilla del usuario: `delivery.yaml` (punto de partida EXP-010, final EXP-021; pasos: BatchNorm → rotaciones → entrenamiento más largo), `figure_specs.yaml` (curvas de train y validación entrega 1 frente a 2, curvas de validación de dropout y L2, BatchNorm, augmentation, progreso y recall por clase, con pies cortos para las slides), informe (~5 páginas estimadas) y slides (10 frames, 10 min), con las reglas de DEC-010 (mismas figuras y en el mismo orden en informe y slides; cada imagen del informe con su pie y su etiqueta). Cuadro de cambios sobre BN + rotaciones (EXP-020) generado como tabla de ablación. `make bundle D=02` sin errores.
 - **Scripts** (compartidos con la entrega 1): `build_results.py` describe el modelo de partida desde su configuración (`describe_model`, `describe_training`), cabeceras genéricas en `baseline_vs_final`, macros por variante `<clave>-gap-acc` (train − val, pp) y `<clave>-l2`; `build_figures.py`, opción `logx` en las curvas de validación (`strength`).
 - **Coordinación:** otra sesión de Claude (`image-recognition-10`) estaba modificando a la vez la entrega 1 y los scripts (pies cortos `\figcaptionshort`, límite de altura de figuras en slides, nueva figura de parada). La entrega 2 adopta esas convenciones; no se tocó `reports/delivery_01/`. Se le avisó de los cambios en los scripts compartidos.
-- El notebook entregable sigue con el modelo de la entrega 1 (pendiente de decidir si se alinea con EXP-021).
+- El notebook entregable sigue con el modelo de la entrega 1 (pendiente de decidir si se alinea con EXP-021). → Alineado en CHG-019.
 
 ### CHG-016: Informe y slides de la entrega 1 con las mismas figuras y en el mismo orden (2026-10-03)
 Por DEC-010. El informe usaba 7 figuras y las slides 8, en distinto orden: `class_distribution` no estaba en el informe y la parada aparecía en la fase 1 de las slides pero en el resultado final del informe.
@@ -670,6 +670,12 @@ A petición del usuario: ajustar las slides a sus cambios en el informe, explica
   - Informe estimado en ~9,5 páginas (la plantilla pide 4-6).
   - Slides: 11 frames con 11,5 min de notas (la plantilla pide 8-10 frames y unos 10 min).
   - Se deja así porque el usuario pidió más detalle. Recortar o no lo decide el usuario.
+
+### CHG-019: El notebook entregable pasa al modelo de la entrega 2 (EXP-021) (2026-10-15)
+A petición del usuario ("preparar todo lo relativo a la segunda entrega"; `review_notes.md` de la entrega 2 lo tenía pendiente). Por DEC-009, cada entrega parte del modelo final de la anterior, y el notebook es el código entregable.
+- **`ffNN_example.ipynb`**, solo lo que separa EXP-010 de `EXP-021_final` (su `config` en `experiments.csv`): BatchNorm antes de LeakyReLU en las 4 capas ocultas, con `Dense(use_bias=False)` porque β de BN sustituye al sesgo [R6 §3.2]; lr 3,6e-3 [EXP-013]; rotaciones aleatorias de 90° en el generador de train (`augment=['rot90']`, EXP-019); paciencias 25 / 8 y hasta 300 épocas (EXP-021); `EXP_ID = 'EXP-021'`; `config.json` del run con `augment` y `batchnorm`. Markdown del modelo y del entrenamiento y tabla de progreso con los pasos de las dos entregas.
+- **Ejecutado** de arriba abajo (`tools/run_notebook.py`, log en `experiments/logs/notebook_EXP-021.log`): run `EXP-021_20261015-165309`, **idéntico** al run del barrido `EXP-021_final` (semilla 1): mejor época 82 de 107, val acc 0,6421, mean recall 0,6600, min recall 0,2941. `model.keras` y `prediction.json` (2 365 imágenes) salen ahora de este modelo; `prediction.json` se copia a `reports/delivery_02/` (el de la entrega 1 sigue en `reports/delivery_01/`). La versión del notebook de la entrega 1 queda en el commit `d557b09`.
+- Antes de esta tarea, el notebook tenía un cambio sin commitear que era solo de formato (VS Code guardó las celdas como listas de líneas): sin cambios de código ni de salidas.
 
 ---
 
