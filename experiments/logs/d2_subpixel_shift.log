@@ -1,0 +1,11 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792177555.257008  381311 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792177556.248264  381311 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d2_subpixel_shift ====
+EXP-027_res32pool_control    res 32 + AveragePooling 2 (= 16), rot90  params=400653    ep=43/68 train_acc=0.714 val_acc=0.637 mean_recall=0.631 min_rec=0.235 80s
+EXP-027_res32pool_shift1     res 32 + AveragePooling 2, rot90 + shift params=400653    ep=73/98 train_acc=0.714 val_acc=0.629 mean_recall=0.628 min_rec=0.217 150s
+EXP-027_res32pool_control_seed2 res 32 + AveragePooling 2 (= 16), rot90  params=400653    ep=51/76 train_acc=0.721 val_acc=0.639 mean_recall=0.637 min_rec=0.231 87s
+EXP-027_res32pool_shift1_seed2 res 32 + AveragePooling 2, rot90 + shift params=400653    ep=64/89 train_acc=0.696 val_acc=0.629 mean_recall=0.625 min_rec=0.258 133s
+EXP-027_res32pool_control_seed3 res 32 + AveragePooling 2 (= 16), rot90  params=400653    ep=49/74 train_acc=0.718 val_acc=0.635 mean_recall=0.627 min_rec=0.276 89s
+EXP-027_res32pool_shift1_seed3 res 32 + AveragePooling 2, rot90 + shift params=400653    ep=68/93 train_acc=0.666 val_acc=0.619 mean_recall=0.606 min_rec=0.249 142s

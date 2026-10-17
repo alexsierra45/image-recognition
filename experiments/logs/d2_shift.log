@@ -1,0 +1,11 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792176825.655074  358530 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792176826.677623  358530 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d2_shift ====
+EXP-025_shift1               rot90 + random shift <= 1 px (delivery-2 params=400653    ep=43/68 train_acc=0.620 val_acc=0.598 mean_recall=0.562 min_rec=0.182 84s
+EXP-025_shift2               rot90 + random shift <= 2 px (delivery-2 params=400653    ep=68/93 train_acc=0.606 val_acc=0.585 mean_recall=0.561 min_rec=0.136 115s
+EXP-025_shift1_seed2         rot90 + random shift <= 1 px (delivery-2 params=400653    ep=67/92 train_acc=0.652 val_acc=0.601 mean_recall=0.594 min_rec=0.176 102s
+EXP-025_shift2_seed2         rot90 + random shift <= 2 px (delivery-2 params=400653    ep=127/152 train_acc=0.574 val_acc=0.561 mean_recall=0.531 min_rec=0.136 178s
+EXP-025_shift1_seed3         rot90 + random shift <= 1 px (delivery-2 params=400653    ep=50/75 train_acc=0.641 val_acc=0.600 mean_recall=0.601 min_rec=0.190 86s
+EXP-025_shift2_seed3         rot90 + random shift <= 2 px (delivery-2 params=400653    ep=45/70 train_acc=0.586 val_acc=0.571 mean_recall=0.564 min_rec=0.136 81s

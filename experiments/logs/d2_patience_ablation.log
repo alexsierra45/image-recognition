@@ -1,0 +1,11 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792182473.516762  414876 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792182479.696534  414876 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d2_patience_ablation ====
+EXP-028_rlr8_es15            rot90, only ReduceLROnPlateau patience 6 params=400653    ep=82/97 train_acc=0.814 val_acc=0.642 mean_recall=0.660 min_rec=0.294 201s
+EXP-028_rlr6_es25            rot90, only EarlyStopping patience 15 -> params=400653    ep=40/65 train_acc=0.667 val_acc=0.626 mean_recall=0.601 min_rec=0.244 132s
+EXP-028_rlr8_es15_seed2      rot90, only ReduceLROnPlateau patience 6 params=400653    ep=65/80 train_acc=0.751 val_acc=0.654 mean_recall=0.647 min_rec=0.253 160s
+EXP-028_rlr6_es25_seed2      rot90, only EarlyStopping patience 15 -> params=400653    ep=42/67 train_acc=0.696 val_acc=0.636 mean_recall=0.617 min_rec=0.235 140s
+EXP-028_rlr8_es15_seed3      rot90, only ReduceLROnPlateau patience 6 params=400653    ep=55/70 train_acc=0.727 val_acc=0.632 mean_recall=0.630 min_rec=0.226 140s
+EXP-028_rlr6_es25_seed3      rot90, only EarlyStopping patience 15 -> params=400653    ep=48/73 train_acc=0.718 val_acc=0.634 mean_recall=0.632 min_rec=0.253 149s

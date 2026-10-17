@@ -1,0 +1,14 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792093886.325790   55128 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792093887.331429   55128 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d2_label_smoothing ====
+EXP-022_ls0.05               label smoothing 0.05 on the delivery-2 m params=400653    ep=48/73 train_acc=0.699 val_acc=0.636 mean_recall=0.599 min_rec=0.249 71s
+EXP-022_ls0.1                label smoothing 0.1 on the delivery-2 mo params=400653    ep=47/72 train_acc=0.693 val_acc=0.639 mean_recall=0.611 min_rec=0.271 70s
+EXP-022_ls0.2                label smoothing 0.2 on the delivery-2 mo params=400653    ep=45/70 train_acc=0.696 val_acc=0.640 mean_recall=0.591 min_rec=0.182 66s
+EXP-022_ls0.05_seed2         label smoothing 0.05 on the delivery-2 m params=400653    ep=45/70 train_acc=0.704 val_acc=0.647 mean_recall=0.607 min_rec=0.267 78s
+EXP-022_ls0.1_seed2          label smoothing 0.1 on the delivery-2 mo params=400653    ep=75/100 train_acc=0.739 val_acc=0.640 mean_recall=0.618 min_rec=0.258 104s
+EXP-022_ls0.2_seed2          label smoothing 0.2 on the delivery-2 mo params=400653    ep=52/77 train_acc=0.686 val_acc=0.635 mean_recall=0.583 min_rec=0.182 77s
+EXP-022_ls0.05_seed3         label smoothing 0.05 on the delivery-2 m params=400653    ep=32/57 train_acc=0.683 val_acc=0.630 mean_recall=0.603 min_rec=0.249 63s
+EXP-022_ls0.1_seed3          label smoothing 0.1 on the delivery-2 mo params=400653    ep=56/81 train_acc=0.732 val_acc=0.644 mean_recall=0.623 min_rec=0.258 97s
+EXP-022_ls0.2_seed3          label smoothing 0.2 on the delivery-2 mo params=400653    ep=51/76 train_acc=0.714 val_acc=0.645 mean_recall=0.604 min_rec=0.271 80s

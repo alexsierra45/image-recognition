@@ -1,0 +1,38 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792173299.951860  242244 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792173301.087650  242244 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d2_capacity_reg ====
+EXP-024_w256_dropout0.2      width 256 x 4, dropout0.2 (BN + rot90, p params=400653    ep=34/59 train_acc=0.589 val_acc=0.565 mean_recall=0.530 min_rec=0.154 59s
+EXP-024_w256_dropout0.5      width 256 x 4, dropout0.5 (BN + rot90, p params=400653    ep=61/86 train_acc=0.528 val_acc=0.509 mean_recall=0.454 min_rec=0.091 83s
+EXP-024_w256_l2_1e-4         width 256 x 4, l2_1e-4 (BN + rot90, pati params=400653    ep=77/102 train_acc=0.719 val_acc=0.635 mean_recall=0.628 min_rec=0.240 92s
+EXP-024_w512_none            width 512 x 4, none (BN + rot90, patienc params=1194509   ep=58/83 train_acc=0.747 val_acc=0.643 mean_recall=0.644 min_rec=0.267 98s
+EXP-024_w512_dropout0.2      width 512 x 4, dropout0.2 (BN + rot90, p params=1194509   ep=59/84 train_acc=0.672 val_acc=0.629 mean_recall=0.608 min_rec=0.208 89s
+EXP-024_w512_dropout0.5      width 512 x 4, dropout0.5 (BN + rot90, p params=1194509   ep=75/100 train_acc=0.587 val_acc=0.559 mean_recall=0.509 min_rec=0.131 108s
+EXP-024_w512_l2_1e-4         width 512 x 4, l2_1e-4 (BN + rot90, pati params=1194509   ep=90/115 train_acc=0.737 val_acc=0.650 mean_recall=0.648 min_rec=0.262 118s
+EXP-024_w1024_none           width 1024 x 4, none (BN + rot90, patien params=3961869   ep=73/98 train_acc=0.756 val_acc=0.648 mean_recall=0.653 min_rec=0.303 110s
+EXP-024_w1024_dropout0.2     width 1024 x 4, dropout0.2 (BN + rot90,  params=3961869   ep=52/77 train_acc=0.680 val_acc=0.637 mean_recall=0.626 min_rec=0.244 94s
+EXP-024_w1024_dropout0.5     width 1024 x 4, dropout0.5 (BN + rot90,  params=3961869   ep=55/80 train_acc=0.608 val_acc=0.578 mean_recall=0.535 min_rec=0.163 94s
+EXP-024_w1024_l2_1e-4        width 1024 x 4, l2_1e-4 (BN + rot90, pat params=3961869   ep=89/114 train_acc=0.730 val_acc=0.645 mean_recall=0.636 min_rec=0.244 132s
+EXP-024_w256_dropout0.2_seed2 width 256 x 4, dropout0.2 (BN + rot90, p params=400653    ep=78/103 train_acc=0.664 val_acc=0.628 mean_recall=0.589 min_rec=0.182 116s
+EXP-024_w256_dropout0.5_seed2 width 256 x 4, dropout0.5 (BN + rot90, p params=400653    ep=35/60 train_acc=0.510 val_acc=0.492 mean_recall=0.432 min_rec=0.091 68s
+EXP-024_w256_l2_1e-4_seed2   width 256 x 4, l2_1e-4 (BN + rot90, pati params=400653    ep=56/81 train_acc=0.697 val_acc=0.637 mean_recall=0.615 min_rec=0.253 83s
+EXP-024_w512_none_seed2      width 512 x 4, none (BN + rot90, patienc params=1194509   ep=77/102 train_acc=0.768 val_acc=0.644 mean_recall=0.650 min_rec=0.271 103s
+EXP-024_w512_dropout0.2_seed2 width 512 x 4, dropout0.2 (BN + rot90, p params=1194509   ep=45/70 train_acc=0.652 val_acc=0.621 mean_recall=0.594 min_rec=0.226 80s
+EXP-024_w512_dropout0.5_seed2 width 512 x 4, dropout0.5 (BN + rot90, p params=1194509   ep=56/81 train_acc=0.580 val_acc=0.556 mean_recall=0.511 min_rec=0.158 92s
+EXP-024_w512_l2_1e-4_seed2   width 512 x 4, l2_1e-4 (BN + rot90, pati params=1194509   ep=79/104 train_acc=0.722 val_acc=0.641 mean_recall=0.644 min_rec=0.226 110s
+EXP-024_w1024_none_seed2     width 1024 x 4, none (BN + rot90, patien params=3961869   ep=53/78 train_acc=0.746 val_acc=0.644 mean_recall=0.640 min_rec=0.276 87s
+EXP-024_w1024_dropout0.2_seed2 width 1024 x 4, dropout0.2 (BN + rot90,  params=3961869   ep=84/109 train_acc=0.707 val_acc=0.645 mean_recall=0.630 min_rec=0.267 138s
+EXP-024_w1024_dropout0.5_seed2 width 1024 x 4, dropout0.5 (BN + rot90,  params=3961869   ep=122/147 train_acc=0.631 val_acc=0.597 mean_recall=0.561 min_rec=0.167 178s
+EXP-024_w1024_l2_1e-4_seed2  width 1024 x 4, l2_1e-4 (BN + rot90, pat params=3961869   ep=84/109 train_acc=0.712 val_acc=0.639 mean_recall=0.633 min_rec=0.258 126s
+EXP-024_w256_dropout0.2_seed3 width 256 x 4, dropout0.2 (BN + rot90, p params=400653    ep=74/99 train_acc=0.637 val_acc=0.604 mean_recall=0.565 min_rec=0.181 115s
+EXP-024_w256_dropout0.5_seed3 width 256 x 4, dropout0.5 (BN + rot90, p params=400653    ep=43/68 train_acc=0.522 val_acc=0.507 mean_recall=0.450 min_rec=0.091 76s
+EXP-024_w256_l2_1e-4_seed3   width 256 x 4, l2_1e-4 (BN + rot90, pati params=400653    ep=103/128 train_acc=0.725 val_acc=0.636 mean_recall=0.632 min_rec=0.213 134s
+EXP-024_w512_none_seed3      width 512 x 4, none (BN + rot90, patienc params=1194509   ep=67/92 train_acc=0.753 val_acc=0.641 mean_recall=0.640 min_rec=0.276 106s
+EXP-024_w512_dropout0.2_seed3 width 512 x 4, dropout0.2 (BN + rot90, p params=1194509   ep=36/61 train_acc=0.644 val_acc=0.614 mean_recall=0.582 min_rec=0.182 67s
+EXP-024_w512_dropout0.5_seed3 width 512 x 4, dropout0.5 (BN + rot90, p params=1194509   ep=43/68 train_acc=0.567 val_acc=0.545 mean_recall=0.497 min_rec=0.158 76s
+EXP-024_w512_l2_1e-4_seed3   width 512 x 4, l2_1e-4 (BN + rot90, pati params=1194509   ep=84/109 train_acc=0.726 val_acc=0.638 mean_recall=0.642 min_rec=0.258 118s
+EXP-024_w1024_none_seed3     width 1024 x 4, none (BN + rot90, patien params=3961869   ep=36/61 train_acc=0.691 val_acc=0.637 mean_recall=0.628 min_rec=0.231 70s
+EXP-024_w1024_dropout0.2_seed3 width 1024 x 4, dropout0.2 (BN + rot90,  params=3961869   ep=56/81 train_acc=0.681 val_acc=0.628 mean_recall=0.615 min_rec=0.244 104s
+EXP-024_w1024_dropout0.5_seed3 width 1024 x 4, dropout0.5 (BN + rot90,  params=3961869   ep=84/109 train_acc=0.608 val_acc=0.583 mean_recall=0.538 min_rec=0.181 139s
+EXP-024_w1024_l2_1e-4_seed3  width 1024 x 4, l2_1e-4 (BN + rot90, pat params=3961869   ep=85/110 train_acc=0.736 val_acc=0.643 mean_recall=0.646 min_rec=0.267 132s

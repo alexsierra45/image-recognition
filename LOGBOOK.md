@@ -55,6 +55,13 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-019 | 2026-10-03 | E2 | Augmentation sobre BN sin pesos de clase (3 semillas) | EXP-013_bn_before_lr3x | 0,632 ± 0,005 | 0,617 ± 0,015 | `EXP-019_rot90*` | ejecutado |
 | EXP-020 | 2026-10-03 | E2 | Dropout, L2 y ablación de BN sobre BN + rotaciones (3 semillas) | EXP-019_rot90 | — | sin mejora | `EXP-020_*` | ejecutado |
 | **EXP-021** | 2026-10-03 | E2 | **Modelo de la entrega 2**: BN + rotaciones, entrenamiento más largo | EXP-019_rot90 | **0,643 ± 0,011** | **0,646 ± 0,015** | `EXP-021_final*` | ejecutado |
+| EXP-022 | 2026-10-15 | E2 | Label smoothing ε ∈ {0,05; 0,1; 0,2} (3 semillas) | EXP-021_final | 0,641 ± 0,003 | 0,617 ± 0,006 | `EXP-022_ls0.1*` | ejecutado (descartado) |
+| EXP-023 | 2026-10-15 | E2 | Promedio de las probabilidades de las 3 semillas (sin entrenar) | EXP-021_final | 0,651 | 0,652 | `ensembles/EXP-023_ens_EXP-021` | ejecutado (no concluyente) |
+| EXP-024 | 2026-10-16 | E2 | Capacidad × regularización: anchura {256, 512, 1024} × {nada, Dropout 0,2/0,5, L2 1e-4} (DEC-013) | EXP-021_final | 0,643 ± 0,006 | 0,645 ± 0,003 (mejor celda: 512 + L2) | `EXP-024_*` | ejecutado (se mantiene 4 × 256) |
+| EXP-025 | 2026-10-16 | E2 | Desplazamientos aleatorios de ≤ 1 / ≤ 2 px | EXP-021_final | 0,600 ± 0,001 | 0,585 ± 0,021 | `EXP-025_shift1*` | ejecutado (descartado) |
+| EXP-026 | 2026-10-16 | E2 | TTA con las 4 rotaciones (sin entrenar), por semilla | EXP-021_final | 0,647 ± 0,007 | 0,643 ± 0,010 | `ensembles/EXP-026_tta_*` | ejecutado (descartado) |
+| EXP-027 | 2026-10-16 | E2 | Medio píxel: entrada de 32 + promedio 2×2, con y sin desplazamiento de 1 px | EXP-021_final | 0,626 ± 0,006 | 0,620 ± 0,012 (control 0,631) | `EXP-027_*` | ejecutado (descartado) |
+| EXP-028 | 2026-10-16 | E2 | Ablación de las paciencias de EXP-021: solo RLR 6 → 8 / solo ES 15 → 25 | EXP-019_rot90 | 0,643 ± 0,011 / 0,632 ± 0,005 | 0,646 ± 0,015 / 0,617 ± 0,015 | `EXP-028_*` | ejecutado (todo el salto es la paciencia de RLR) |
 
 ---
 
@@ -518,6 +525,115 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Resultados:** semilla 1: época 82 de 107, mean recall 0,660, val acc 0,642; semilla 2: época 65 de 90, mean recall 0,647, val acc 0,654; semilla 3: época 55 de 80, mean recall 0,630, val acc 0,632. **Media: mean recall 0,646 ± 0,015 · val acc 0,643 ± 0,011 · min recall 0,258** · train acc 0,764.
 - **Conclusión:** a diferencia de EXP-018, **entrenar más sí ayuda aquí** (+2,9 pp sobre `EXP-019_rot90`, con las mejores épocas entre la 55 y la 82): con augmentation la validación sigue subiendo más tarde. Frente al modelo de la entrega 1 (`EXP-010_bs256_sqrt_60ep`: 0,578 ± 0,007 / 0,616 ± 0,006), la regularización suma +6,8 pp de mean recall y +2,7 pp de accuracy. **Es el modelo final de la entrega 2.**
 - **Siguiente paso:** documentos de la entrega 2 (`reports/delivery_02/`).
+- **Corrección (2026-10-16, EXP-028):** «entrenar más» era una mala descripción del cambio. EXP-021 cambió a la vez dos factores (paciencia de EarlyStopping 15 → 25 y de ReduceLROnPlateau 6 → 8; el tope de 300 épocas nunca se alcanza). La ablación muestra que **todo el +2,9 pp es la paciencia de ReduceLROnPlateau**: la lr baja más tarde. La de EarlyStopping no cambia nada.
+
+### EXP-022: Label smoothing sobre el modelo de la entrega 2
+- **Fecha:** 2026-10-15 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-021_final` · **Estado:** ejecutado (descartado)
+- **Por qué:** a petición del usuario ("no estoy obteniendo buenos resultados"). Es la propuesta 4 de `next-ideas`: una regularización de la salida que todavía no se había probado.
+- **Hipótesis:** penalizar la sobreconfianza en entrenamiento reduce la brecha de 12,1 pp sin perder validación.
+- **Cambio:** objetivos $(1-ε)$·one-hot + ε/K (`CategoricalCrossentropy(label_smoothing=ε)`) con ε ∈ {0,05; 0,1; 0,2}. Todo lo demás, como `EXP-021_final`. 3 semillas.
+- **Fundamento:** Szegedy et al. 2016, §7 [R38]; Müller, Kornblith, Hinton 2019 [R39].
+- **Resultados** (3 semillas; brecha = train acc − val acc):
+
+| Variante | val mean recall | val acc | min recall | train acc | Brecha (pp) | Mejor época / épocas |
+|---|---|---|---|---|---|---|
+| Sin label smoothing (base) | 0,646 ± 0,015 | 0,643 ± 0,011 | 0,258 | 0,764 | 12,1 | 67 / 92 |
+| ε = 0,05 | 0,603 ± 0,004 | 0,638 ± 0,008 | 0,255 | 0,695 | 5,7 | 42 / 67 |
+| ε = 0,1 | 0,617 ± 0,006 | 0,641 ± 0,003 | 0,262 | 0,721 | 8,0 | 59 / 84 |
+| ε = 0,2 | 0,593 ± 0,011 | 0,640 ± 0,005 | 0,212 | 0,699 | 5,9 | 49 / 74 |
+
+  Recall por clase, base → ε = 0,1: **Helipad 0,697 → 0,424** (11 imágenes de validación), Storage tank 0,660 → 0,590, Excavator 0,700 → 0,650, Dump truck 0,478 → 0,430; Bus 0,443 → 0,482, Small car 0,812 → 0,846.
+- **Conclusión:**
+  - **Se refuta.** La brecha baja, pero porque baja la accuracy de train. La de validación no cambia y el mean recall baja entre 2,9 y 5,3 pp con las tres intensidades, con poca dispersión entre semillas: es el mismo patrón que Dropout y L2 (EXP-013, EXP-020).
+  - La pérdida se concentra en pocas clases. Solo Helipad aporta unos 2 pp de los 2,9 de ε = 0,1, y en esa clase la diferencia son unas 3 imágenes.
+  - El entrenamiento para antes (mejor época 42-59 frente a 67).
+  - Una posible explicación, no verificada: repartir ε entre todas las clases resta margen a las que tienen pocos ejemplos.
+  - Se mantiene `EXP-021_final`.
+
+### EXP-023: Promedio de las 3 semillas del modelo de la entrega 2
+- **Fecha:** 2026-10-15 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-021_final` (3 semillas por separado) · **Estado:** ejecutado (no concluyente)
+- **Por qué:** a petición del usuario; es la propuesta 1 de `next-ideas`. Las semillas varían mucho: mean recall 0,630-0,660 y train acc 0,73-0,81.
+- **Hipótesis:** promediar los modelos reduce la varianza entre runs [R8 §7.11] y debería superar en más de 1 pp a la media de los modelos por separado.
+- **Cambio:** se promedian las probabilidades softmax de los 3 modelos guardados (`experiments/models/EXP-021_final*.keras`), sin entrenar nada (`tools/ensemble_eval.py`).
+- **Resultados** (`experiments/ensembles/EXP-023_ens_EXP-021.json`):
+  - **Promedio:** val acc **0,651**, mean recall **0,652**, min recall 0,262, train acc 0,786 (brecha 13,5 pp).
+  - **Modelos por separado** (recalculados): 0,660 / 0,647 / 0,630 de mean recall (media 0,646) y 0,642 / 0,654 / 0,633 de accuracy (media 0,643). Coinciden con `experiments.csv`; la semilla 3 difiere en 0,0005 (inferencia en CPU frente a GPU).
+- **Conclusión:**
+  - Mejora +0,6 pp de mean recall y +0,8 pp de accuracy sobre la media de los modelos, pero no llega a la mejor semilla (0,660). No supera el criterio de éxito de 1 pp.
+  - Es una sola medida, con una ganancia menor que el ruido entre semillas (1,5 pp): **no concluyente**.
+  - Triplica el coste de predecir. El modelo entregable sigue siendo uno solo (el del notebook), y el `prediction.json` de la entrega 2 sigue saliendo de él.
+- **Siguiente paso:** quedan dos propuestas que no requieren cambiar el alcance de la entrega: TTA con las 4 rotaciones (IDEA-012) y traslaciones aleatorias (IDEA-013).
+
+### EXP-024: Capacidad × regularización (entrega 2)
+- **Fecha:** 2026-10-16 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-021_final` · **Estado:** ejecutado
+- **Por qué:** DEC-013. Dropout y L2 solo se habían juzgado sobre 4 × 256, una red elegida en la entrega 1 en parte porque las mayores memorizaban.
+- **Hipótesis:** con más capacidad, Dropout y L2 dejan de empujar al subajuste y ayudan [R5].
+- **Cambio** (dos factores a propósito): anchura de las 4 capas ocultas ∈ {256, 512, 1024} × {ninguna, Dropout 0,2, Dropout 0,5, L2 1e-4}. Todo lo demás, como EXP-021. 3 semillas; la celda 256 sin regularización es EXP-021.
+- **Resultados** (val mean recall, media ± desviación típica; entre paréntesis, brecha en accuracy en pp):
+
+| Anchura (parámetros) | Ninguna | Dropout 0,2 | Dropout 0,5 | L2 1e-4 |
+|---|---|---|---|---|
+| 256 (400 653) | **0,646 ± 0,015** (12,1) | 0,561 ± 0,030 (3,1) | 0,445 ± 0,011 (1,8) | 0,625 ± 0,009 (7,8) |
+| 512 (1 194 509) | 0,644 ± 0,005 (11,4) | 0,594 ± 0,013 (3,5) | 0,506 ± 0,007 (2,5) | 0,645 ± 0,003 (8,5) |
+| 1024 (3 961 869) | 0,640 ± 0,013 (8,8) | 0,624 ± 0,008 (5,3) | 0,545 ± 0,014 (3,0) | 0,638 ± 0,007 (8,4) |
+
+- **Conclusión:**
+  - **La interacción existe:** el coste de Dropout frente a la misma anchura sin regularizar baja al crecer la red. Con 0,2 pasa de −8,4 a −5,0 y a −1,7 pp; con 0,5, de −20,1 a −9,5 pp.
+  - **Pero ninguna celda supera a EXP-021** (criterio de DEC-013).
+    - Las redes anchas sin regularizar empatan con ella (0,644 y 0,640) y no memorizan más: con BN y rotaciones, la brecha baja de 12,1 a 8,8 pp con 1024 unidades.
+    - La mejor celda regularizada, 512 + L2 (0,645 ± 0,003), también empata, con menos dispersión entre semillas.
+  - **Se mantiene 4 × 256 sin Dropout ni L2**, que iguala a redes con 3 a 10 veces más parámetros. La conclusión de la entrega ya no depende de la red pequeña.
+  - **Corrección (2026-10-17, CHG-027):** «no memorizan más» era una lectura excesiva de la brecha.
+    - La brecha media de 4 × 256 (12,1 pp) se debe sobre todo a la semilla 1 (17,2 pp, mejor época 82); las otras dos dan 9,6 y 9,5. Las de 4 × 1024 son 10,8, 10,2 y 5,5. La brecha de cada run sigue sobre todo a la época conservada.
+    - La diferencia de brecha entre anchuras no es concluyente. Con la validación empatada, una brecha menor solo significa ajustar menos el entrenamiento, no generalizar mejor. Se elige 4 × 256 por ser el modelo más simple.
+
+### EXP-025: Desplazamientos aleatorios (entrega 2)
+- **Fecha:** 2026-10-16 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-021_final` · **Estado:** ejecutado (descartado) · **Idea:** IDEA-013
+- **Hipótesis:** desplazar la imagen enseña la invarianza a traslaciones [R8 §7.4, §9.2], igual que las rotaciones enseñaron la de orientación.
+- **Cambio:** se añaden a las rotaciones desplazamientos aleatorios de hasta 1 o 2 píxeles en cada eje, con relleno por reflejo (`augment_batch`, op `shiftK`). 3 semillas.
+- **Resultados:**
+  - ≤ 1 px: mean recall 0,585 ± 0,021, val acc 0,600, train acc 0,638, brecha 3,8 pp.
+  - ≤ 2 px: mean recall 0,552 ± 0,018, val acc 0,572, train acc 0,589, brecha 1,6 pp.
+  - Pierden casi todas las clases; Helipad (−24 / −33 pp), Storage tank y Shipping container son las que más.
+- **Conclusión:** **se refuta.** El mean recall cae 6,0 y 9,4 pp y la accuracy de train baja con él: subajuste. A 16 × 16, un píxel es el 6 % del lado y los recortes están encuadrados sobre el objeto, así que el desplazamiento recorta parte de él (explicación plausible, no verificada). EXP-027 comprueba si es el tamaño del desplazamiento.
+
+### EXP-026: Test-time augmentation con las 4 rotaciones (entrega 2)
+- **Fecha:** 2026-10-16 · **Etapa:** ffNN (entrega 2) · **Base:** `EXP-021_final` · **Estado:** ejecutado (descartado) · **Idea:** IDEA-012
+- **Cambio:** cada modelo predice la imagen y sus 3 rotaciones y se promedian las probabilidades (`tools/ensemble_eval.py --tta rot90`). Se mide por semilla; no hay que entrenar. Fundamento: [R40].
+- **Resultados** (`experiments/ensembles/EXP-026_tta_*`):
+  - Mean recall por semilla, sin → con TTA: 0,660 → 0,643, 0,647 → 0,653 y 0,630 → 0,634. Media: 0,646 → **0,643 ± 0,010** (−0,3 pp).
+  - Accuracy: 0,643 → **0,647 ± 0,007** (+0,4 pp).
+- **Conclusión:** no mejora. La semilla 1, la que baja, es la que tiene la época elegida como máximo del mean recall sin TTA: parte de su 0,660 es efecto de esa selección, y cualquier cambio en la predicción lo hace volver hacia la media. Que TTA apenas cambie las métricas sugiere que la red ya responde de forma parecida a las cuatro orientaciones.
+
+### EXP-027: Desplazamiento de medio píxel (entrega 2)
+- **Fecha:** 2026-10-16 · **Etapa:** ffNN, regularización (entrega 2) · **Base:** `EXP-021_final` · **Estado:** ejecutado (descartado)
+- **Hipótesis:** el problema de EXP-025 es el tamaño del desplazamiento; medio píxel podría ayudar.
+- **Cambio:**
+  - Reducir de 224 a 32 por área y promediar después bloques de 2 × 2 equivale a reducir de 224 a 16 (224 / 16 = 14 = 7 × 2). Por tanto, entrada de 32 + `AveragePooling2D(2)` delante de la red (`pool`, clave nueva) equivale a la entrada de 16.
+  - Desplazar 1 px a 32 es desplazar medio píxel a 16.
+  - Control: 32 + pooling sin desplazamiento. Variante: lo mismo con `shift1`. 3 semillas cada una.
+- **Resultados:**
+  - Control: 0,631 ± 0,005, val acc 0,637, train acc 0,718.
+  - Medio píxel: 0,620 ± 0,012, val acc 0,626, train acc 0,692.
+- **Conclusión:**
+  - El control queda 1,5 pp por debajo de EXP-021, del orden del ruido entre semillas. Difieren el redondeo `uint8` de las cachés y la trayectoria del entrenamiento.
+  - Frente al control, el medio píxel cuesta 1,1 pp (dentro del ruido) y no mejora.
+  - **El patrón es monótono:** cuanto mayor el desplazamiento, peor, y siempre bajando el train. A esta resolución, la invarianza a traslaciones no se le puede dar a una red densa a través de los datos; es lo que una CNN aporta en su arquitectura (pesos compartidos y pooling [R8 §9.2]). Puente a la entrega 3.
+- **Siguiente paso:** el modelo final de la entrega 2 sigue siendo `EXP-021_final`. Las vías dentro del alcance de la entrega están agotadas.
+
+### EXP-028: Ablación de las paciencias del modelo final (entrega 2)
+- **Fecha:** 2026-10-16 · **Etapa:** ffNN (entrega 2) · **Base:** `EXP-019_rot90` (EarlyStopping 15, ReduceLROnPlateau 6) · **Estado:** ejecutado
+- **Por qué:** el usuario preguntó de dónde salía el salto de 0,617 a 0,646 tras la augmentation. Era EXP-021, que cambiaba **dos** factores a la vez y lo llamaba «entrenamiento más largo».
+- **Diagnóstico previo, en los historiales:** con rotaciones, la validación oscila mucho entre épocas. Con paciencia 6, ReduceLROnPlateau bajaba la lr en las épocas 14, 27 y 37 (una por semilla); con 8, en la 71, la 43 y la 39. Que el modelo final suba también la media de las 5 últimas épocas (semilla 1: 0,594 → 0,646; semilla 2: 0,608 → 0,646) descarta que el salto sea solo un efecto de elegir el máximo de una curva ruidosa.
+- **Cambio:** un factor cada vez, con 3 semillas: (a) solo ReduceLROnPlateau 6 → 8, con EarlyStopping 15; (b) solo EarlyStopping 15 → 25, con ReduceLROnPlateau 6.
+- **Resultados** (los runs son deterministas):
+  - (a) mean recall 0,646 ± 0,015, val acc 0,643 ± 0,011, mejores épocas 82 / 65 / 55. Idéntico a EXP-021, salvo que para 10 épocas antes.
+  - (b) mean recall 0,617 ± 0,015, val acc 0,632 ± 0,005, mejores épocas 40 / 42 / 48. Idéntico a EXP-019_rot90, salvo que entrena 10 épocas más.
+- **Conclusión:**
+  - **Todo el salto (+2,9 pp) es la paciencia de ReduceLROnPlateau.** Con una validación ruidosa, una paciencia corta confunde el ruido con una meseta y baja la lr antes de tiempo. La paciencia de EarlyStopping no influye.
+  - La ganancia se apoya en las semillas 1 y 2. En la 3, la primera bajada ya llegaba casi en la misma época (37 frente a 39) y no gana nada.
+  - El modelo final no cambia (EXP-021 y la variante (a) dan las mismas mejores épocas; solo difiere cuándo para). Lo que cambia es cómo se explica.
+  - Fundamento: ReduceLROnPlateau reacciona a una métrica ruidosa, y la paciencia es su único filtro frente a ese ruido. Es una explicación empírica a partir de los historiales: no hay una referencia específica.
 
 ---
 
@@ -706,6 +822,8 @@ Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<no
 
 ### ISS-008: EXP-005 describía como permanente el colapso a 224×224 · resuelta (→ corrección en EXP-005)
 EXP-005 decía que a 224×224 "la pérdida de train se queda en ≈ 2,28 desde la época 2 y la accuracy en ≈ 0,21". El historial (`history/EXP-005_r224.json`) muestra que eso dura unas 11 épocas: después la pérdida baja a 2,03 y la train acc llega a 0,315 (el valor de `experiments.csv`). **Detectado** al redactar la fase 2 de la entrega 1 (CHG-018), que ahora habla de "las diez primeras épocas" con la mediana de esas épocas. La conclusión (problema de optimización, no de varianza) no cambia.
+### ISS-012: EXP-021 cambiaba dos factores a la vez y su ganancia se atribuía a «entrenar más» · resuelta (→ EXP-028, CHG-026)
+EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlateau (6 → 8) a la vez. Eso rompe la regla de un factor por experimento, y la bitácora, el informe y las slides atribuían la ganancia a un entrenamiento más largo. El usuario preguntó de dónde salía el salto. La ablación (EXP-028) lo atribuye entero a la paciencia de ReduceLROnPlateau.
 
 ---
 
@@ -764,6 +882,16 @@ Prioridad = impacto esperado / coste. Al probar una idea se crea su EXP y la ide
 - **Qué:** reentrenar la configuración final con batch 16 (lr reescalada por la regla de la raíz) y 3 semillas, y compararla con batch 256.
 - **Por qué:** EXP-007 con batch 16 da 0,587 ± 0,004 frente a 0,578 ± 0,007 con batch 256 (EXP-012). Puede ser el efecto regularizador del ruido de los batches pequeños [R30]. Con regularización explícita (fase 6) o augmentation (fase 8) la diferencia podría desaparecer.
 - **Coste:** ~8 min por run con batch 16. **Éxito:** > 1 pp por encima del batch 256 con 3 semillas.
+
+### IDEA-012: Test-time augmentation con las 4 rotaciones de 90° · probada → EXP-026 (sin mejora)
+- **Qué:** promediar las predicciones de cada imagen y de sus 3 rotaciones, con el modelo de EXP-021 y, combinado con EXP-023, con los 3 modelos.
+- **Por qué:** el modelo se entrenó con rotaciones, y promediar sobre ellas impone también en la predicción la invarianza que se le enseñó. Krizhevsky et al. 2012 promediaban la predicción de 10 recortes de cada imagen de test [R40].
+- **Coste/riesgo:** no hay que entrenar; unos segundos de inferencia. **Éxito:** más de +1 pp de mean recall sobre el mismo modelo sin TTA.
+
+### IDEA-013: Traslaciones aleatorias de ±1-2 píxeles como augmentation · probada → EXP-025, EXP-027 (refutada)
+- **Qué:** una transformación nueva en `augment_batch` que desplaza la imagen de 16×16 (con reflejo en el borde), sobre EXP-021, con 3 semillas.
+- **Por qué:** es la invarianza que más le falta a una red densa [R8 §9.2], y es la única propuesta que ataca su sesgo y no su varianza. Data augmentation: [R8 §7.4].
+- **Coste/riesgo:** ~2 min por run en GPU. Los objetos están centrados en el recorte, así que un desplazamiento grande puede sacar parte del objeto. **Éxito:** más de +1,5 pp de mean recall con 3 semillas.
 
 ### Etapas futuras del curso (para no perderlas de vista)
 - **CNN:** conectividad local, compartición de pesos y equivarianza a traslaciones reducen los parámetros en órdenes de magnitud frente a la ffNN [R8 §9.2].
@@ -826,6 +954,13 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 **Decisión del usuario.** Las slides se presentan guiándose por el informe: los dos documentos usan **las mismas figuras, en el mismo orden**. En el informe, para optimizar el espacio, dos figuras **relacionadas** pueden compartir fila (máximo 2, cada una con su pie y su número); figuras sin relación nunca van juntas. Cada figura se cita en el texto. `check_bundle.py` lo comprueba (CHG-016).
 *Actualización (CHG-018, por las ediciones del usuario en el informe):* el análisis de la parada va en el resultado final, no en la fase 1, así que la normalización va sola. Las filas compartidas quedan en resolución + capacidad (fases 2-3). Orden común: class_distribution, normalisation, resolution_sweep, capacity, activation, lr_sweep, progress, stopping, per_class_recall.
 
+### DEC-013: Prueba de dos factores, capacidad × regularización, sobre el modelo de la entrega 2 (2026-10-16)
+**Decisión del usuario**, tras revisar el método de un factor cada vez: probar la regularización y el Dropout variando la arquitectura, tomar la decisión más adecuada y seguir experimentando.
+- **Motivo:** en la entrega 2, Dropout y L2 solo se juzgaron sobre 4 × 256. Esa red se eligió en la entrega 1 (fase 3) en parte porque las más grandes memorizaban, justo lo que la regularización debe corregir. Dropout está pensado para redes con capacidad de sobra [R5], así que la conclusión «Dropout no ayuda» solo valía para esa red.
+- **Por qué dos factores:** lo que se mide es la interacción. Cambiando un solo factor cada vez, una técnica que solo funciona combinada con otra se infravalora; ya pasó con BatchNorm (+1,3 pp solo, −4,8 pp al quitarlo con augmentation: EXP-013, EXP-020). Es una excepción deliberada a la regla de un factor por experimento. Cada celda de la rejilla sigue comparándose con su base de la misma anchura y sin regularización.
+- **Diseño (EXP-024):** sobre `EXP-021_final`, anchura de las 4 capas ocultas ∈ {256, 512, 1024} × {sin regularización, Dropout 0,2, Dropout 0,5, L2 1e-4}, con 3 semillas. Se mantiene todo lo demás: BN + rotaciones de 90°, lr 3,6e-3 y paciencias 25/8.
+- **Criterio:** se adopta una celda si supera a EXP-021 en más que el ruido entre semillas (~1,5 pp de mean recall) sin perder accuracy. Si no, se mantiene 4 × 256 y la conclusión de la entrega se refuerza: la regularización tampoco ayuda con más capacidad.
+
 ---
 
 ## Referencias externas
@@ -862,6 +997,9 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R30]** Keskar et al. (2017). *On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima*. ICLR.
 - **[R31]** Loshchilov, Hutter (2017). *SGDR: Stochastic Gradient Descent with Warm Restarts*. ICLR. (schedule coseno; citada desde EXP-011, añadida a la lista en CHG-018)
 - **[R32]** Loshchilov, Hutter (2019). *Decoupled Weight Decay Regularization*. ICLR. (AdamW; citada desde EXP-012, añadida a la lista en CHG-018)
+- **[R38]** Szegedy, Vanhoucke, Ioffe, Shlens, Wojna (2016). *Rethinking the Inception Architecture for Computer Vision*. CVPR. (§7: label smoothing)
+- **[R39]** Müller, Kornblith, Hinton (2019). *When Does Label Smoothing Help?* NeurIPS.
+- **[R40]** Krizhevsky, Sutskever, Hinton (2012). *ImageNet Classification with Deep Convolutional Neural Networks*. NeurIPS. (§4.1: promedio de la predicción sobre 10 recortes de cada imagen de test)
 
 ---
 

@@ -399,6 +399,82 @@ def d2_final():
         run(seeded('EXP-021_final', seed), 'EXP-021', 'd2', 'delivery-2 model (BN + rot90), patience 25/8', dict(D2_FINAL, seed=seed))
 
 
+# EXP-021 (3 seeds): 0.646 +- 0.015 mean recall, 0.643 +- 0.011 val acc; train-val gap 12.1 pp. Delivery-2 model.
+
+
+def d2_label_smoothing():
+    # Output regularisation not tried yet: soften the one-hot targets (Szegedy et al. 2016; Mueller et al. 2019).
+    # Base EXP-021 (D2_FINAL); only epsilon changes.
+    for seed in SEEDS:
+        for eps in (0.05, 0.1, 0.2):
+            run(seeded('EXP-022_ls%s' % eps, seed), 'EXP-022', 'd2', 'label smoothing %s on the delivery-2 model' % eps,
+                dict(D2_FINAL, seed=seed, label_smoothing=eps))
+
+
+# EXP-022 (3 seeds): label smoothing 0.05/0.1/0.2 -> 0.603/0.617/0.593 (val acc unchanged, Helipad loses most). Discarded.
+# EXP-023: average of the 3 seeds of EXP-021 -> 0.652 (+0.6 pp, not conclusive).
+
+
+D2_WIDTHS = (256, 512, 1024)
+D2_REGS = [('none', {}), ('dropout0.2', {'dropout': 0.2}), ('dropout0.5', {'dropout': 0.5}), ('l2_1e-4', {'l2': 1e-4})]
+
+
+def d2_capacity_reg():
+    # Capacity x regularisation (DEC-013): Dropout and L2 were judged only on 4 x 256, a network chosen in delivery 1
+    # partly because larger ones memorised. Dropout is meant for networks with capacity to spare (Srivastava et al.).
+    # Two factors ON PURPOSE: the interaction is what is measured. Base EXP-021 (D2_FINAL); 4 hidden layers, only the
+    # width and the regulariser change. w256_none = EXP-021_final (not re-run).
+    for seed in SEEDS:
+        for w in D2_WIDTHS:
+            for tag, reg in D2_REGS:
+                if w == 256 and tag == 'none':
+                    continue
+                run(seeded('EXP-024_w%d_%s' % (w, tag), seed), 'EXP-024', 'd2', 'width %d x 4, %s (BN + rot90, patience 25/8)' % (w, tag),
+                    dict(D2_FINAL, seed=seed, hidden=[w] * 4, **reg))
+
+
+# EXP-024 (3 seeds): the cost of Dropout shrinks with the width (0.2: -8.5 / -5.0 / -1.6 pp at 256 / 512 / 1024), but no
+# cell beats EXP-021 (best: 512 + L2 1e-4, 0.645 +- 0.003; 512 alone 0.644). Kept: 4 x 256, no Dropout, no L2.
+
+
+def d2_shift():
+    # Random translations (IDEA-013): the invariance a dense network lacks most. Base EXP-021; only the shift is added.
+    for seed in SEEDS:
+        for k in (1, 2):
+            run(seeded('EXP-025_shift%d' % k, seed), 'EXP-025', 'd2', 'rot90 + random shift <= %d px (delivery-2 model)' % k,
+                dict(D2_FINAL, seed=seed, augment=['rot90', 'shift%d' % k]))
+
+
+# EXP-025 (3 seeds): random shifts hurt (1 px: 0.585 +- 0.021, 2 px: 0.552 +- 0.018; train acc falls too). At 16 x 16
+# one pixel is 6 % of the image. EXP-026: TTA over the 4 rotations, 0.643 vs 0.646 (no gain).
+
+
+def d2_subpixel_shift():
+    # Was it the size of the shift? 224 -> 32 (area) -> 2 x 2 mean = 224 -> 16 (area), so a 1-px shift on the 32 cache
+    # followed by AveragePooling2D(2) is a half-pixel shift at the model's resolution. Control without shift first:
+    # it must reproduce EXP-021 (up to the uint8 rounding of the caches).
+    base = dict(D2_FINAL, res=32, pool=2)
+    for seed in SEEDS:
+        run(seeded('EXP-027_res32pool_control', seed), 'EXP-027', 'd2', 'res 32 + AveragePooling 2 (= 16), rot90 (control)',
+            dict(base, seed=seed))
+        run(seeded('EXP-027_res32pool_shift1', seed), 'EXP-027', 'd2', 'res 32 + AveragePooling 2, rot90 + shift 1 px at 32 (half a pixel at 16)',
+            dict(base, seed=seed, augment=['rot90', 'shift1']))
+
+
+# EXP-027 (3 seeds): half a pixel (32 + pool 2, shift 1 at 32): 0.620 +- 0.012 vs its control 0.631 +- 0.005. Shifts out.
+
+
+def d2_patience_ablation():
+    # EXP-021 changed two things at once vs EXP-019_rot90: EarlyStopping 15 -> 25 and ReduceLROnPlateau 6 -> 8 (and the
+    # cap 150 -> 300, never reached). The histories point at the lr patience (with the noisy validation of rot90,
+    # patience 6 cut the lr at epoch 14-27). One factor each:
+    for seed in SEEDS:
+        run(seeded('EXP-028_rlr8_es15', seed), 'EXP-028', 'd2', 'rot90, only ReduceLROnPlateau patience 6 -> 8 (ES 15)',
+            dict(D2_FINAL, seed=seed, es_patience=15))
+        run(seeded('EXP-028_rlr6_es25', seed), 'EXP-028', 'd2', 'rot90, only EarlyStopping patience 15 -> 25 (RLR 6)',
+            dict(D2_FINAL, seed=seed, rlr_patience=6))
+
+
 if __name__ == '__main__':
     for name in sys.argv[1:]:
         print('==== %s ====' % name, flush=True)

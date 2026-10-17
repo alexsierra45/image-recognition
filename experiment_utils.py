@@ -40,11 +40,13 @@ DEFAULT_CFG = {
     # model
     'norm': 'raw',            # 'raw' (pixels in [0, 255]) | 'scale' (Rescaling 1/255) | 'standardize' (per-channel train mean/std)
     'input_relu': False,      # the original Activation('relu') right after Flatten (ISS-001)
+    'pool': 1,                # >1: AveragePooling2D(pool) right after the input scaling (res 32 + pool 2 = area to 16: EXP-027)
     'hidden': [],             # widths of the hidden Dense layers
     'activation': 'relu',     # relu | leaky_relu | elu | gelu | selu | tanh
     'leaky_alpha': 0.1,
     'init': None,             # None -> he_normal (ReLU family), lecun_normal (selu), glorot_uniform (tanh)
     'dropout': 0.0, 'l2': 0.0,
+    'label_smoothing': 0.0,   # targets (1 - eps) one-hot + eps / K (EXP-022); 0 -> the plain cross-entropy string loss
     'bn': None,               # None | 'before' (Dense -> BN -> act) | 'after' (Dense -> act -> BN)
     # optimisation
     'optimizer': {'name': 'adam', 'lr': 1e-3, 'beta_1': 0.9, 'beta_2': 0.999, 'epsilon': 1e-8, 'amsgrad': True,
@@ -57,7 +59,7 @@ DEFAULT_CFG = {
     # imbalance and augmentation
     'class_weight': None,     # None | 'inverse' | 'sqrt'
     'oversample': None,       # None | alpha: sample class c with prob proportional to n_c**(1 - alpha) (1 = balanced)
-    'augment': [],            # subset of ['flip', 'rot90', 'color']
+    'augment': [],            # subset of ['flip', 'rot90', 'color', 'shiftK'] (shiftK: random translation by <= K px)
 }
 
 _DATA = {}
@@ -108,6 +110,13 @@ def augment_batch(x, rng, ops):
                     x[i] = x[i, :, ::-1]
                 if rng.random() < 0.5:
                     x[i] = x[i, ::-1, :]
+    shift = max([int(o[5:]) for o in ops if o.startswith('shift')] or [0])
+    if shift:   # random translation by up to `shift` pixels in each axis, reflecting at the border (EXP-025)
+        h, w = x.shape[1:3]
+        pad = np.pad(x, ((0, 0), (shift, shift), (shift, shift), (0, 0)), mode='reflect')
+        for i in range(len(x)):
+            dy, dx = rng.integers(-shift, shift + 1, size=2)
+            x[i] = pad[i, shift + dy:shift + dy + h, shift + dx:shift + dx + w]
     if 'color' in ops:
         c = rng.uniform(0.8, 1.2, size=(len(x), 1, 1, 1)).astype(np.float32)      # contrast
         b = rng.uniform(-20, 20, size=(len(x), 1, 1, 1)).astype(np.float32)       # brightness (uint8 units)
@@ -203,6 +212,8 @@ def build_model(cfg, data):
     elif cfg['norm'] == 'standardize':
         mean, var = channel_stats(data)
         x = layers.Normalization(mean=mean.tolist(), variance=var.tolist())(x)
+    if cfg['pool'] > 1:
+        x = layers.AveragePooling2D(cfg['pool'])(x)
     x = layers.Flatten()(x)
     if cfg['input_relu']:
         x = layers.Activation('relu')(x)
@@ -290,7 +301,9 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
     x, y, tr, va = data['x'], data['y'], data['train'], data['valid']
 
     model = build_model(cfg, data)
-    model.compile(optimizer=build_optimizer(cfg['optimizer']), loss='categorical_crossentropy', metrics=['accuracy'])
+    loss = (keras.losses.CategoricalCrossentropy(label_smoothing=cfg['label_smoothing']) if cfg['label_smoothing']
+            else 'categorical_crossentropy')
+    model.compile(optimizer=build_optimizer(cfg['optimizer']), loss=loss, metrics=['accuracy'])
     sw = class_weights(y[tr], cfg['class_weight']) if cfg['class_weight'] else None
     train_seq = CachedSequence(x, y, tr, cfg['batch_size'], True, cfg['seed'], cfg['augment'], sw, cfg['oversample'])
 
