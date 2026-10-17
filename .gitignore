@@ -22,3 +22,4 @@ cache/
 
 # Paquetes de Overleaf de las entregas (se regeneran con make bundle)
 reports/*/*.zip
+reports/*.zip

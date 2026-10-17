@@ -41,7 +41,8 @@ Para proponer los siguientes pasos, usar el skill `next-ideas`.
 - **Ejecutar un experimento sin interfaz** (CHG-005): `source .venv/bin/activate && python tools/run_notebook.py ffNN_example.ipynb --python .venv/bin/python`, en segundo plano. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU en Windows (ISS-005); con la caché y la GPU, minutos.
 
 ## Entregas (informe + slides para Overleaf)
-- Sistema en `reports/` (CHG-011): `make bundle D=NN` regenera macros, tablas y figuras desde `experiments/` (solo lectura), instala `drafts/` en `overleaf/sections/` sin pisar ediciones y genera el zip. Nueva entrega: comando `/new-delivery <n> <baseline>`.
+- Sistema en `reports/` (CHG-011): `make bundle D=NN` regenera macros, tablas y figuras desde `experiments/` (solo lectura), instala `drafts/` en `reports/overleaf/delivery_NN/sections/` sin pisar ediciones y genera el zip. Nueva entrega: comando `/new-delivery <n> <baseline>`.
+- **Un solo proyecto de Overleaf para todo el curso** (DEC-011): `reports/overleaf/` con `common/` compartido, una carpeta `delivery_NN/` por entrega y sus documentos principales `delivery_NN_report.tex` / `delivery_NN_slides.tex` en la raíz. Las fuentes de cada entrega (`delivery.yaml`, `drafts/`, notas) siguen en `reports/delivery_NN/`. Zip: `reports/overleaf_project.zip`.
 - En los `.tex`, ninguna cifra a mano: `\res{clave}` y tablas de `generated/`. Lo que no se pueda rastrear va a `review_notes.md`.
 - Figuras: mismo estilo que los experimentos (`plot_theme.py`), textos en inglés, PNG (DEC-007). Texto y pies, en español.
 - No hay LaTeX local: se compila en Overleaf (pdfLaTeX).

@@ -1,4 +1,4 @@
-"""Numbers -> LaTeX. Reads experiments/ (read-only) and writes <delivery>/overleaf/generated/:
+"""Numbers -> LaTeX. Reads experiments/ (read-only) and writes reports/overleaf/<delivery>/generated/ (DEC-011):
 results_macros.tex (\\res{key}), tables/*.tex (booktabs), meta.tex, and <delivery>/results_index.json (key -> source).
 
 Usage: python scripts/build_results.py reports/delivery_01
@@ -13,6 +13,8 @@ import shutil
 import sys
 
 import yaml
+
+import project_paths  # noqa: E402  (scripts/ is on sys.path when run as a script)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXP = os.path.join(ROOT, 'experiments')
@@ -176,7 +178,8 @@ TABLE_COLUMNS = {   # column id -> (header, alignment)
     'step': ('Paso', 'c'), 'label': ('Variante', 'l'), 'seeds': ('Semillas', 'c'), 'mean_recall': ('Mean recall', 'c'),
     'val_acc': ('Accuracy', 'c'), 'train_acc': ('Accuracy train', 'c'), 'train_mean_recall': ('Mean recall train', 'c'),
     'min_recall': ('Recall mín.', 'c'), 's_per_epoch': ('s/época', 'c'), 'epochs': ('Mejor época / épocas', 'c'),
-    'inactive': ('Inactivas (\\%)', 'c'), 'params': ('Parámetros', 'r'), 'cap': ('Épocas máx.', 'c')}
+    'inactive': ('Inactivas (\\%)', 'c'), 'params': ('Parámetros', 'r'), 'cap': ('Épocas máx.', 'c'),
+    'gap': ('Brecha (pp)', 'c')}
 
 
 def write_variant_tables(data, cfg, fmt, out):
@@ -202,6 +205,8 @@ def write_variant_tables(data, cfg, fmt, out):
                     cells.append(thousands(data.stat(v, 'params')[0]))
                 elif c == 'cap':
                     cells.append(str(json.loads(data.rows[data.runs(v)[0]]['config'])['epochs']))
+                elif c == 'gap':   # train - validation accuracy, pp (means over the seeds)
+                    cells.append(num(100 * (data.stat(v, 'train_acc')[0] - data.stat(v, 'val_acc')[0]), fmt['pp']))
                 elif c == 's_per_epoch':
                     cells.append(num(data.stat(v, c)[0], 2))
                 else:
@@ -213,7 +218,8 @@ def write_variant_tables(data, cfg, fmt, out):
 
 def history_value(data, spec):
     """delivery.yaml `history_values`: one number from the history of a run, or over the runs of an experiment.
-    op: at (epoch, 1-based) | median_first (n epochs) | std_last (n epochs) | min / max of a val.* field over the runs
+    op: at (epoch, 1-based) | median_first (n epochs) | std_last (n epochs) | first_drop (first epoch with a reduced lr)
+    | min / max of a val.* field over the runs
     whose id starts with `prefix`."""
     op, field = spec['op'], spec['field']
     if op in ('min', 'max'):
@@ -227,6 +233,9 @@ def history_value(data, spec):
     if op == 'median_first':
         s = sorted(h[:spec['n']])
         return (s[(len(s) - 1) // 2] + s[len(s) // 2]) / 2, {'epochs': '1-%d' % spec['n']}
+    if op == 'first_drop':   # first epoch with a reduced learning rate (field: history.learning_rate)
+        k = next((k for k in range(1, len(h)) if h[k] < 0.5 * h[k - 1]), None)
+        return (k + 1 if k is not None else float('nan')), {'stat': 'first epoch with lr < 0.5 x previous'}
     if op == 'std_last':
         s = h[-spec['n']:]
         m = sum(s) / len(s)
@@ -250,7 +259,7 @@ def write_ablation(data, cfg, variants, fmt, out):
 def main(delivery_dir):
     cfg = yaml.safe_load(open(os.path.join(delivery_dir, 'delivery.yaml'), encoding='utf-8'))
     fmt = cfg['format']
-    out = os.path.join(delivery_dir, 'overleaf', 'generated')
+    out = os.path.join(project_paths.delivery_root(delivery_dir), 'generated')
     shutil.rmtree(os.path.join(out, 'tables'), ignore_errors=True)  # generated/ is always rebuilt from scratch
     os.makedirs(os.path.join(out, 'tables'), exist_ok=True)
     data = Data()
@@ -318,6 +327,42 @@ def main(delivery_dir):
         share = sum(h['val']['cm'][t][p] / sum(h['val']['cm'][t]) for h in hs) / len(hs)
         M.add('final-conf-%s-%s' % tuple(n.lower().replace(' ', '-') for n in (cf['actual'], cf['pred'])), num(share, fmt['metric']),
               {'source': 'history/*.json', 'variant': variants['final'], 'field': 'val.cm', 'stat': 'row share, mean over seeds'})
+    for e in cfg.get('ensembles', []):   # experiments/ensembles/<id>.json (tools/ensemble_eval.py): <key>-mean-recall, ...
+        path = os.path.join(EXP, 'ensembles', e['id'] + '.json')
+        with open(path, encoding='utf-8') as ifs:
+            ens = json.load(ifs)
+        src = {'source': 'ensembles/%s.json' % e['id'], 'members': [m['run'] for m in ens['members']]}
+        for name, v in [('mean-recall', ens['val']['mean_recall']), ('val-acc', ens['val']['acc']),
+                        ('min-recall', ens['val']['min_recall']), ('train-acc', ens['train']['acc']),
+                        ('members-mean-recall', sum(m['mean_recall'] for m in ens['members']) / len(ens['members'])),
+                        ('members-val-acc', sum(m['val_acc'] for m in ens['members']) / len(ens['members'])),
+                        ('best-member-mean-recall', max(m['mean_recall'] for m in ens['members']))]:
+            M.add('%s-%s' % (e['key'], name), num(v, fmt['metric']), dict(src, field=name))
+        M.add('%s-gap-acc' % e['key'], num(100 * (ens['train']['acc'] - ens['val']['acc']), fmt['pp']), dict(src, field='train - val acc, pp'))
+        M.add('%s-n-members' % e['key'], str(len(ens['members'])), src)
+        for name, v, w in [('gain', ens['val']['mean_recall'], 'members-mean-recall'), ('gain-acc', ens['val']['acc'], 'members-val-acc')]:
+            mm = sum(m['mean_recall' if w == 'members-mean-recall' else 'val_acc'] for m in ens['members']) / len(ens['members'])
+            M.add('%s-%s' % (e['key'], name), num(100 * (v - mm), fmt['pp']), dict(src, formula='ensemble - mean of the members, pp'))
+    for g in cfg.get('ensemble_groups', []):   # mean +- std over several ensembles/<id>.json (e.g. TTA of each seed)
+        es = [json.load(open(os.path.join(EXP, 'ensembles', i + '.json'), encoding='utf-8')) for i in g['ids']]
+        src = {'source': 'ensembles/*.json', 'ids': g['ids']}
+        for name, vals in [('mean-recall', [e['val']['mean_recall'] for e in es]), ('val-acc', [e['val']['acc'] for e in es]),
+                           ('members-mean-recall', [e['members'][0]['mean_recall'] for e in es]),
+                           ('members-val-acc', [e['members'][0]['val_acc'] for e in es])]:
+            mu = sum(vals) / len(vals)
+            sd = math.sqrt(sum((v - mu) ** 2 for v in vals) / (len(vals) - 1)) if len(vals) > 1 else float('nan')
+            M.add('%s-%s' % (g['key'], name), num(mu, fmt['metric']), dict(src, field=name, stat='mean'))
+            M.add('%s-%s-std' % (g['key'], name), num(sd, fmt['std']), dict(src, field=name, stat='std'))
+        for name, a_, b_ in [('gain', 'mean_recall', 'mean_recall'), ('gain-acc', 'acc', 'val_acc')]:
+            d = sum(e['val'][a_] - e['members'][0][b_] for e in es) / len(es)
+            M.add('%s-%s' % (g['key'], name), num(100 * d, fmt['pp']), dict(src, formula='mean of (with - without), pp'))
+    for cr in cfg.get('class_recalls', []):   # validation recall of one class for any variant: <key>-recall-<class>
+        names, rec, support = data.recall_per_class(variants[cr['variant']])
+        k = names.index(cr['class'])
+        slug = cr['class'].lower().replace(' ', '-')
+        M.add('%s-recall-%s' % (cr['variant'], slug), num(rec[k], fmt['metric']),
+              {'source': 'history/*.json', 'variant': variants[cr['variant']], 'field': 'val.recall', 'class': cr['class']})
+        M.add('valid-count-%s' % slug, str(support[k]), {'source': 'history/*.json', 'field': 'row sum of val.cm', 'class': cr['class']})
 
     # Seed noise: pooled standard deviation of the mean recall over every variant with >= 3 seeds
     groups = {}

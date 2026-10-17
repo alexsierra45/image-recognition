@@ -793,6 +793,29 @@ A petición del usuario ("preparar todo lo relativo a la segunda entrega"; `revi
 - **Ejecutado** de arriba abajo (`tools/run_notebook.py`, log en `experiments/logs/notebook_EXP-021.log`): run `EXP-021_20261015-165309`, **idéntico** al run del barrido `EXP-021_final` (semilla 1): mejor época 82 de 107, val acc 0,6421, mean recall 0,6600, min recall 0,2941. `model.keras` y `prediction.json` (2 365 imágenes) salen ahora de este modelo; `prediction.json` se copia a `reports/delivery_02/` (el de la entrega 1 sigue en `reports/delivery_01/`). La versión del notebook de la entrega 1 queda en el commit `d557b09`.
 - Antes de esta tarea, el notebook tenía un cambio sin commitear que era solo de formato (VS Code guardó las celdas como listas de líneas): sin cambios de código ni de salidas.
 
+### CHG-021: Las entregas pasan a un único proyecto de Overleaf, `reports/overleaf/` (2026-10-15)
+Por DEC-011. No cambia el contenido de ninguna entrega.
+- **Migración** (con `git mv`, para conservar la historia):
+  - `common/` estaba repetido, idéntico, en la plantilla y en las dos entregas. Queda una sola copia, en `reports/overleaf/common/`.
+  - `figures/`, `generated/` y `sections/` de cada entrega pasan de `reports/delivery_NN/overleaf/` a `reports/overleaf/delivery_NN/`.
+  - Los `report.tex` y `slides.tex` de cada entrega pasan a `reports/overleaf/delivery_NN_report.tex` y `delivery_NN_slides.tex`, con las dos líneas de rutas de búsqueda.
+  - Las fuentes de cada entrega (`delivery.yaml`, `drafts/`, `figure_specs.yaml`, notas, `.build_state.json`) siguen en `reports/delivery_NN/`.
+  - El `confusion_matrix.png` sin versionar de la entrega 1 se movió con su carpeta.
+  - `ablation.tex` de la entrega 2 estaba borrado desde CHG-020 y se quita del índice.
+- **Scripts:**
+  - Módulo nuevo `scripts/project_paths.py`: la estructura del proyecto y la generación de los documentos principales desde la plantilla, sin sobrescribir.
+  - `build_results.py`, `build_figures.py` y `draft_sections.py` escriben en `reports/overleaf/delivery_NN/`. `draft_sections.py` crea además los documentos principales que falten.
+  - `check_bundle.py` resuelve las rutas como LaTeX (la raíz y después el `\input@path` del documento). Da error si un documento principal no incluye su carpeta o si hay `sections/`, `generated/` o `figures/` en la raíz.
+  - `pack_bundle.py` genera `reports/overleaf_project.zip` con todo el proyecto, e indica qué subir para añadir la entrega a un proyecto existente.
+  - Se borran los zips por entrega; `.gitignore` ignora `reports/*.zip`.
+- **Documentación:** `reports/template/README.md`, `.claude/commands/new-delivery.md`, `Makefile` y CLAUDE.md.
+- **Verificado:** primera compilación real de los documentos. Los cuatro compilan desde el zip con Tectonic 0.15 (motor XeTeX, descargado solo en el scratchpad de la sesión; Overleaf usará pdfLaTeX), sin marcas de figura, tabla ni macro ausente.
+  - Informe de la entrega 1: 11 páginas, igual que el PDF entregado.
+  - Informe de la entrega 2: 9 páginas.
+  - Slides: 14 páginas cada una. El PDF entregado de la entrega 1 tiene 13 y no tiene el frame de referencias, así que esa edición se hizo en Overleaf y no está en el repositorio.
+  - `check_bundle.py`: mismos resultados que antes de migrar en las dos entregas. Generar los documentos principales de una entrega nueva (prueba con `delivery_99`, borrada después) funciona y no sobrescribe.
+- **Compilar destapó ISS-011**, resuelta aquí.
+
 ---
 
 ## Incidencias (ISS)
@@ -822,6 +845,9 @@ Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<no
 
 ### ISS-008: EXP-005 describía como permanente el colapso a 224×224 · resuelta (→ corrección en EXP-005)
 EXP-005 decía que a 224×224 "la pérdida de train se queda en ≈ 2,28 desde la época 2 y la accuracy en ≈ 0,21". El historial (`history/EXP-005_r224.json`) muestra que eso dura unas 11 épocas: después la pérdida baja a 2,03 y la train acc llega a 0,315 (el valor de `experiments.csv`). **Detectado** al redactar la fase 2 de la entrega 1 (CHG-018), que ahora habla de "las diez primeras épocas" con la mediana de esas épocas. La conclusión (problema de optimización, no de varianza) no cambia.
+### ISS-010: `check_bundle.py` no detectaba `\res{}` con `$` dentro de modo matemático · resuelta (→ CHG-020)
+Algunas macros ya traen su propio modo matemático, como la lr (`$3{,}6\cdot 10^{-3}$`) o el factor L2. Escribirlas dentro de `$...$` anida los `$` y rompe la compilación en pdfLaTeX, y la comprobación no lo veía. Apareció al redactar la entrega 2 (`$\lambda = \res{l2-1e-5-l2}$`). También se evitan los números con coma decimal dentro de `$...$` (`$p = 0,5$`), porque en modo matemático la coma añade un espacio.
+
 ### ISS-012: EXP-021 cambiaba dos factores a la vez y su ganancia se atribuía a «entrenar más» · resuelta (→ EXP-028, CHG-026)
 EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlateau (6 → 8) a la vez. Eso rompe la regla de un factor por experimento, y la bitácora, el informe y las slides atribuían la ganancia a un entrenamiento más largo. El usuario preguntó de dónde salía el salto. La ablación (EXP-028) lo atribuye entero a la paciencia de ReduceLROnPlateau.
 
@@ -954,6 +980,19 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 **Decisión del usuario.** Las slides se presentan guiándose por el informe: los dos documentos usan **las mismas figuras, en el mismo orden**. En el informe, para optimizar el espacio, dos figuras **relacionadas** pueden compartir fila (máximo 2, cada una con su pie y su número); figuras sin relación nunca van juntas. Cada figura se cita en el texto. `check_bundle.py` lo comprueba (CHG-016).
 *Actualización (CHG-018, por las ediciones del usuario en el informe):* el análisis de la parada va en el resultado final, no en la fase 1, así que la normalización va sola. Las filas compartidas quedan en resolución + capacidad (fases 2-3). Orden común: class_distribution, normalisation, resolution_sweep, capacity, activation, lr_sweep, progress, stopping, per_class_recall.
 
+### DEC-011: Un solo proyecto de Overleaf para todas las entregas (2026-10-15)
+**Decisión del usuario.** No quiere crear un proyecto de Overleaf por entrega, sino tener todo en uno, organizado y con cada entrega separada.
+- **Alternativas:**
+  - (a) Cada documento principal dentro de la carpeta de su entrega. Overleaf no lo admite: el documento principal tiene que estar en la raíz [R36].
+  - (b) Un documento principal en la raíz que cargue el de la subcarpeta con el paquete `import` [R36].
+  - (c) **Elegida:** los documentos principales en la raíz (`delivery_NN_report.tex`, `delivery_NN_slides.tex`), y cada uno añade `delivery_NN/` a las rutas de búsqueda de LaTeX: `\input@path` para `\input` e `\IfFileExists`, y `\graphicspath` para las imágenes.
+- **Por qué (c):** las secciones no cambian (siguen usando `figures/...` y `generated/...`), `common/` queda en una sola copia y cada documento solo carga las macros `\res{}` de su entrega, así que las claves repetidas entre entregas no chocan. `\graphicspath` hace falta porque en Beamer `\includegraphics` no encontraba las figuras solo con `\input@path`; se vio al compilar.
+- **Restricción:** no puede haber carpetas `sections/`, `generated/` ni `figures/` en la raíz del proyecto, porque LaTeX busca primero allí.
+- **Subir una entrega nueva:** con el botón Upload del proyecto existente se sube la carpeta `delivery_NN/` y los dos `.tex` principales. Overleaf conserva la estructura de las carpetas subidas [R37].
+
+### DEC-012: La matriz de confusión del modelo final, siempre en su propia diapositiva antes de las conclusiones (2026-10-15)
+**Regla del usuario, para todas las entregas.** En las slides, la matriz de confusión del modelo final va sola en el frame que precede a "Conclusiones…". Por DEC-010, la misma figura va también en el informe, al final del resultado final. Se usa la media de las matrices de las semillas normalizadas por filas: es la que cita el texto (`final-conf-*`). `check_bundle.py` da error si falta, y la plantilla ya trae el frame (CHG-022).
+
 ### DEC-013: Prueba de dos factores, capacidad × regularización, sobre el modelo de la entrega 2 (2026-10-16)
 **Decisión del usuario**, tras revisar el método de un factor cada vez: probar la regularización y el Dropout variando la arquitectura, tomar la decisión más adecuada y seguir experimentando.
 - **Motivo:** en la entrega 2, Dropout y L2 solo se juzgaron sobre 4 × 256. Esa red se eligió en la entrega 1 (fase 3) en parte porque las más grandes memorizaban, justo lo que la regularización debe corregir. Dropout está pensado para redes con capacidad de sobra [R5], así que la conclusión «Dropout no ayuda» solo valía para esa red.
@@ -997,6 +1036,8 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R30]** Keskar et al. (2017). *On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima*. ICLR.
 - **[R31]** Loshchilov, Hutter (2017). *SGDR: Stochastic Gradient Descent with Warm Restarts*. ICLR. (schedule coseno; citada desde EXP-011, añadida a la lista en CHG-018)
 - **[R32]** Loshchilov, Hutter (2019). *Decoupled Weight Decay Regularization*. ICLR. (AdamW; citada desde EXP-012, añadida a la lista en CHG-018)
+- **[R36]** Overleaf. *My main file is in a subfolder, but this is not allowed on Overleaf* (documentación de ayuda). https://www.overleaf.com/help/243-my-main-file-is-in-a-subfolder-but-this-is-not-allowed-on-overleaf-but-i-dont-want-to-change-my-folder-structure-and-slash-input-paths
+- **[R37]** Overleaf. *Uploading files to a project* (documentación). https://docs.overleaf.com/managing-projects-and-files/adding-files-to-a-project/uploading-files-to-a-project
 - **[R38]** Szegedy, Vanhoucke, Ioffe, Shlens, Wojna (2016). *Rethinking the Inception Architecture for Computer Vision*. CVPR. (§7: label smoothing)
 - **[R39]** Müller, Kornblith, Hinton (2019). *When Does Label Smoothing Help?* NeurIPS.
 - **[R40]** Krizhevsky, Sutskever, Hinton (2012). *ImageNet Classification with Deep Convolutional Neural Networks*. NeurIPS. (§4.1: promedio de la predicción sobre 10 recortes de cada imagen de test)

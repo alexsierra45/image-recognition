@@ -1,4 +1,5 @@
-% Resultado final (~1 min): recall por clase o matriz de confusión.
+% Resultado final (~1 min): recall por clase. Después, SIEMPRE, la matriz de confusión sola, justo antes de las
+% conclusiones (DEC-012; check_bundle.py lo comprueba).
 \begin{frame}{Resultado final}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.35\textwidth}
@@ -17,4 +18,13 @@
     \end{column}
   \end{columns}
   \speakernote{1}{\todoslot{qué decir}}
+\end{frame}
+
+\begin{frame}{Matriz de confusión}
+  \begin{figure}
+    \centering
+    \safegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{figures/confusion.png}{Matriz de confusión}
+    \caption{\footnotesize \figcaptionshort{confusion}}
+  \end{figure}
+  \speakernote{1}{\todoslot{qué pares de clases se confunden y por qué}}
 \end{frame}

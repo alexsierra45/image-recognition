@@ -71,8 +71,9 @@
   layout: full
   caption_es: "Recall de validación por clase: baseline frente al modelo final (media de 3 semillas)."
 
-- id: confusion
+- id: confusion                        # ALWAYS: its own slide, right before the conclusions (DEC-012)
   type: confusion
-  select: {run: EXP-018_final}          # seed 1, the model of the notebook
+  select: {variant: EXP-018_final}      # mean of the row-normalised matrices of its seeds ({run: ...} = one run)
   layout: full
-  caption_es: "Matriz de confusión de validación del modelo final (semilla 1), normalizada por filas."
+  caption_es: "Matriz de confusión de validación del modelo final, normalizada por filas (media de 3 semillas)."
+  caption_slides_es: "Validación, normalizada por filas (media de 3 semillas)."

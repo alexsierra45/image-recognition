@@ -1,12 +1,14 @@
 """Checks an Overleaf bundle without compiling it (no LaTeX installed locally).
 
-Errors block the bundle; warnings are reported. Usage: python scripts/check_bundle.py reports/delivery_01
+Errors block the bundle; warnings are reported. Usage: python scripts/check_bundle.py reports/delivery_01 [project_root]
 """
 import os
 import re
 import shutil
 import subprocess
 import sys
+
+import project_paths
 
 ALLOWED_PACKAGES = {
     'inputenc', 'fontenc', 'babel', 'amsmath', 'amssymb', 'graphicx', 'booktabs', 'xcolor', 'geometry', 'hyperref',
@@ -39,11 +41,15 @@ def read(path):
         return ifs.read()
 
 
+SEARCH_PATH = []   # folders LaTeX searches after the project root (\\input@path of the main document, DEC-011)
+
+
 def resolve(root, name, exts):
-    for e in [''] + exts:
-        p = os.path.join(root, name + e)
-        if os.path.isfile(p):
-            return p
+    for d in [root] + SEARCH_PATH:
+        for e in [''] + exts:
+            p = os.path.join(d, name + e)
+            if os.path.isfile(p):
+                return p
     return None
 
 
@@ -71,7 +77,14 @@ def defined_keys(path, prefix):
     return set(re.findall(r'\\csname %s@([^\\]+)\\endcsname' % prefix, read(path)))
 
 
-def check_text(root, path, rep, res_keys, fig_keys, labels, refs):
+def math_keys(path, prefix):
+    """Keys whose value already carries $...$ (e.g. lr = $3{,}6\\cdot 10^{-3}$): they cannot go inside math mode."""
+    if not os.path.exists(path):
+        return set()
+    return {k for k, v in re.findall(r'\\csname %s@([^\\]+)\\endcsname\{(.*)\}' % prefix, read(path)) if '$' in v}
+
+
+def check_text(root, path, rep, res_keys, fig_keys, labels, refs, res_math=frozenset()):
     rel = os.path.relpath(path, root)
     raw = read(path)
     text = strip_comments(raw)
@@ -87,6 +100,12 @@ def check_text(root, path, rep, res_keys, fig_keys, labels, refs):
     for k in re.findall(r'\\res\{([^}]+)\}', text):
         if k not in res_keys:
             rep.err('%s: \\res{%s} is not defined in generated/results_macros.tex' % (rel, k))
+    # \res{} with a $...$ value inside inline math -> nested $ (breaks pdfLaTeX)
+    for i, seg in enumerate(re.split(r'(?<!\\)\$', text)):
+        if i % 2:
+            for k in re.findall(r'\\res\{([^}]+)\}', seg):
+                if k in res_math:
+                    rep.err('%s: \\res{%s} is inside math mode but its value already has $...$' % (rel, k))
     for k in re.findall(r'\\figcaption\{([^}]+)\}', text):
         if k not in fig_keys:
             rep.err('%s: \\figcaption{%s} is not defined in generated/figure_captions.tex' % (rel, k))
@@ -145,6 +164,7 @@ def slide_captions(root, frame):
     """Plain-text length of each \\caption in a frame, with \\figcaptionshort / \\figcaption / \\res resolved."""
     defs = {}
     for name in ('generated/figure_captions.tex', 'generated/results_macros.tex'):
+        name = os.path.relpath(resolve(root, name, []) or os.path.join(root, name), root)
         path = os.path.join(root, name)
         if os.path.exists(path):
             for m in re.finditer(r'\\csname (figcapshort|figcap|res)@([^\\]+)\\endcsname\{(.*)\}\s*$', read(path), flags=re.M):
@@ -192,6 +212,22 @@ def check_slides(files_text, rep, root=None):
     return len(content), total
 
 
+def check_confusion_slide(files_text, rep):
+    """User rule (DEC-012): the confusion matrix always gets a slide of its own, right before the conclusions."""
+    frames = [f for f in re.findall(r'\\begin\{frame\}(.*?)\\end\{frame\}', files_text, flags=re.S) if '\\titlepage' not in f]
+    titles = [(re.search(r'^\s*\{([^}]*)\}', f) or re.search(r'()', '')).group(1) for f in frames]
+    concl = [i for i, t in enumerate(titles) if t.lower().startswith('conclusiones')]
+    if not concl:
+        rep.err('slides: no frame titled "Conclusiones..." (the confusion matrix slide goes right before it)')
+        return
+    i = concl[0]
+    prev = frames[i - 1] if i > 0 else ''
+    figs = FIG_RE.findall(prev)
+    if figs != ['confusion']:
+        rep.err('slides: the frame right before "%s" must show only figures/confusion.png (found: %s)'
+                % (titles[i], ', '.join(figs) or 'no figure'))
+
+
 def check_report_length(files_text, rep):
     body = re.sub(r'\\(res|input|include|label|ref|cite|includegraphics|safegraphics|safetable|figcaption|bibitem)(\[[^\]]*\])?\{[^}]*\}', ' x ', files_text)
     body = re.sub(r'\\[a-zA-Z]+\*?(\[[^\]]*\])?', ' ', body)
@@ -219,9 +255,9 @@ def figure_sequence(root, main_file):
     return seq
 
 
-def check_parity(root, rep):
+def check_parity(root, rep, mains):
     """Report and slides tell the same story: the same figures, in the same order (DEC-010)."""
-    rpt, sld = figure_sequence(root, 'report.tex'), figure_sequence(root, 'slides.tex')
+    rpt, sld = figure_sequence(root, mains['report']), figure_sequence(root, mains['slides'])
     for f in sld:
         if f not in rpt:
             rep.err('figure "%s" is in the slides but not in the report' % f)
@@ -236,9 +272,9 @@ def check_parity(root, rep):
     return 'figures (same order in both): %s' % ', '.join(common_s)
 
 
-def check_report_figures(root, rep):
+def check_report_figures(root, rep, main='report.tex'):
     """Report: every figure float holds at most 2 images (one row) and every figure label is cited with \\ref."""
-    text = '\n'.join(strip_comments(read(p)) for p in collect(root, 'report.tex', Report()))
+    text = '\n'.join(strip_comments(read(p)) for p in collect(root, main, Report()))
     for fl in re.findall(r'\\begin\{figure\}.*?\\end\{figure\}', text, flags=re.S):
         n = len(FIG_RE.findall(fl))
         if n > 2:
@@ -251,20 +287,34 @@ def check_report_figures(root, rep):
         rep.err('report: figure \\label{%s} is never cited with \\ref in the text' % l)
 
 
-def main(delivery_dir):
-    root = os.path.join(delivery_dir, 'overleaf')
+def check_project(root, rep):
+    """The single Overleaf project (DEC-011): no folder at its root that would shadow a delivery's folders."""
+    for d in ('sections', 'generated', 'figures'):
+        if os.path.isdir(os.path.join(root, d)):
+            rep.err('%s/ at the project root would shadow the folders of every delivery (\\input@path searches the root first)' % d)
+
+
+def main(delivery_dir, root=project_paths.PROJECT):
     rep = Report()
-    gen = os.path.join(root, 'generated')
+    mains = {k: project_paths.main_file(delivery_dir, k) for k in project_paths.KINDS}
+    gen = os.path.join(root, project_paths.name(delivery_dir), 'generated')
+    check_project(root, rep)
+    for kind, main_file in mains.items():
+        if os.path.exists(os.path.join(root, main_file)):
+            SEARCH_PATH[:] = project_paths.search_path(root, main_file)
+            if os.path.join(root, project_paths.name(delivery_dir) + '/') not in SEARCH_PATH:
+                rep.err('%s does not add %s/ to \\input@path' % (main_file, project_paths.name(delivery_dir)))
     res_keys = defined_keys(os.path.join(gen, 'results_macros.tex'), 'res')
     fig_keys = defined_keys(os.path.join(gen, 'figure_captions.tex'), 'figcap')
+    res_math = math_keys(os.path.join(gen, 'results_macros.tex'), 'res')
     summary = []
-    for main_file, kind in [('report.tex', 'report'), ('slides.tex', 'slides')]:
+    for kind, main_file in mains.items():
         if not os.path.exists(os.path.join(root, main_file)):
             rep.err('%s is missing' % main_file)
             continue
         labels, refs, texts = set(), set(), []
         for path in collect(root, main_file, rep):
-            texts.append(check_text(root, path, rep, res_keys, fig_keys, labels, refs))
+            texts.append(check_text(root, path, rep, res_keys, fig_keys, labels, refs, res_math))
         for r in sorted(refs - labels):
             rep.err('%s: \\ref{%s} has no \\label' % (main_file, r))
         allt = '\n'.join(texts)
@@ -272,15 +322,16 @@ def main(delivery_dir):
                               if os.sep + 'sections' + os.sep in p)
         if kind == 'slides':
             n, total = check_slides(allt, rep, root)
+            check_confusion_slide(allt, rep)
             summary.append('slides: %d content frames, speaker notes %.1f min' % (n, total))
         else:
             summary.append(check_report_length(body_text, rep))
-    if os.path.exists(os.path.join(root, 'report.tex')) and os.path.exists(os.path.join(root, 'slides.tex')):
-        summary.append(check_parity(root, rep))
-        check_report_figures(root, rep)
+    if all(os.path.exists(os.path.join(root, m)) for m in mains.values()):
+        summary.append(check_parity(root, rep, mains))
+        check_report_figures(root, rep, mains['report'])
     for tool in ['tectonic', 'latexmk']:
         if shutil.which(tool):
-            for main_file in ['report.tex', 'slides.tex']:
+            for main_file in mains.values():
                 cmd = [tool, main_file] if tool == 'tectonic' else [tool, '-pdf', '-interaction=nonstopmode', main_file]
                 r = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
                 (rep.err if r.returncode else summary.append)('%s %s: %s' % (tool, main_file, 'failed' if r.returncode else 'ok'))
@@ -297,4 +348,4 @@ def main(delivery_dir):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1]))
+    sys.exit(main(sys.argv[1], *sys.argv[2:3]))   # optional 2nd argument: another project root (tests)

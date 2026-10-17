@@ -26,15 +26,26 @@ Va en `reports/template/`; cada entrega nueva es una copia de esta carpeta.
 
 ## Estructura
 
+Todas las entregas comparten **un único proyecto de Overleaf**, `reports/overleaf/` (DEC-011):
+
 ```
-common/        shared_packages, slides_style, report_style, static_meta,
-               placeholders, results_interface   (estables)
-generated/     meta.tex, results_macros.tex, figure_captions.tex, tables/   (SE REGENERA siempre)
-figures/       figuras curadas en PNG                 (SE REGENERA siempre)
-sections/      slides_01..07_*.tex y report_01..06_*.tex   (texto: editable)
-slides.tex     ensambla la presentación
-report.tex     ensambla el informe
+reports/overleaf/
+  common/                  shared_packages, slides_style, report_style, static_meta,
+                           placeholders, results_interface   (estables; una sola copia para todas las entregas)
+  delivery_NN_report.tex   ensambla el informe de la entrega NN   (documentos principales: en la raíz,
+  delivery_NN_slides.tex   ensambla la presentación               Overleaf no los admite en subcarpetas)
+  delivery_NN/
+    generated/             meta.tex, results_macros.tex, figure_captions.tex, tables/   (SE REGENERA siempre)
+    figures/               figuras curadas en PNG                 (SE REGENERA siempre)
+    sections/              slides_01..07_*.tex y report_01..06_*.tex   (texto: editable)
 ```
+
+Cada documento principal se crea a partir de `template/overleaf/report.tex` o `slides.tex`, con dos líneas tras
+`\documentclass` que añaden `delivery_NN/` a las rutas de búsqueda de LaTeX (`\input@path` para `\input` e
+`\IfFileExists`, `\graphicspath` para las imágenes). Así las secciones siguen usando rutas relativas
+(`figures/...`, `generated/...`) y las entregas no se pisan: cada documento solo carga las macros de la suya. En la
+raíz del proyecto no puede haber carpetas `sections/`, `generated/` ni `figures/` (taparían las de las entregas;
+`check_bundle.py` lo comprueba).
 
 Fuera del paquete de Overleaf, cada entrega tiene `delivery.yaml`, `figure_specs.yaml`, `drafts/` (borradores de
 las secciones que escribe Claude; `make sections D=NN` los instala en `sections/` sin pisar los editados a mano),
@@ -71,6 +82,14 @@ las secciones que escribe Claude; `make sections D=NN` los instala en `sections/
    la presentación). En el informe, como mucho 2 figuras por fila y solo si están relacionadas, cada una con su
    `\caption` y `\label` (dos `minipage` en un `figure`); toda figura se cita con `\ref`. `check_bundle.py` lo comprueba.
 10. Nombres de archivo en inglés; texto en español (acentos con utf8, igual que la original).
+11. **Matriz de confusión en su propia diapositiva, justo antes de las conclusiones** (DEC-012, regla del usuario):
+    figura `confusion` (`select: {variant: <final>}`: media de las matrices normalizadas por filas de sus semillas),
+    sola en el frame que precede a "Conclusiones…". Por la regla 9 también va en el informe, al final del resultado
+    final. `check_bundle.py` da error si falta.
+12. **Una sola convención de métricas** (CHG-026): las variantes se comparan por *mean recall*, de validación y de
+    train (la métrica con la que se decide; en las figuras de tipo `strength`, `options.metric: mean_recall`). La
+    brecha train − validación y las curvas por época van en *accuracy*, la única métrica de train registrada por época.
+    Se dice una vez en "Objetivo y datos" y en los pies de las curvas por época.
 
 ## Qué debe rellenar Claude Code al crear una entrega
 
@@ -78,12 +97,17 @@ las secciones que escribe Claude; `make sections D=NN` los instala en `sections/
   `\DeliveryShortTitle`, `\DeliverySubtitle`, `\DeliveryDate` (`\today` o fecha fija).
 - Sustituir cada `\todoslot{...}` por contenido respaldado por la memoria y los logs.
 - Quitar o añadir frames de decisión y secciones según la entrega (el esqueleto es una guía, no un molde rígido).
-- Si no hay referencias: vaciar `slides_07_references.tex` y borrar las líneas de referencias en `slides.tex`.
+- Si no hay referencias: vaciar `slides_07_references.tex` y borrar las líneas de referencias en `delivery_NN_slides.tex`.
 
 ## Uso en Overleaf
 
-Subir como proyecto (zip). Elegir `slides.tex` o `report.tex` como documento principal
-(menú del proyecto), compilador pdfLaTeX.
+`make bundle D=NN` genera `reports/overleaf_project.zip`, con todo el proyecto (todas las entregas).
+- **La primera vez:** New Project → Upload Project con el zip.
+- **Entregas siguientes, en el mismo proyecto:** con el botón Upload del árbol de archivos, subir la carpeta
+  `delivery_NN/` (conserva su estructura) y los dos archivos `delivery_NN_report.tex` y `delivery_NN_slides.tex`.
+  `common/` solo si cambió.
+- **Compilar:** abrir `delivery_NN_report.tex` o `delivery_NN_slides.tex` y pulsar Recompile (Overleaf compila el
+  archivo abierto si tiene `\documentclass`; también se puede fijar en Menú → Main document). Compilador pdfLaTeX.
 
 ## Estado de verificación
 

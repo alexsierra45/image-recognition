@@ -1,7 +1,7 @@
 """Curated figures for a delivery, redrawn from experiments/ (read-only) following <delivery>/figure_specs.yaml.
 
-Same style as the experiment plots (plot_theme.py), English labels, PNG. Writes <delivery>/overleaf/figures/<id>.png,
-<delivery>/overleaf/generated/figure_captions.tex (\\figcaption{id}: Spanish caption + selection note) and
+Same style as the experiment plots (plot_theme.py), English labels, PNG. Writes reports/overleaf/<delivery>/figures/<id>.png,
+reports/overleaf/<delivery>/generated/figure_captions.tex (\\figcaption{id}: Spanish caption + selection note) and
 <delivery>/figure_log.md (what was included / omitted and why).
 
 Usage: python scripts/build_figures.py reports/delivery_01
@@ -18,6 +18,7 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import plot_style as ps  # noqa: E402
 from build_results import ROOT, Data, tex  # noqa: E402
+import project_paths  # noqa: E402
 
 C = ps.CONCEPT
 
@@ -149,12 +150,16 @@ def fig_capacity(data, spec):
 
 
 def fig_strength(data, spec):
+    """Validation curve of one regulariser: validation (solid) and train (dashed) vs its strength, mean of the seeds.
+    options.metric: 'accuracy' (default) or 'mean_recall' (train = train_mean_recall, end of run, inference mode)."""
     sel, opt = spec['select'], spec.get('options', {})
-    xs, val, tr, inc = [0.0], [data.stat(sel['base'], 'val_acc')[0]], [data.stat(sel['base'], 'train_acc')[0]], [sel['base']]
+    m = opt.get('metric', 'accuracy')
+    vc, tc = {'accuracy': ('val_acc', 'train_acc'), 'mean_recall': ('mean_recall', 'train_mean_recall')}[m]
+    xs, val, tr, inc = [0.0], [data.stat(sel['base'], vc)[0]], [data.stat(sel['base'], tc)[0]], [sel['base']]
     for v in sorted({variant_of(r) for r in data.rows if r.startswith(sel['prefix']) and '_lr' not in r}):
         xs.append(cfg_of(data, data.runs(v)[0])[sel['param']])
-        val.append(data.stat(v, 'val_acc')[0])
-        tr.append(data.stat(v, 'train_acc')[0])
+        val.append(data.stat(v, vc)[0])
+        tr.append(data.stat(v, tc)[0])
         inc.append(v)
     o = np.argsort(xs)
     xs, val, tr = np.array(xs)[o], np.array(val)[o], np.array(tr)[o]
@@ -172,8 +177,9 @@ def fig_strength(data, spec):
         ax.set_xticklabels(labels)
         ax.minorticks_off()
     ax.set_xlabel(opt.get('xlabel', sel['param']))
-    ax.set_ylabel('accuracy')
-    ax.set_title(opt.get('title', 'Validation curve: accuracy vs %s (mean of 3 seeds)' % sel['param']))
+    label = 'mean recall (macro)' if m == 'mean_recall' else 'accuracy'
+    ax.set_ylabel(label)
+    ax.set_title(opt.get('title', 'Validation curve: %s vs %s (mean of 3 seeds)' % (label, sel['param'])))
     ax.legend(fontsize=7)
     return fig, {'included': inc, 'omitted': ['EXP-013 L2 and BatchNorm variants (other techniques)'],
                  'criterion': 'dropout variants of EXP-013 + their base, mean of 3 seeds', 'note': ''}
@@ -188,6 +194,88 @@ def fig_bars(data, spec):
     ax.set_title(opt.get('title', ''))
     return fig, {'included': [it['variant'] for it in spec['select']['variants']], 'omitted': [],
                  'criterion': 'all variants of the step and their base, 3 seeds each', 'note': ''}
+
+
+def fig_dumbbell(data, spec):
+    """One row per variant: validation (filled dot = mean of the seeds, small dots = each seed) and train (hollow dot),
+    joined by a line whose length is the train-validation gap. Dots, not bars, so the axis need not start at 0 and
+    differences of 1-4 pp are visible. The reference row is grey and marks a vertical line at its validation mean."""
+    opt = spec.get('options', {})
+    m = opt.get('metric', 'mean_recall')
+    tm = {'mean_recall': 'train_mean_recall', 'val_acc': 'train_acc'}[m]
+    items = spec['select']['variants']
+    fig, ax = ps.new_figure(spec['layout'], opt.get('height', 0.45 + 0.1 * len(items)))
+    ys = np.arange(len(items))[::-1]
+    lo, hi = 1.0, 0.0
+    for y, it in zip(ys, items):
+        v = it['variant']
+        col = C['baseline'] if it.get('role') == 'baseline' else C['final']
+        seeds = [float(data.rows[r][m]) for r in data.runs(v)]
+        val, tr = float(np.mean(seeds)), data.stat(v, tm)[0]
+        ax.plot([val, tr], [y, y], color=col, lw=2, alpha=0.35, solid_capstyle='round', zorder=1)
+        ax.scatter(seeds, [y] * len(seeds), s=12, color=col, alpha=0.45, lw=0, zorder=2)
+        ax.scatter([val], [y], s=60, color=col, edgecolor='white', lw=1.2, zorder=3)
+        ax.scatter([tr], [y], s=60, facecolor='white', edgecolor=col, lw=1.6, zorder=3)
+        ax.text(min(seeds) - 0.006, y, '%.3f' % val, ha='right', va='center', fontsize=7, color=ps.INK)
+        if it.get('role') == 'baseline':
+            ax.axvline(val, color=C['baseline'], ls=':', lw=1, zorder=0)
+        lo, hi = min(lo, min(seeds)), max(hi, tr)
+    ax.set_yticks(ys)
+    ax.set_yticklabels([it['label'] for it in items])
+    for lab, it in zip(ax.get_yticklabels(), items):
+        if it.get('highlight'):
+            lab.set_fontweight('bold')
+    ax.set_ylim(-0.6, len(items) - 0.4)
+    ax.set_xlim(lo - 0.045, hi + 0.015)
+    ax.grid(axis='y', visible=False)
+    ax.set_xlabel(('mean recall (macro)' if m == 'mean_recall' else 'accuracy') + ': validation vs train')
+    ax.scatter([], [], s=40, color=C['final'], edgecolor='white', label='validation (mean of 3 seeds)')
+    ax.scatter([], [], s=12, color=C['final'], alpha=0.45, lw=0, label='validation, each seed')
+    ax.scatter([], [], s=40, facecolor='white', edgecolor=C['final'], lw=1.6, label='train (mean)')
+    ax.legend(fontsize=6.5, loc='lower center', bbox_to_anchor=(0.5, 1.0), ncol=3, frameon=False,
+              handletextpad=0.3, columnspacing=1.2)
+    ax.set_title(opt.get('title', ''), pad=22)
+    return fig, {'included': [r for it in items for r in data.runs(it['variant'])], 'omitted': [],
+                 'criterion': 'all variants of the step and their base, every seed', 'note': ''}
+
+
+def fig_capacity_reg(data, spec):
+    """Two factors (DEC-013): one line per regulariser vs the width of the hidden layers. Left: validation mean recall
+    (mean of the seeds; band = min-max over seeds). Right: train - validation accuracy gap (pp, the definition the text
+    uses). Optional star on the chosen cell."""
+    sel, opt = spec['select'], spec.get('options', {})
+    widths = sel['widths']
+    fig, (a1, a2) = ps.plt.subplots(1, 2, figsize=opt.get('size', (8.4, 3.3)))
+    included = []
+    for i, rg in enumerate(sel['regs']):
+        col = ps.PALETTE[i]
+        mr, lo, hi, gap = [], [], [], []
+        for w in widths:
+            v = sel.get('overrides', {}).get('%d_%s' % (w, rg['tag']), sel['pattern'].format(w=w, r=rg['tag']))
+            seeds = [float(data.rows[r]['mean_recall']) for r in data.runs(v)]
+            included += data.runs(v)
+            mr.append(np.mean(seeds)); lo.append(min(seeds)); hi.append(max(seeds))
+            gap.append(100 * (data.stat(v, 'train_acc')[0] - data.stat(v, 'val_acc')[0]))
+            if opt.get('chosen') == '%d_%s' % (w, rg['tag']):
+                a1.scatter([w], [np.mean(seeds)], marker='*', s=180, color=col, edgecolor=ps.INK, lw=0.6, zorder=5,
+                           label='chosen')
+        a1.fill_between(widths, lo, hi, color=col, alpha=0.12, lw=0)
+        a1.plot(widths, mr, marker='o', color=col, label=rg['label'])
+        a2.plot(widths, gap, marker='o', color=col, label=rg['label'])
+    for ax in (a1, a2):
+        ax.set_xscale('log', base=2)
+        ax.set_xticks(widths)
+        ax.set_xticklabels([str(w) for w in widths])
+        ax.minorticks_off()
+        ax.set_xlabel('width of the 4 hidden layers')
+    a1.set_ylabel('validation mean recall')
+    a1.set_title('Validation (mean of 3 seeds, band = min-max)')
+    a2.set_ylabel('train - validation accuracy (pp)')
+    a2.set_title('Train-validation gap')
+    a1.legend(fontsize=7, loc='best')
+    fig.suptitle(opt.get('title', ''), fontsize=10)
+    fig.tight_layout()
+    return fig, {'included': included, 'omitted': [], 'criterion': 'every cell of the grid, every seed', 'note': ''}
 
 
 def fig_learning_curves(data, spec):
@@ -267,10 +355,14 @@ def fig_per_class_recall(data, spec):
 
 
 def fig_confusion(data, spec):
-    h = data.history(spec['select']['run'])
-    cm = np.array(h['val']['cm'], dtype=float)
-    cmn = cm / np.maximum(cm.sum(1, keepdims=True), 1)
-    names = h['class_names']
+    """Row-normalised validation confusion matrix: one run (select.run) or the mean over the seeds of a variant
+    (select.variant), the same mean the text quotes (final-conf-*)."""
+    sel = spec['select']
+    runs = [sel['run']] if 'run' in sel else data.runs(sel['variant'])
+    hs = [data.history(r) for r in runs]
+    cmn = np.mean([np.array(h['val']['cm'], dtype=float) / np.maximum(np.array(h['val']['cm']).sum(1, keepdims=True), 1)
+                   for h in hs], axis=0)
+    names = hs[0]['class_names']
     fig, ax = ps.new_figure(spec['layout'], 1.9)
     im = ax.imshow(cmn, cmap='Blues', vmin=0, vmax=1)
     fig.colorbar(im, ax=ax, fraction=0.046)
@@ -286,9 +378,13 @@ def fig_confusion(data, spec):
             if cmn[i, j] >= 0.01:
                 ax.text(j, i, '%.2f' % cmn[i, j], ha='center', va='center', fontsize=6,
                         color='white' if cmn[i, j] > 0.5 else ps.INK)
-    ax.set_title('Confusion matrix (validation): %s' % spec['select']['run'])
-    return fig, {'included': [spec['select']['run']], 'omitted': ['seeds 2 and 3 (one matrix per model)'],
-                 'criterion': 'seed 1 = the model trained in ffNN_example.ipynb', 'note': ''}
+    title = spec.get('options', {}).get('title', 'Confusion matrix (validation, row-normalised)')
+    ax.set_title(title)
+    if 'run' in sel:
+        return fig, {'included': runs, 'omitted': ['other seeds (one matrix per model)'],
+                     'criterion': 'one run (select.run)', 'note': ''}
+    return fig, {'included': runs, 'omitted': [], 'criterion': 'mean of the row-normalised matrices of every seed',
+                 'note': ''}
 
 
 def cfg_path(c, path):
@@ -430,7 +526,7 @@ def fig_activation(data, spec):
 
 
 TYPES = {'class_distribution': fig_class_distribution, 'sweep': fig_sweep, 'capacity': fig_capacity, 'strength': fig_strength,
-         'bars': fig_bars, 'learning_curves': fig_learning_curves, 'per_class_recall': fig_per_class_recall,
+         'bars': fig_bars, 'dumbbell': fig_dumbbell, 'capacity_reg': fig_capacity_reg, 'learning_curves': fig_learning_curves, 'per_class_recall': fig_per_class_recall,
          'confusion': fig_confusion, 'group_sweep': fig_group_sweep, 'stopping': fig_stopping, 'activation': fig_activation}
 NEEDS_CFG = {'progress': fig_progress, 'ablation': fig_ablation}
 
@@ -438,8 +534,8 @@ NEEDS_CFG = {'progress': fig_progress, 'ablation': fig_ablation}
 def main(delivery_dir):
     cfg = yaml.safe_load(open(os.path.join(delivery_dir, 'delivery.yaml'), encoding='utf-8'))
     specs = yaml.safe_load(open(os.path.join(delivery_dir, 'figure_specs.yaml'), encoding='utf-8'))
-    fig_dir = os.path.join(delivery_dir, 'overleaf', 'figures')
-    gen_dir = os.path.join(delivery_dir, 'overleaf', 'generated')
+    fig_dir = os.path.join(project_paths.delivery_root(delivery_dir), 'figures')
+    gen_dir = os.path.join(project_paths.delivery_root(delivery_dir), 'generated')
     shutil.rmtree(fig_dir, ignore_errors=True)  # figures/ is always rebuilt from scratch
     os.makedirs(fig_dir, exist_ok=True)
     os.makedirs(gen_dir, exist_ok=True)

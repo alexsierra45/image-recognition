@@ -1,5 +1,6 @@
-"""Installs the section drafts (<delivery>/drafts/*.tex, written by Claude) into <delivery>/overleaf/sections/
-without overwriting the user's edits.
+"""Installs the section drafts (<delivery>/drafts/*.tex, written by Claude) into reports/overleaf/<delivery>/sections/
+(DEC-011) without overwriting the user's edits, and writes the two main documents of the delivery at the root of
+the Overleaf project if they are missing.
 
 A section is (re)written only if it does not exist or if it is unchanged since the system last wrote it
 (sha256 kept in <delivery>/.build_state.json). If the user edited it, the new draft is saved as
@@ -13,6 +14,8 @@ import os
 import shutil
 import sys
 
+import project_paths
+
 
 def sha(path):
     with open(path, 'rb') as ifs:
@@ -21,7 +24,7 @@ def sha(path):
 
 def main(delivery_dir, status_only=False):
     drafts = os.path.join(delivery_dir, 'drafts')
-    sections = os.path.join(delivery_dir, 'overleaf', 'sections')
+    sections = os.path.join(project_paths.delivery_root(delivery_dir), 'sections')
     state_path = os.path.join(delivery_dir, '.build_state.json')
     state = json.load(open(state_path)) if os.path.exists(state_path) else {}
     os.makedirs(sections, exist_ok=True)
@@ -55,6 +58,9 @@ def main(delivery_dir, status_only=False):
     if not status_only:
         with open(state_path, 'w') as ofs:
             json.dump(state, ofs, indent=1, sort_keys=True)
+        for kind in project_paths.KINDS:
+            if project_paths.write_main(delivery_dir, kind):
+                print('%-12s %s' % ('written', project_paths.main_file(delivery_dir, kind)))
 
 
 if __name__ == '__main__':
