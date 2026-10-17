@@ -1,0 +1,78 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+\makeatletter\def\input@path{{delivery_02/}}\makeatother   % this delivery's files: delivery_02/{sections,generated,figures}
+\AtBeginDocument{\graphicspath{{delivery_02/}}}
+
+% ============================================================
+%  Presentación de entrega (Beamer) -- PLANTILLA
+%  Máster Universitario en Inteligencia Artificial (UPM)
+%  Visión por Computador
+%
+%  Estructura: este archivo solo ensambla. El contenido de cada
+%  bloque está en sections/slides_XX_*.tex
+%  Los valores numéricos vienen de generated/ (no escribirlos a mano).
+%  Duración objetivo: 10 min  ->  8 a 10 diapositivas de contenido.
+% ============================================================
+
+% ---------- Estilo y utilidades ----------
+\input{common/shared_packages}
+\input{common/slides_style}
+\input{common/static_meta}
+\input{common/placeholders}
+\input{common/results_interface}
+
+% ---------- Datos generados ----------
+\input{generated/meta}
+\input{generated/results_macros}
+
+% ---------- Datos de portada ----------
+\title[\DeliveryShortTitle]{\DeliveryTitle}
+\subtitle{\DeliverySubtitle}
+\author[\AuthorShort]{\AuthorName}
+\institute[\InstituteShort]{\InstituteBlock}
+\date{\DeliveryDate}
+
+\begin{document}
+
+% ---------------------------------------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ============================================================
+\section{Contexto}
+% ============================================================
+\input{sections/slides_01_context}
+
+% ============================================================
+\section{Punto de partida}
+% ============================================================
+\input{sections/slides_02_baseline}
+
+% ============================================================
+\section{Decisiones}
+% ============================================================
+\input{sections/slides_03_decisions}
+
+% ============================================================
+\section{Resultados}
+% ============================================================
+\input{sections/slides_04_progress}
+\input{sections/slides_05_final}
+
+% ============================================================
+\section{Conclusiones}
+% ============================================================
+\input{sections/slides_06_conclusions}
+
+% ============================================================
+% Referencias (opcional: borrar la línea si no hay referencias)
+% ============================================================
+\section*{Referencias}
+\input{sections/slides_07_references}
+
+% Portada repetida al final (como en la plantilla original; opcional)
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\end{document}

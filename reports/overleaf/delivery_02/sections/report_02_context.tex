@@ -1,0 +1,20 @@
+% Fuentes: DEC-009, DEC-008, EXP-010; xview_ann_train.json.
+\section{Objetivo y datos}
+El objetivo es reducir el sobreajuste del modelo de la entrega anterior con técnicas de regularización
+(penalizaciones de norma, Dropout, BatchNorm y \emph{data augmentation}), sin redes convolucionales ni
+\emph{transfer learning}. Los datos y la partición son los mismos: \res{n-images} imágenes etiquetadas de
+\res{baseline-res}~$\times$~\res{baseline-res} píxeles, reducidas a la entrada de la red, en \res{n-classes} clases muy
+desbalanceadas (\res{class-max-name}, \res{class-max-count} imágenes, frente a \res{class-min-name},
+\res{class-min-count}: \res{imbalance-ratio}:1), y un \emph{split} estratificado con semilla fija (\res{n-train}
+imágenes de entrenamiento y \res{n-valid} de validación). El conjunto de test (\res{n-test} imágenes) no tiene
+etiquetas locales y no se usa para decidir nada.
+
+La métrica guía sigue siendo el \emph{mean recall} de validación (recall medio por clase; azar:
+\res{chance-mean-recall}). El sobreajuste se mide con la brecha entre la \emph{accuracy} de entrenamiento y la de
+validación, en puntos porcentuales (pp); la de entrenamiento se calcula al final de cada run, con el modelo de la mejor
+época, en modo inferencia y sobre todo el conjunto de entrenamiento sin \emph{augmentation}, así que es comparable
+entre variantes. Convención de todo el informe: las variantes se comparan por \emph{mean recall}, de validación y de
+entrenamiento (la métrica con la que se decide); la brecha y las curvas por época se dan en \emph{accuracy}, la
+única métrica de entrenamiento que se registra en cada época. Los cuadros incluyen las dos. El tratamiento específico del desbalance se deja para una entrega posterior: ninguna variante usa
+pesos de clase. Todas las cifras son de validación y, salvo que se diga otra cosa, medias de \res{final-seeds}
+semillas.

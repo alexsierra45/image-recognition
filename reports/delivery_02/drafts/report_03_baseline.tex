@@ -1,10 +1,23 @@
-% Fuentes: EXP-010 (EXP-010_bs256_sqrt_60ep), DEC-008.
+% Fuentes: EXP-010 (EXP-010_bs256_sqrt_60ep), EXP-006 (capacidad), DEC-008.
 \section{Punto de partida}
-El punto de partida es el modelo final de la entrega anterior (Cuadro~\ref{tab:baseline}). Su \emph{accuracy} de
-entrenamiento (\res{phase0-train-acc}) supera a la de validación (\res{phase0-val-acc}) en \res{phase0-gap-acc}~pp, y
-en la entrega anterior se vio que aumentar la capacidad solo aumentaba esa brecha: el modelo memoriza el conjunto de
-entrenamiento. Todos los experimentos parten de él y siguen eligiendo la mejor época con el \emph{mean recall} de
-validación.
+El punto de partida es el modelo final de la entrega anterior (Cuadro~\ref{tab:baseline}): \res{phase0-hidden}
+[\texttt{Dense} $\rightarrow$ LeakyReLU] sobre imágenes de \res{phase0-res}~$\times$~\res{phase0-res}
+(\res{phase0-params} parámetros), entrenado con Adam y \emph{batch} de \res{phase0-batch}, con \emph{EarlyStopping} y
+\emph{ReduceLROnPlateau} sobre el \emph{mean recall} de validación. Tres observaciones de la entrega anterior apuntan
+a sobreajuste:
+\begin{itemize}
+  \item \textbf{Brecha.} Su \emph{accuracy} de entrenamiento (\res{phase0-train-acc}) supera a la de validación
+  (\res{phase0-val-acc}) en \res{phase0-gap-acc}~pp.
+  \item \textbf{Capacidad.} Aumentar el número de parámetros solo aumentaba esa brecha: una red de tres capas
+  (1024--512--256, \res{big3layer-params} parámetros) llegaba a una \emph{accuracy} de entrenamiento de
+  \res{big3layer-train-acc} con el mismo \emph{mean recall} de validación (\res{big3layer-mean-recall}).
+  \item \textbf{Parada.} Tras la mejor época, la \emph{accuracy} de entrenamiento seguía subiendo y la de validación
+  no: \emph{EarlyStopping} paraba porque la red solo memorizaba.
+\end{itemize}
+La regularización restringe el modelo para que generalice mejor, aunque empeore en entrenamiento~\cite{goodfellow}.
+Si la brecha es varianza (sobreajuste), regularizar debería cerrarla \emph{subiendo} la validación; si lo que limita es
+el sesgo del modelo, la cerrará bajando el entrenamiento, sin ganancia en validación. Los experimentos de esta entrega
+distinguen los dos casos.
 
 \begin{table}[h]
   \centering

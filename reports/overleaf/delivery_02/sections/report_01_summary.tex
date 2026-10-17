@@ -1,0 +1,15 @@
+% Fuentes: LOGBOOK.md (DEC-009, EXP-013, EXP-019..EXP-021), experiments.csv.
+\section*{Resumen}
+Se regulariza la red densa (ffNN) de la entrega anterior, que clasifica recortes de imágenes aéreas de
+xView~\cite{xview} en \res{n-classes} clases y mostraba una brecha de \res{phase0-gap-acc}~pp entre la \emph{accuracy}
+de entrenamiento y la de validación. Se prueban penalización L2, Dropout, BatchNorm y \emph{data augmentation}, una
+técnica cada vez y con \res{final-seeds} semillas por variante, y después sus combinaciones, \emph{label smoothing},
+redes más anchas y desplazamientos. Dropout, L2 y \emph{label smoothing} no ayudan: cierran la brecha bajando la
+\emph{accuracy} de entrenamiento, no subiendo la de validación; Dropout y L2 tampoco en redes más anchas, de hasta
+\res{w1024-params} parámetros. BatchNorm no regulariza
+por sí solo, pero permite triplicar la \emph{learning rate}; las rotaciones de 90$^\circ$, que codifican la ausencia
+de una orientación canónica en las imágenes aéreas, son la única técnica que reduce la brecha y sube la validación a
+la vez; los desplazamientos, en cambio, empeoran. Retrasando la bajada de la \emph{learning rate} (su paciencia en \emph{ReduceLROnPlateau}, que el ruido de la validación con rotaciones disparaba demasiado pronto), el modelo final alcanza un \emph{mean recall} de
+\res{best-mean-recall}~$\pm$~\res{best-mean-recall-std} (+\res{gain-total}~pp sobre la entrega anterior) y una
+\emph{accuracy} de \res{best-val-acc}~$\pm$~\res{best-val-acc-std}; la brecha baja a \res{final-gap-acc}~pp, pero no
+desaparece.

@@ -1,8 +1,15 @@
-% Fuentes: LOGBOOK.md EXP-013, EXP-019, EXP-020, EXP-021.
-\section{Decisiones y resultados}
-Cada experimento añade o cambia una sola técnica y se repite con \res{final-seeds} semillas; el ruido entre semillas
-es de unos \res{seed-noise-pp}~pp~\cite{bouthillier}, así que las diferencias menores no se consideran
-concluyentes. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada paso.
+% Fuentes: LOGBOOK.md EXP-013, EXP-019..EXP-022, EXP-024, EXP-025, EXP-027; DEC-013.
+\section{Técnicas de regularización y resultados}
+Cada experimento añade o cambia una sola técnica sobre el modelo anterior y se repite con \res{final-seeds} semillas;
+el ruido entre semillas es de unos \res{seed-noise-pp}~pp~\cite{bouthillier}, así que las diferencias menores no se
+consideran concluyentes. El orden sigue las preguntas que va dejando cada resultado. Primero se prueba cada técnica
+por separado sobre el modelo de la entrega anterior (Cuadro~\ref{tab:phase1}); después, la \emph{data augmentation}
+sobre el ganador (Cuadro~\ref{tab:aug}) y las penalizaciones combinadas con ella (Cuadro~\ref{tab:combine});
+\emph{label smoothing} sobre el modelo final (Cuadro~\ref{tab:ls}); si Dropout y L2 fallaban por la red pequeña,
+variando la capacidad (Sección~\ref{sec:capacity}); y, como la \emph{augmentation} era lo que funcionaba,
+desplazamientos para enseñar también la traslación (Sección~\ref{sec:shift}). Como con regularización el entrenamiento es más lento,
+el tope de épocas sube de \res{phase0-epochs-cap} a \res{dropout01-epochs-cap}; el modelo de partida no cambia,
+porque paraba por \emph{EarlyStopping} mucho antes. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada paso.
 
 \begin{table}[h]
   \centering\small
@@ -11,15 +18,49 @@ concluyentes. El Cuadro~\ref{tab:phases} resume lo que se mantuvo en cada paso.
   \label{tab:phases}
 \end{table}
 
-\subsection{Dropout y penalización L2}
-\decisionpoint{la brecha entre train y validación es sobreajuste, y penalizar la complejidad debería cerrarla subiendo
-la validación~\cite{srivastava,goodfellow}.}
-{al aumentar el dropout o el factor L2, train y validación bajan juntas (figuras~\ref{fig:dropout} y~\ref{fig:l2}): con dropout
-\res{dropout05-dropout}, el \emph{mean recall} cae \res{loss-dropout05}~pp, y con L2 \res{l2-1e-3-l2} la
-\emph{accuracy} de validación baja a \res{l2-1e-3-val-acc}.}
-{ninguna intensidad mejora la validación; las suaves la dejan igual dentro del ruido.}
-{ni dropout ni L2. La brecha no responde a penalizaciones: el límite parece estar en el sesgo de una red densa sobre
-píxeles, sin invarianzas espaciales.}
+\begin{table}[h]
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/phase1_variants}}
+  \caption{Cada técnica por separado sobre el modelo de la entrega 1 (\res{final-seeds} semillas por fila; brecha =
+  \emph{accuracy} de train $-$ \emph{accuracy} de validación).}
+  \label{tab:phase1}
+\end{table}
+
+\subsection{Dropout}
+En cada paso de entrenamiento, Dropout anula cada unidad oculta con probabilidad $p$ y escala las demás por
+$1/(1-p)$; en inferencia se usa la red completa. Equivale a entrenar a la vez un conjunto exponencial de subredes que
+comparten pesos y promediarlas al predecir, y evita que las unidades dependan unas de otras
+(co-adaptación)~\cite{srivastava,goodfellow}.
+
+\decisionpoint{Si la brecha es sobreajuste, Dropout tras cada capa oculta debería cerrarla subiendo la validación.}
+{Al aumentar $p$ la brecha se cierra (de \res{phase0-gap-acc}~pp a \res{dropout05-gap-acc}~pp con
+$p$~$=$~\res{dropout05-dropout}), pero porque el \emph{mean recall} de entrenamiento cae
+(\res{phase0-train-mean-recall} $\rightarrow$ \res{dropout05-train-mean-recall}), y el de validación cae con él
+(Figura~\ref{fig:dropout}).}
+{Ninguna intensidad mejora la validación. Con $p$~$=$~\res{dropout01-dropout} el \emph{mean recall} ya queda en
+\res{dropout01-mean-recall} (\res{loss-dropout01}~pp), y con $p$~$=$~\res{dropout05-dropout}, en
+\res{dropout05-mean-recall} (\res{loss-dropout05}~pp); la clase más pequeña es la primera en perderse: \res{class-min-name} (\res{valid-count-helipad} imágenes de validación) pasa de recall
+\res{phase0-recall-helipad} a \res{dropout05-recall-helipad}. Es el comportamiento de un modelo sin capacidad que
+sobre: la red de \res{phase0-hidden} ya está cerca del subajuste, y quitarle unidades al azar la empuja a él.}
+{Sin Dropout.}
+
+\subsection{Penalización L2}
+La penalización L2 añade $\lambda \lVert \mathbf{w} \rVert^2$ a la pérdida, de modo que cada paso encoge los pesos
+hacia cero (\emph{weight decay}); equivale a una estimación MAP con una distribución a priori gaussiana sobre los
+pesos~\cite{goodfellow}. Con Adam no es exactamente \emph{weight decay}: el gradiente de la penalización se divide,
+como el resto, por la raíz de su segundo momento, así que los pesos con gradientes grandes se encogen
+menos~\cite{loshchilov}.
+
+\decisionpoint{Penalizar la norma de los pesos limita la complejidad efectiva de la red y debería reducir la brecha.}
+{Con $\lambda$~$=$~\res{l2-1e-5-l2} y $\lambda$~$=$~\res{l2-1e-4-l2} nada cambia: la brecha sigue en
+\res{l2-1e-5-gap-acc} y \res{l2-1e-4-gap-acc}~pp, y el \emph{mean recall} (\res{l2-1e-5-mean-recall} y
+\res{l2-1e-4-mean-recall}) empata con el de partida. Con $\lambda$~$=$~\res{l2-1e-3-l2}, la brecha se cierra
+(\res{l2-1e-3-gap-acc}~pp), pero bajando el \emph{mean recall} de entrenamiento a \res{l2-1e-3-train-mean-recall} y el
+de validación a \res{l2-1e-3-mean-recall} (Figura~\ref{fig:l2}).}
+{La curva de validación de L2 tiene la misma forma que la de Dropout: no hay ningún valor intermedio en que la
+validación mejore. La brecha no responde a penalizaciones, lo que apunta a que el límite está en el sesgo del modelo,
+una red densa sobre píxeles sin invarianzas espaciales~\cite{goodfellow}, y no en su varianza.}
+{Sin L2.}
 
 \begin{figure}[!htbp]
   \centering
@@ -38,26 +79,62 @@ píxeles, sin invarianzas espaciales.}
 \end{figure}
 
 \subsection{BatchNorm}
-\decisionpoint{normalizar las preactivaciones estabiliza el entrenamiento y permite una \emph{learning rate}
-mayor~\cite{ioffe}.}
-{con la \emph{learning rate} de partida, BatchNorm antes o después de la activación empata con el modelo sin él
-(Figura~\ref{fig:bn}).}
-{antes de la activación y con la \emph{learning rate} triplicada (\res{phase1-lr}) mejora +\res{gain-bn}~pp; por sí
-solo no reduce la brecha (\res{phase1-gap-acc}~pp), pero resulta imprescindible combinado con la augmentation: sin
-él se pierden \res{loss-no-bn}~pp (Cuadro~\ref{tab:combine}).}
+BatchNorm normaliza la preactivación de cada unidad con la media y la varianza del \emph{batch} y después la escala y
+la desplaza con dos parámetros aprendidos ($\gamma$, $\beta$); en inferencia usa medias móviles de esas
+estadísticas~\cite{ioffe}. El artículo original lo coloca antes de la no linealidad, y entonces el sesgo de la capa
+\texttt{Dense} sobra, porque $\beta$ lo sustituye. La salida no depende de la escala de los pesos, lo que permite
+\emph{learning rates} mayores~\cite{ioffe,santurkar}; y como las estadísticas de cada \emph{batch} son ruidosas, añade
+algo de regularización~\cite{ioffe}.
+
+\decisionpoint{BatchNorm regulariza y, sobre todo, permite entrenar con una \emph{learning rate} mayor.}
+{Con la \emph{learning rate} de partida, BatchNorm antes o después de la activación empata con el modelo sin él
+(\res{bn-samelr-mean-recall} y \res{bn-after-mean-recall}; Figura~\ref{fig:bn}). Lejos de regularizar, sube el
+\emph{mean recall} de entrenamiento (+\res{gain-bn-train-mr}~pp) y la brecha crece a \res{bn-samelr-gap-acc}~pp: aquí
+actúa sobre la optimización, no sobre la generalización.}
+{Antes de la activación y con la \emph{learning rate} triplicada (\res{phase1-lr}), el \emph{mean recall} sube
++\res{gain-bn}~pp y el recall mínimo, de \res{phase0-min-recall} a \res{phase1-min-recall}; las tres semillas igualan o
+superan a la mejor del modelo de partida, pero la mejora es del orden del ruido. Después de la activación, triplicar
+la \emph{learning rate} empeora (\res{bn-after-lr3x-mean-recall}). Su peso real aparece al combinarlo con la
+\emph{augmentation}: sin él se pierden \res{loss-no-bn}~pp (Sección~\ref{sec:combine}).}
 {BatchNorm antes de la activación, \emph{learning rate} \res{phase1-lr}.}
 
 \subsection{Data augmentation}
-\decisionpoint{en imágenes aéreas no hay una orientación canónica, así que volteos y rotaciones de 90$^\circ$
-conservan la etiqueta; mostrarlos en entrenamiento codifica una invarianza que la red no tiene~\cite{goodfellow}.}
-{con el mismo presupuesto de épocas, las transformaciones geométricas bajan la \emph{accuracy} de train y suben la de
-validación (Figura~\ref{fig:aug}); las variaciones de brillo y contraste empeoran
-(\res{loss-color}~pp).}
-{las rotaciones de 90$^\circ$ suben el \emph{mean recall} \res{gain-rot90}~pp y la \emph{accuracy}
-\res{gain-rot90-acc}~pp, y reducen la brecha a \res{phase2-gap-acc}~pp; volteos y el grupo completo D4 empatan con
-ellas dentro del ruido.}
-{rotaciones de 90$^\circ$ en entrenamiento. Sobre este modelo, añadir dropout o L2 sigue sin ayudar
-(Cuadro~\ref{tab:combine}).}
+La \emph{data augmentation} amplía el conjunto de entrenamiento con transformaciones que conservan la
+etiqueta~\cite{goodfellow}. Las imágenes aéreas se toman desde arriba y no tienen una orientación canónica: un avión
+girado 90$^\circ$ o reflejado sigue siendo un avión. Las 8 simetrías del cuadrado (grupo diédrico D4: cuatro
+rotaciones de 90$^\circ$, con y sin reflejo) conservan la etiqueta y, sobre una rejilla de píxeles, son permutaciones
+exactas, sin interpolación. Una red densa no tiene ninguna de estas invarianzas: tiene que aprender cada orientación
+por separado, y mostrársela en entrenamiento es la forma de enseñársela. Se comparan volteos, rotaciones de
+90$^\circ$, D4 completo y variaciones de brillo y contraste (fotométricas), todas aplicadas al azar en cada
+\emph{batch} de entrenamiento, sobre el modelo con BatchNorm y con paciencias de \res{phase2-es-patience} y
+\res{phase2-rlr-patience} épocas (Cuadro~\ref{tab:aug}).
+
+\decisionpoint{Las transformaciones geométricas codifican una invarianza real de los datos, así que deberían reducir
+la brecha subiendo la validación, no solo bajando el entrenamiento.}
+{Con las transformaciones geométricas, el \emph{mean recall} de entrenamiento baja (rotaciones:
+\res{no-aug-train-mean-recall} $\rightarrow$ \res{phase2-train-mean-recall}) y el de validación sube
+(\res{no-aug-mean-recall} $\rightarrow$ \res{phase2-mean-recall}); la mejor época llega más tarde
+(\res{no-aug-best-epoch} $\rightarrow$ \res{phase2-best-epoch} de media), porque hay más variedad que aprender
+(Figura~\ref{fig:aug}). Las variaciones de brillo y contraste no reducen la brecha
+(\res{color-gap-acc}~pp) y empeoran la validación (\res{loss-color}~pp): la red tiene que aprender a ignorar una
+información que, en imágenes de \res{phase2-res}~$\times$~\res{phase2-res} píxeles, es buena parte de la que tiene
+(explicación plausible, no verificada).}
+{Las rotaciones de 90$^\circ$ suben el \emph{mean recall} +\res{gain-rot90}~pp y la \emph{accuracy}
++\res{gain-rot90-acc}~pp, y reducen la brecha a \res{phase2-gap-acc}~pp. Los volteos (+\res{gain-flip}~pp) y D4
+(+\res{gain-d4}~pp) empatan con ellas dentro del ruido. Por clases, ganan sobre todo Cargo plane (\res{no-aug-recall-cargo-plane} $\rightarrow$
+\res{phase2-recall-cargo-plane}), Motorboat (\res{no-aug-recall-motorboat} $\rightarrow$
+\res{phase2-recall-motorboat}) y Dump truck (\res{no-aug-recall-dump-truck} $\rightarrow$
+\res{phase2-recall-dump-truck}); Truck pierde (\res{no-aug-recall-truck} $\rightarrow$ \res{phase2-recall-truck}).}
+{Rotaciones de 90$^\circ$ en entrenamiento: la mejor media en las dos métricas y un subconjunto más simple que D4,
+aunque la diferencia con D4 y con los volteos no es concluyente.}
+
+\begin{table}[h]
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/augmentation_variants}}
+  \caption{\emph{Data augmentation} sobre el modelo con BatchNorm (\res{final-seeds} semillas por fila; paciencias de
+  \res{phase2-es-patience} y \res{phase2-rlr-patience} épocas).}
+  \label{tab:aug}
+\end{table}
 
 \begin{figure}[!htbp]
   \centering
@@ -75,9 +152,113 @@ ellas dentro del ruido.}
   \end{minipage}
 \end{figure}
 
+\subsection{Combinaciones}\label{sec:combine}
+\decisionpoint{Con la \emph{augmentation} cerrando parte de la brecha, una penalización suave podría sumar; y
+BatchNorm, que por sí solo aportaba poco, podría pesar más combinado con ella.}
+{Sobre BatchNorm + rotaciones (Cuadro~\ref{tab:combine}), Dropout vuelve a bajar entrenamiento y validación a la vez
+(\res{loss-c-dropout01} y \res{loss-c-dropout02}~pp con $p$~$=$~\res{c-dropout01-dropout} y
+$p$~$=$~\res{c-dropout02-dropout}); una posible causa es que Dropout cambia la varianza de las activaciones entre
+entrenamiento e inferencia y desajusta las estadísticas que BatchNorm ha acumulado~\cite{li2019}. L2 deja la
+\emph{accuracy} igual y el \emph{mean recall} algo por debajo, dentro del ruido. Es lo esperable: delante de
+BatchNorm, la salida no depende de la escala de los pesos, así que L2 no restringe la función que calcula la red;
+solo cambia la \emph{learning rate} efectiva~\cite{laarhoven}.}
+{Sin BatchNorm (con la \emph{learning rate} de la entrega 1, \res{phase0-lr}, porque la triple se eligió para la
+red con BatchNorm), el \emph{mean recall} queda en \res{c-no-bn-mean-recall} (\res{loss-no-bn}~pp), cuando sin
+\emph{augmentation} BatchNorm solo aportaba +\res{gain-bn}~pp: con
+\emph{augmentation} hay más variedad que ajustar y la optimización más rápida que permite BatchNorm se nota. Quitar la
+\emph{augmentation} cuesta \res{gain-rot90}~pp.}
+{BatchNorm + rotaciones, sin Dropout ni L2.}
+
 \begin{table}[h]
-  \centering\small
-  \safetable{generated/tables/ablation}
-  \caption{Cambios sobre el modelo con BatchNorm y rotaciones (\res{final-seeds} semillas por fila).}
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/combine_variants}}
+  \caption{Cambios sobre el modelo con BatchNorm y rotaciones de 90$^\circ$ (\res{final-seeds} semillas por fila).}
   \label{tab:combine}
+\end{table}
+
+\subsection{Label smoothing}
+\emph{Label smoothing} regulariza la salida en lugar de los pesos: sustituye la etiqueta \emph{one-hot} por
+$(1-\varepsilon)$ en la clase correcta y $\varepsilon/K$ repartido entre las $K$ clases, de modo que la red ya no gana
+nada haciendo crecer sus \emph{logits} sin límite ni dando probabilidad 1 a los ejemplos de
+entrenamiento~\cite{szegedy,muller}.
+
+\decisionpoint{Penalizar la sobreconfianza en entrenamiento debería reducir la brecha que queda en el modelo final.}
+{Sobre el modelo final (Cuadro~\ref{tab:ls}), con $\varepsilon$~$=$~0,05, 0,1 y 0,2, la brecha baja (de
+\res{final-gap-acc}~pp a \res{ls01-gap-acc}~pp con $\varepsilon$~$=$~0,1), pero de nuevo porque baja la
+\emph{accuracy} de entrenamiento: la de validación no cambia (\res{ls01-val-acc}, \res{loss-ls01-acc}~pp).}
+{El \emph{mean recall} baja con las tres intensidades, con poca dispersión entre semillas (\res{ls01-mean-recall}
+con $\varepsilon$~$=$~0,1, \res{loss-ls01}~pp). La pérdida se concentra en pocas clases: \res{class-min-name} pasa de
+\res{final-recall-helipad} a \res{ls01-recall-helipad} (solo \res{valid-count-helipad} imágenes de validación, unas
+pocas de diferencia) y Storage tank de \res{final-recall-storage-tank} a \res{ls01-recall-storage-tank}, mientras
+que Bus y Small car mejoran algo. Repartir probabilidad entre todas las clases resta margen precisamente a las que
+tienen pocos ejemplos (explicación plausible, no verificada).}
+{Sin \emph{label smoothing}.}
+
+\begin{table}[h]
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/ls_variants}}
+  \caption{\emph{Label smoothing} sobre el modelo final (\res{final-seeds} semillas por fila).}
+  \label{tab:ls}
+\end{table}
+
+\subsection{Capacidad y regularización}\label{sec:capacity}
+Dropout y L2 se juzgaron sobre la red de \res{phase0-hidden}, que la entrega anterior eligió en parte porque las redes
+mayores memorizaban: justo lo que la regularización debe corregir. Dropout está pensado para redes con capacidad de
+sobra~\cite{srivastava}, así que su veredicto podía depender de la anchura. Para comprobarlo se varían a la vez los
+dos factores sobre el modelo final: anchura de las 4 capas ocultas (256, 512 y 1024 unidades, de
+\res{final-params} a \res{w1024-params} parámetros) por regularización (ninguna, Dropout 0,2 o 0,5, L2
+$10^{-4}$). Es una excepción deliberada a cambiar un solo factor, porque lo que se mide es su interacción.
+
+\decisionpoint{Con más capacidad, Dropout y L2 deberían dejar de empujar al subajuste y ayudar.}
+{La interacción existe (Figura~\ref{fig:capreg}): el coste de Dropout 0,2 frente a la misma anchura sin regularizar
+pasa de \res{cost-d02-w256}~pp con 256 unidades a \res{cost-d02-w512}~pp con 512 y \res{cost-d02-w1024}~pp con 1024,
+y el de Dropout 0,5, de \res{cost-d05-w256} a \res{cost-d05-w1024}~pp. Sin regularizar, la brecha media baja de
+\res{final-gap-acc}~pp con 256 unidades a \res{w1024-gap-acc}~pp con 1024, pero no es una diferencia real: la de 256 se
+debe sobre todo a una semilla (\res{final-s1-gap-acc}~pp; las otras dos, \res{final-s2-gap-acc} y
+\res{final-s3-gap-acc}~pp), y la brecha de cada run depende sobre todo de la época en que se conserva el modelo. Con la
+misma validación, una brecha menor solo significa ajustar menos el entrenamiento.}
+{Ninguna combinación supera al modelo final. Las redes más anchas sin regularizar empatan con él
+(\res{w512-mean-recall} y \res{w1024-mean-recall}, frente a \res{best-mean-recall}), y la mejor celda regularizada,
+512 unidades con L2 (\res{w512-l2-mean-recall}~$\pm$~\res{w512-l2-mean-recall-std}), también: empata, con menos
+dispersión entre semillas. Dropout reduce su coste al crecer la red, pero no llega a compensarlo en el rango
+probado.}
+{Se mantiene \res{final-hidden} sin Dropout ni L2: con la validación empatada se elige el modelo más simple, con
+varias veces menos parámetros (\res{final-params} frente a \res{w1024-params}). La conclusión de las
+secciones anteriores ya no depende de la red pequeña: la regularización explícita tampoco ayuda con más capacidad.}
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=\linewidth]{figures/capacity_reg.png}{Capacidad por regularización}
+  \caption{\figcaption{capacity_reg}}
+  \label{fig:capreg}
+\end{figure}
+
+\subsection{Desplazamientos}\label{sec:shift}
+Con la regularización explícita descartada también para redes más anchas, queda la vía que sí funcionó: dar a la red
+invarianzas a través de los datos. Las rotaciones le enseñaron la orientación; la invarianza que más le falta a una red
+densa es la de traslación, porque cada píxel tiene su propio peso~\cite{goodfellow}. Se añaden desplazamientos
+aleatorios de la imagen (rellenando el borde por reflejo) al modelo final.
+
+\decisionpoint{Desplazar la imagen unos píxeles conserva la etiqueta y debería enseñar a la red la invarianza a
+traslaciones, como las rotaciones le enseñaron la de orientación.}
+{Con desplazamientos de hasta 1 y 2 píxeles (Cuadro~\ref{tab:shift}), el \emph{mean recall} cae
+\res{loss-shift1} y \res{loss-shift2}~pp, y también el de entrenamiento (\res{shift1-train-mean-recall} y
+\res{shift2-train-mean-recall}): la red vuelve al subajuste. A \res{final-res}~$\times$~\res{final-res}, un píxel es una
+fracción grande de la imagen y los recortes están encuadrados sobre el objeto, así que el desplazamiento recorta parte
+de él (explicación plausible, no verificada).}
+{Para ver si era el tamaño del desplazamiento, se prueba medio píxel. Reducir la imagen a 32 píxeles por área y
+promediar después bloques de 2~$\times$~2 equivale a reducirla a 16, así que desplazar un píxel la imagen de 32 antes
+de una capa de promedio es desplazar medio píxel la de 16. El control sin desplazamientos queda a
+\res{loss-pool-control}~pp del modelo final, del orden del ruido (difieren el redondeo de las imágenes y la
+trayectoria del entrenamiento), y frente a ese control el medio píxel cuesta \res{loss-half}~pp. El patrón es
+monótono: cuanto mayor el desplazamiento, peor.}
+{Sin desplazamientos. A esta resolución, la invarianza a traslaciones no se le puede dar a una red densa a través de
+los datos; es justo lo que una red convolucional incorpora en su arquitectura.}
+
+\begin{table}[h]
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/shift_variants}}
+  \caption{Desplazamientos aleatorios sobre el modelo final (\res{final-seeds} semillas por fila). Las dos últimas
+  filas usan la entrada de 32 píxeles con un promedio de 2~$\times$~2 delante de la red.}
+  \label{tab:shift}
 \end{table}

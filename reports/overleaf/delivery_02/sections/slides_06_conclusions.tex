@@ -1,0 +1,14 @@
+% Conclusiones (~1 min). Fuentes: EXP-013, EXP-019..EXP-027.
+\begin{frame}{Conclusiones y siguientes pasos}
+  \begin{itemize}
+    \item \textbf{Funcionan} las rotaciones y BatchNorm: mean recall \res{baseline-mean-recall} $\rightarrow$ \res{best-mean-recall}
+    \item \textbf{No funcionan}: Dropout y L2 (tampoco en redes más anchas), label smoothing (\res{loss-ls01}~pp), desplazamientos (\res{loss-shift1}~pp con 1 píxel); promediar semillas o rotaciones al predecir, poco o nada
+    \item La brecha no era sobre todo varianza: el límite es el sesgo de una red densa sobre píxeles
+    \item Los datos le dieron la invarianza a la orientación, pero no la de traslación
+  \end{itemize}
+  \vspace{0.2cm}
+  \begin{alertblock}{Siguientes pasos}
+    Redes convolucionales propias y arquitecturas conocidas, entrenadas desde cero: la invarianza a traslaciones, en la arquitectura.
+  \end{alertblock}
+  \speakernote{1}{Label smoothing reparte probabilidad y castiga a las clases pequeñas. Los desplazamientos empeoran también con medio píxel (\res{loss-half}~pp frente a su control): a 16 $\times$ 16 recortan el objeto. El promedio de las \res{ens-n-members} semillas da +\res{ens-gain}~pp, no concluyente; la TTA con rotaciones, \res{tta-gain}~pp. Puente a las CNN.}
+\end{frame}

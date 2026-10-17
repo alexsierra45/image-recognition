@@ -1,46 +1,129 @@
-% Fuentes: EXP-021 (EXP-021_final, 3 semillas); EXP-010 como punto de partida.
-\section{Resultado final}
-Con augmentation la validación sigue mejorando durante más épocas, así que el modelo final se entrena con más
-paciencia (\res{final-es-patience} épocas para \emph{EarlyStopping}): gana +\res{gain-longer}~pp de \emph{mean recall}
-y su mejor época es, de media, la \res{final-best-epoch}. El modelo es \res{final-hidden} [\texttt{Dense}
-$\rightarrow$ BatchNorm $\rightarrow$ LeakyReLU] sobre imágenes de \res{final-res}~$\times$~\res{final-res}, con
-rotaciones de 90$^\circ$ y sin dropout ni L2. El Cuadro~\ref{tab:final} lo compara con el modelo de la entrega
-anterior: +\res{gain-total}~pp de \emph{mean recall} y +\res{gain-total-acc}~pp de \emph{accuracy} (Figura~\ref{fig:progress}).
+% Fuentes: EXP-028 (ablación de paciencias), EXP-021 (EXP-021_final, 3 semillas; semilla 1 = run del notebook EXP-021_20261015-165309); EXP-010 como
+% punto de partida.
+\section{Resultado final}\label{sec:final}
+Del modelo con rotaciones (\res{phase2-mean-recall}) al final (\res{best-mean-recall}) no se añade ninguna
+técnica: cambian los \emph{callbacks} de parada. Con rotaciones, la validación oscila mucho de una época a otra (cada
+época presenta las imágenes giradas de otra forma), y \emph{ReduceLROnPlateau} con paciencia \res{phase2-rlr-patience}
+confunde ese ruido con una meseta: baja la \emph{learning rate} en las épocas \res{drop-rlr6-s1},
+\res{drop-rlr6-s2} y \res{drop-rlr6-s3} (una por semilla), antes de que la red haya aprendido lo que puede con la
+\emph{learning rate} alta. Con paciencia \res{final-rlr-patience}, la primera bajada llega en las épocas
+\res{drop-rlr8-s1}, \res{drop-rlr8-s2} y \res{drop-rlr8-s3}. Como el modelo final cambió a la vez esta paciencia y
+la de \emph{EarlyStopping} (de \res{phase2-es-patience} a \res{final-es-patience}), se separan con una ablación
+(Cuadro~\ref{tab:patience}): cambiar solo la de \emph{ReduceLROnPlateau} da todo el salto (+\res{gain-rlr8}~pp), y
+cambiar solo la de \emph{EarlyStopping}, nada (+\res{gain-es25}~pp: la misma mejor época, solo entrena más antes de
+parar). La ganancia se apoya en dos de las tres semillas: en la tercera, la bajada ya llegaba casi en la misma época.
+
+El modelo es \texttt{Rescaling} $\rightarrow$ \texttt{Flatten} $\rightarrow$
+\res{final-hidden} [\texttt{Dense} $\rightarrow$ BatchNorm $\rightarrow$ LeakyReLU] $\rightarrow$ softmax sobre
+imágenes de \res{final-res}~$\times$~\res{final-res} (\res{final-params} parámetros), entrenado con Adam
+(\emph{learning rate} \res{final-lr}), \emph{batch} de \res{final-batch} y rotaciones aleatorias de 90$^\circ$, sin
+Dropout ni L2. El Cuadro~\ref{tab:final} lo compara con el modelo de la entrega anterior: +\res{gain-total}~pp de
+\emph{mean recall} y +\res{gain-total-acc}~pp de \emph{accuracy} (Figura~\ref{fig:progress}). El notebook de la
+entrega reproduce exactamente el entrenamiento de la semilla 1.
+
+\begin{table}[h]
+  \centering
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/patience_variants}}
+  \caption{Ablación de los \emph{callbacks} sobre el modelo con rotaciones (\res{final-seeds} semillas por fila):
+  paciencias de \emph{EarlyStopping} y de \emph{ReduceLROnPlateau}.}
+  \label{tab:patience}
+\end{table}
 
 \begin{table}[h]
   \centering\small
-  \safetable{generated/tables/baseline_vs_final}
+  \resizebox{\linewidth}{!}{\safetable{generated/tables/baseline_vs_final}}
   \caption{Modelo de la entrega anterior frente al regularizado (validación; media $\pm$ desviación típica de
   \res{final-seeds} semillas).}
   \label{tab:final}
 \end{table}
 
-La brecha entre train y validación pasa de \res{phase0-gap-acc}~pp a \res{final-gap-acc}~pp
-(Figura~\ref{fig:curves}): con el mismo presupuesto de épocas la augmentation la reducía a \res{phase2-gap-acc}~pp, y
-entrenar más recupera parte de la memorización a cambio de una validación mejor. La regularización mejora la
-generalización, pero no elimina la brecha. Por clases (Figura~\ref{fig:final}), la más difícil sigue siendo
-\res{final-worst-class} (recall \res{final-worst-recall}). Como la mejor época y cada decisión se eligen con la misma
-validación con la que se miden, las cifras son algo optimistas~\cite{cawley}.
+\paragraph{Promedio de las \res{ens-n-members} semillas.} Las \res{final-seeds} semillas del modelo final difieren
+bastante entre sí (desviación de \res{best-mean-recall-std} en \emph{mean recall}), y promediar las predicciones de
+varios modelos reduce esa varianza~\cite{goodfellow}. Promediando las probabilidades de los tres modelos, sin entrenar
+nada más, el \emph{mean recall} de validación es \res{ens-mean-recall} y la \emph{accuracy}, \res{ens-val-acc}:
++\res{ens-gain}~pp y +\res{ens-gain-acc}~pp sobre la media de los modelos por separado, aunque por debajo de la mejor
+semilla (\res{ens-best-member-mean-recall}). Es una sola medida, sin repeticiones, y la ganancia es menor que el ruido
+entre semillas, así que no es concluyente; a cambio, triplica el coste de predecir. Otra forma de promediar sin entrenar es
+la \emph{test-time augmentation}: predecir cada imagen y sus tres rotaciones de 90$^\circ$ y promediar, de modo que la
+predicción respete la misma invarianza que se enseñó en entrenamiento~\cite{krizhevsky}. Medida modelo a modelo, deja la
+\emph{accuracy} casi igual (\res{tta-val-acc}~$\pm$~\res{tta-val-acc-std}, +\res{tta-gain-acc}~pp) y el
+\emph{mean recall} también (\res{tta-mean-recall}~$\pm$~\res{tta-mean-recall-std}, \res{tta-gain}~pp), lo que sugiere que la
+red ya responde de forma parecida a las cuatro orientaciones, que es lo que buscaban las rotaciones en
+entrenamiento. El modelo final
+sigue siendo uno solo, el que entrena el notebook, y predice sin promedios.
+
+\paragraph{Brecha.} La brecha entre entrenamiento y validación pasa de \res{phase0-gap-acc}~pp a
+\res{final-gap-acc}~pp (Figura~\ref{fig:curves}). Con el mismo presupuesto de épocas, las rotaciones la reducían a
+\res{phase2-gap-acc}~pp; dejar que la \emph{learning rate} baje más tarde recupera parte de la memorización a cambio de una validación mejor. En las
+curvas, el modelo regularizado aprende más despacio: durante las primeras épocas va por debajo del de la entrega
+anterior, también en validación, y lo supera cuando este ya ha parado. La regularización mejora la generalización,
+pero no elimina la brecha.
+
+\paragraph{Punto de parada.} La Figura~\ref{fig:stopping} (semilla 1) muestra cómo decide la validación. Hasta la
+época \res{stop-last-joint-epoch}, con la \emph{learning rate} inicial, la validación sube con mucho ruido entre
+épocas (las rotaciones cambian en cada una). La primera bajada de la \emph{learning rate} (época
+\res{stop-first-lr-drop}) estabiliza las dos curvas y da un salto, y la mejor época llega poco después
+(\res{stop-best-epoch}, \emph{mean recall} \res{stop-val-recall-best}). Después, la \emph{accuracy} de entrenamiento
+sigue subiendo (\res{stop-train-acc-best} $\rightarrow$ \res{stop-train-acc-end}, medida con \emph{augmentation}) y
+la de validación apenas se mueve (\res{stop-val-acc-best} $\rightarrow$ \res{stop-val-acc-end}), sin que el
+\emph{mean recall} vigilado mejore; las bajadas siguientes (épocas \res{stop-later-lr-drops}) no lo cambian, y
+\emph{EarlyStopping} para en la época \res{stop-epoch} conservando la \res{stop-best-epoch}. Frente a la entrega
+anterior, la fase con la \emph{learning rate} alta dura mucho más: con \emph{augmentation} cada época presenta
+imágenes distintas y la red sigue aprendiendo de ellas.
 
 \begin{figure}[!htbp]
   \centering
   \begin{minipage}[t]{0.485\linewidth}
     \centering
-    \safegraphics[width=\linewidth]{figures/overfitting_curves.png}{Curvas de train y validación}
-    \caption{\figcaption{overfitting_curves}}
-    \label{fig:curves}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.485\linewidth}
-    \centering
     \safegraphics[width=\linewidth]{figures/progress.png}{Progreso por paso}
     \caption{\figcaption{progress}}
     \label{fig:progress}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.485\linewidth}
+    \centering
+    \safegraphics[width=\linewidth]{figures/overfitting_curves.png}{Curvas de train y validación}
+    \caption{\figcaption{overfitting_curves}}
+    \label{fig:curves}
   \end{minipage}
 \end{figure}
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=0.5\linewidth]{figures/stopping.png}{Punto de parada}
+  \caption{\figcaption{stopping}}
+  \label{fig:stopping}
+\end{figure}
+
+\paragraph{Por clases.} No todas las clases mejoran (Figura~\ref{fig:final}). La que más gana es
+\res{class-min-name} (\res{phase0-recall-helipad} $\rightarrow$ \res{final-recall-helipad}), aunque con solo
+\res{valid-count-helipad} imágenes de validación cada imagen pesa mucho en su recall y la cifra es muy ruidosa. La más
+difícil sigue siendo \res{final-worst-class}, que incluso empeora (\res{phase0-recall-truck} $\rightarrow$
+\res{final-worst-recall}) y se confunde con los otros vehículos: de sus imágenes de validación, una proporción de
+\res{final-conf-truck-small-car} se clasifica como Small car, \res{final-conf-truck-dump-truck} como Dump truck y
+\res{final-conf-truck-bus} como Bus (media de las matrices de confusión de las \res{final-seeds} semillas). A
+\res{final-res}~$\times$~\res{final-res} píxeles, lo que distingue a estos vehículos ocupa muy pocos píxeles, y rotar
+no añade información sobre ello (interpretación, no verificada).
+
+Como la mejor época y cada decisión se eligen con la misma validación con la que se miden, las cifras son algo
+optimistas~\cite{cawley}; la desviación entre semillas solo recoge la variabilidad de la inicialización, del orden de
+los datos y de la \emph{augmentation}, no la del \emph{split}, que es fijo.
 
 \begin{figure}[!htbp]
   \centering
   \safegraphics[width=0.85\linewidth]{figures/per_class_recall.png}{Recall por clase}
   \caption{\figcaption{per_class_recall}}
   \label{fig:final}
+\end{figure}
+
+\paragraph{Matriz de confusión.} La Figura~\ref{fig:confusion} muestra los dos tipos de error que quedan. Los vehículos se
+confunden entre sí: Truck, Bus y Dump truck reparten sus errores entre ellos y con Small car. Además, Building recoge
+parte de las clases de objetos pequeños sobre un fondo: de las imágenes de Storage tank, una proporción de
+\res{final-conf-storage-tank-building} se clasifica como Building. Fuera de esos dos grupos, los errores son
+menores y están más repartidos.
+
+\begin{figure}[!htbp]
+  \centering
+  \safegraphics[width=0.75\linewidth]{figures/confusion.png}{Matriz de confusión}
+  \caption{\figcaption{confusion}}
+  \label{fig:confusion}
 \end{figure}

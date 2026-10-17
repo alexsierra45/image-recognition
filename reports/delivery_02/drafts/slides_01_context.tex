@@ -1,11 +1,12 @@
-% Objetivo (~1 min). Fuentes: DEC-009, EXP-010.
-\begin{frame}{Objetivo de la entrega}
+% Objetivo y punto de partida (~1 min). Fuentes: DEC-009, EXP-010, EXP-006. Versión de 10 frames / 10 min (CHG-025).
+\begin{frame}{Objetivo y punto de partida: ¿varianza o sesgo?}
   \begin{itemize}
-    \item Partimos de la ffNN de la entrega 1: mean recall \res{phase0-mean-recall}, accuracy \res{phase0-val-acc}
-    \item Sobreajusta: accuracy de train \res{phase0-train-acc} frente a \res{phase0-val-acc} en validación
-    \item Objetivo: reducir el sobreajuste con L2, Dropout, BatchNorm y data augmentation (sin CNN)
+    \item Partimos de la ffNN de la entrega 1: \res{phase0-hidden} sobre \res{phase0-res}~$\times$~\res{phase0-res}, mean recall \res{phase0-mean-recall}
+    \item Sobreajusta: train \res{phase0-train-acc} frente a validación \res{phase0-val-acc} (brecha de \res{phase0-gap-acc}~pp)
+    \item Objetivo: reducirlo con L2, Dropout, BatchNorm y data augmentation, sin CNN
+    \item Una técnica cada vez, \res{final-seeds} semillas por variante (ruido: \res{seed-noise-pp}~pp)
   \end{itemize}
-  \vspace{0.3cm}
-  \keymessage{Mismos datos y mismo split; cada variante con \res{final-seeds} semillas.}
-  \speakernote{1}{Qué pide esta entrega y desde dónde partimos.}
+  \vspace{0.2cm}
+  \keymessage{Si la brecha es varianza, regularizar sube la validación; si es sesgo, solo baja el train.}
+  \speakernote{1}{Mismos datos y split que la entrega 1, sin pesos de clase. La brecha se mide con la accuracy de train en modo inferencia, sin augmentation. En la entrega 1, más capacidad solo memorizaba más (train \res{big3layer-train-acc} con el mismo mean recall).}
 \end{frame}

@@ -1,0 +1,11 @@
+% >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
+\begin{tabular}{cp{0.50\linewidth}ccc}
+\toprule
+Fase & Cambio que se mantiene & Mean recall & Accuracy & Semillas \\
+\midrule
+0 & Modelo de la entrega 1 (EXP-010) & 0,578 $\pm$ 0,007 & 0,616 $\pm$ 0,006 & 3 \\
+1 & Dropout y L2 descartados; BatchNorm antes de la activación y lr $\times$3 (EXP-013) & 0,590 $\pm$ 0,009 & 0,612 $\pm$ 0,005 & 3 \\
+2 & Augmentation: rotaciones de 90$^\circ$ (EXP-019) & 0,617 $\pm$ 0,015 & 0,632 $\pm$ 0,005 & 3 \\
+3 & Modelo final: la learning rate baja más tarde (paciencia de ReduceLROnPlateau 6 $\rightarrow$ 8; EXP-021, EXP-028) & 0,646 $\pm$ 0,015 & 0,643 $\pm$ 0,011 & 3 \\
+\bottomrule
+\end{tabular}

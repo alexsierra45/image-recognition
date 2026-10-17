@@ -20,12 +20,12 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 | Etapa del curso | ffNN (red feedforward): **plan de mejora en 9 fases completado** (DEC-006) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
 | Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
-| Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015 |
-| Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrena ahora `ffNN_example.ipynb` (CHG-013). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
+| Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
+| Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrenaba `ffNN_example.ipynb` hasta CHG-019 (versión en el commit `d557b09`). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
 | Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
-| Diagnóstico | Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Compilar las entregas 1 y 2 en Overleaf. Entrega 3: CNN propias y arquitecturas conocidas desde cero. El desbalance (fase 7) e IDEA-010 quedan para la entrega 5 |
+| Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
+| Próximo paso | Subir el proyecto único `reports/overleaf_project.zip` a Overleaf (DEC-011), compilar la entrega 2 y revisar `review_notes.md`. Entrega 3: CNN propias y arquitecturas conocidas desde cero. El desbalance (fase 7) e IDEA-010 quedan para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -793,6 +793,28 @@ A petición del usuario ("preparar todo lo relativo a la segunda entrega"; `revi
 - **Ejecutado** de arriba abajo (`tools/run_notebook.py`, log en `experiments/logs/notebook_EXP-021.log`): run `EXP-021_20261015-165309`, **idéntico** al run del barrido `EXP-021_final` (semilla 1): mejor época 82 de 107, val acc 0,6421, mean recall 0,6600, min recall 0,2941. `model.keras` y `prediction.json` (2 365 imágenes) salen ahora de este modelo; `prediction.json` se copia a `reports/delivery_02/` (el de la entrega 1 sigue en `reports/delivery_01/`). La versión del notebook de la entrega 1 queda en el commit `d557b09`.
 - Antes de esta tarea, el notebook tenía un cambio sin commitear que era solo de formato (VS Code guardó las celdas como listas de líneas): sin cambios de código ni de salidas.
 
+### CHG-020: Entrega 2 ampliada al nivel de detalle de la entrega 1 (2026-10-15)
+El borrador de CHG-015 (~940 palabras, 10 frames) era anterior a la ampliación de la entrega 1 (CHG-018, 11 páginas entregadas). Se amplía con el mismo esquema, sin experimentos nuevos (todo sale de EXP-013, EXP-019..EXP-021).
+- **Informe** (~2 430 palabras, ~8,5 páginas estimadas):
+  - Objetivo: cómo se mide la brecha (accuracy de train en modo inferencia, sin augmentation).
+  - Punto de partida: la pregunta de la entrega, ¿varianza o sesgo? Se apoya en la brecha, en la capacidad (EXP-006, 1024-512-256) y en la parada.
+  - Cada técnica con su fundamento:
+    - Dropout [R5; R8 §7.12].
+    - L2 como weight decay y MAP gaussiano [R8 §7.1.1, §5.6.1], y por qué con Adam no equivale a weight decay [R32].
+    - BatchNorm antes de la activación [R6], que permite una lr mayor [R6; R35].
+    - Augmentation: el grupo D4 son permutaciones exactas sobre la rejilla [R8 §7.4].
+  - Combinaciones: Dropout + BN (desplazamiento de varianza [R34], dado como posible causa) y L2 delante de BN, que no restringe la función [R33].
+  - Tres cuadros de variantes con train acc y brecha: `phase1_variants` (EXP-013), `augmentation_variants` (EXP-019) y `combine_variants` (EXP-020).
+  - Recall por clase: Helipad en 0 con dropout 0,5. Con rotaciones, Cargo plane, Motorboat y Dump truck mejoran y Truck empeora.
+  - Resultado final: análisis del punto de parada de la semilla 1 con la figura nueva `stopping`. La primera bajada de la lr llega en la época 71 (en la entrega 1, en la 20) y la mejor época es la 82.
+  - Por clases: Helipad pasa de 0,303 a 0,697 (11 imágenes: muy ruidoso). Truck baja a 0,258 y se confunde con Small car, Dump truck y Bus.
+  - Bibliografía: de 6 a 10 entradas.
+- **Slides**: 11 frames y 11 min de notas, en el orden del informe (DEC-010), con el esquema pregunta / qué vemos / decisión de la entrega 1. Frames nuevos: el del punto de parada; se quita el frame "L2 y combinaciones", que pasa a las notas.
+- **Scripts:**
+  - `build_results.py`: sección opcional `class_recalls` (macros `<clave>-recall-<clase>` y `valid-count-<clase>`) y columna `gap` en los cuadros de variantes.
+  - `check_bundle.py`: error si un `\res{}` cuyo valor ya lleva `$...$` va dentro de modo matemático (ISS-010). Probado en negativo. La entrega 1 sigue con 0 errores.
+- **`make bundle D=02`:** 0 errores y 2 avisos de longitud, como en la entrega 1; recortar lo decide el usuario. `review_notes.md` reescrito.
+
 ### CHG-021: Las entregas pasan a un único proyecto de Overleaf, `reports/overleaf/` (2026-10-15)
 Por DEC-011. No cambia el contenido de ninguna entrega.
 - **Migración** (con `git mv`, para conservar la historia):
@@ -815,6 +837,94 @@ Por DEC-011. No cambia el contenido de ninguna entrega.
   - Slides: 14 páginas cada una. El PDF entregado de la entrega 1 tiene 13 y no tiene el frame de referencias, así que esa edición se hizo en Overleaf y no está en el repositorio.
   - `check_bundle.py`: mismos resultados que antes de migrar en las dos entregas. Generar los documentos principales de una entrega nueva (prueba con `delivery_99`, borrada después) funciona y no sobrescribe.
 - **Compilar destapó ISS-011**, resuelta aquí.
+
+### CHG-022: Label smoothing, promedio de modelos y diapositiva de la matriz de confusión (2026-10-15)
+- **`experiment_utils.py`:** clave nueva `label_smoothing` (por defecto 0). Si vale 0, la pérdida sigue siendo la cadena `'categorical_crossentropy'`, así que los runs anteriores se reproducen igual. `sweep.py`: fase `d2_label_smoothing` (EXP-022).
+- **`tools/ensemble_eval.py`** (nuevo): promedia las probabilidades de los modelos guardados en validación y train, con las mismas métricas que `run_experiment`, y recalcula cada modelo por separado para comprobar que coincide con `experiments.csv`. Escribe en `experiments/ensembles/<id>.json` (EXP-023).
+- **Scripts de entregas:**
+  - `build_results.py`: sección opcional `ensembles` (macros `<clave>-mean-recall`, `-gain`, `-best-member-mean-recall`…).
+  - `build_figures.py`: la figura `confusion` acepta `select: {variant: ...}`, que dibuja la media de las matrices de las semillas normalizadas por filas.
+  - `check_bundle.py`: da error si el frame anterior a "Conclusiones…" no muestra solo `figures/confusion.png` (DEC-012).
+- **Plantilla:** frame de la matriz de confusión al final de `slides_05_final.tex`, la figura al final de `report_05_final.tex`, la regla 11 del README y el `figure_specs.example.yaml` con `variant`.
+- **Entrega 2:**
+  - Figura `confusion` (media de las 3 semillas de EXP-021): diapositiva propia, la 13 de 16, justo antes de las conclusiones, y en el informe al final del resultado final, con un párrafo sobre los dos grupos de errores (vehículos entre sí; Building recoge Storage tank en 0,20).
+  - Subsección y cuadro `ls_variants` de label smoothing (EXP-022).
+  - Párrafo del promedio de semillas (EXP-023) en el resultado final.
+  - Frame "Dos pruebas más" y conclusiones actualizadas. Bibliografía: + [R38], [R39].
+- **Verificado:** `make bundle D=02`: 0 errores y 3 avisos de longitud (~9,7 páginas estimadas, 13 frames y 13 min de notas). Compilado con Tectonic: informe de 10 páginas y slides de 16, sin desbordes ni marcas de contenido ausente. Las diapositivas nuevas caben (revisadas como imagen). La entrega 1 sigue compilando (11 páginas).
+
+### CHG-023: Las figuras de BatchNorm y augmentation de la entrega 2 pasan de barras a dumbbell (2026-10-16)
+A petición del usuario: no le gustaba cómo comparaban visualmente las dos figuras.
+- **Qué fallaba en las barras:**
+  - Empezaban en 0, así que diferencias de 1-4 pp de mean recall se veían planas.
+  - El train era un trazo discontinuo flotando sobre cada barra, sin unirse a ella.
+  - La leyenda ocupaba un tercio del ancho y las etiquetas estaban giradas.
+  - La brecha train-val, que es de lo que trata la entrega, no se leía.
+- **Ahora** (tipo nuevo `dumbbell` en `build_figures.py`):
+  - Una fila por variante: validación como punto relleno (media de 3 semillas) más un punto pequeño por semilla, y train como punto hueco, unidos por una línea cuya longitud es la brecha.
+  - Al ser puntos, el eje no necesita empezar en 0.
+  - La fila de referencia, en gris, marca una vertical punteada en su validación. La variante elegida va en negrita. Etiquetas horizontales y leyenda en una fila encima.
+  - Las semillas sustituyen a la barra de error: con 3 semillas, mostrarlas es más honesto que una desviación típica.
+- **Sin cifras de brecha en la figura:** se miden en mean recall y el texto cita la brecha en accuracy (p. ej. 15,1 frente a 14,0 pp para el mismo modelo), así que pondrían dos definiciones a la vez. El pie dice que la brecha es en mean recall.
+- **Slide de augmentation:** la viñeta pasa de la accuracy de train al mean recall de train, que es lo que muestra la figura (regla de CHG-014).
+- **Verificado:** `make bundle D=02`: 0 errores. Compilado con Tectonic: informe de 11 páginas y slides de 16, sin desbordes; la slide de augmentation revisada como imagen. En esas imágenes, "¿" sale como "£": es un artefacto de Tectonic (XeTeX con `T1` e `inputenc`). En Overleaf, con pdfLaTeX, la entrega 1 lo mostraba bien con los mismos paquetes.
+
+### CHG-024: Capacidad × regularización, desplazamientos y TTA, en el código y en la entrega 2 (2026-10-16)
+- **`experiment_utils.py`:** op de augmentation `shiftK` (desplazamiento aleatorio de hasta K píxeles con relleno por reflejo; probada sobre un array pequeño) y clave `pool` (`AveragePooling2D` delante de `Flatten`). Las dos tienen valores por defecto que no cambian los runs anteriores.
+- **`sweep.py`:** fases `d2_capacity_reg` (EXP-024), `d2_shift` (EXP-025) y `d2_subpixel_shift` (EXP-027).
+- **`tools/ensemble_eval.py`:** opción `--tta rot90` (EXP-026).
+- **Scripts de entregas:**
+  - `build_figures.py`: tipo `capacity_reg`, con dos paneles: mean recall de validación y brecha según la anchura, una línea por regularizador.
+  - `build_results.py`: sección `ensemble_groups`, con la media ± desviación de varias evaluaciones de `ensembles/` (la TTA por semilla).
+- **Entrega 2, como continuación lógica:**
+  - **Informe:**
+    - La sección de técnicas abre con el orden de las preguntas: cada técnica sola, augmentation, combinaciones, label smoothing, capacidad (¿fallaba Dropout por la red pequeña?) y desplazamientos (¿se le puede enseñar la traslación como la orientación?).
+    - Subsecciones nuevas «Capacidad y regularización», con la figura `capacity_reg`, y «Desplazamientos», con el cuadro `shift_variants`.
+    - La TTA va junto al promedio de semillas en el resultado final.
+    - Resumen y conclusiones actualizados; la bibliografía añade [R40].
+  - **Slides:** frames «¿Y con una red más grande?» y «Desplazamientos», en el mismo orden que el informe; conclusiones actualizadas.
+  - **Corregida una afirmación demasiado amplia del borrador:** decía que label smoothing tampoco ayudaba con redes más anchas, pero solo se probó con 4 × 256.
+- **Verificado:** `make bundle D=02`: 0 errores y 3 avisos de longitud (~11,4 páginas estimadas, 15 frames, 15 min). Compilado con Tectonic: informe de 12 páginas y slides de 18, sin marcas de contenido ausente. Se arregló un frame que se salía 14 pt de alto (figura de 0,5 a 0,42 de la altura). Queda el desborde conocido de 7 pt de `phase_summary`. Las slides nuevas, revisadas como imagen.
+- **Sin cambios:** el modelo final (EXP-021), el notebook y `prediction.json`.
+
+### CHG-025: Slides de la entrega 2 recortadas a 10 frames y 10 minutos (2026-10-16)
+A petición del usuario: adaptar la presentación a 10 min con los resultados más importantes. Tenía 15 frames y 15 min tras CHG-024. El informe no cambia.
+- **Sin quitar ninguna figura:** las 10 siguen en las slides, en el mismo orden que en el informe (DEC-010).
+- **Fusiones:**
+  - Objetivo con punto de partida.
+  - Dropout con L2: un frame con las dos curvas de validación.
+  - Progreso con brecha: un frame con las dos figuras.
+- **Frames eliminados:** «Dos pruebas más» (label smoothing y promedio de semillas) y «Desplazamientos», con sus tablas. Sus resultados pasan a una línea de las conclusiones («No funcionan»: label smoothing −2,8 pp, desplazamientos −6,0 pp con 1 px, promediar al predecir poco o nada) y a las notas del orador. Siguen completos en el informe.
+- **Orden:** objetivo y punto de partida → Dropout y L2 → BatchNorm → augmentation → capacidad × regularización → progreso y brecha → parada → resultado final → matriz de confusión (sola, justo antes de las conclusiones: DEC-012) → conclusiones.
+- **Notas:** 10 min en total; 1,25 min en los frames con más contenido (Dropout y L2, capacidad, conclusiones) y 0,75 en parada, resultado final y matriz.
+- **Verificado:** `make bundle D=02`: 0 errores, y ya ningún aviso de las slides; queda el de longitud del informe. Compilado con Tectonic: 13 páginas (portada, 10 de contenido, referencias y portada final). Un desborde de 5 pt en «Progreso y brecha», arreglado con figuras de 0,5 de la altura. Todas las slides revisadas en una hoja de contactos.
+- La versión de 15 frames nunca llegó a commitearse. Solo queda una copia temporal en el scratchpad de esta sesión; los frames eliminados se pueden reconstruir a partir de CHG-022 y CHG-024 y de las secciones del informe.
+
+### CHG-026: Convención de métricas única y el salto del modelo final explicado, en la entrega 2 (2026-10-16)
+A petición del usuario: «me quiero mantener consistente» (sin cambiar conclusiones) y «no queda claro cómo se hace el salto de 61 a 64».
+- **Convención** (regla 12 de la plantilla y memoria):
+  - Las variantes se comparan por mean recall, de validación y de train.
+  - La brecha y las curvas por época van en accuracy, la única métrica de train registrada por época.
+  - Se dice una vez en «Objetivo y datos» y en los pies de las curvas por época.
+- **Cambios en la entrega 2:**
+  - `build_figures.py`: el tipo `strength` acepta `options.metric`. Las curvas de Dropout y L2 pasan a mean recall: misma historia, train y validación bajan juntos.
+  - Los pies de los dumbbells hablan de «distancia en mean recall» y no de «brecha».
+  - Cinco pasajes del informe que describían el nivel de train de una variante pasan a mean recall (Dropout, L2, BatchNorm, augmentation y desplazamientos); macro nueva `gain-bn-train-mr`. Las brechas siguen en accuracy.
+- **Salto 0,617 → 0,646 (EXP-028):**
+  - **Informe:** el resultado final abre con el mecanismo (el ruido de la validación con rotaciones disparaba la bajada de la lr), las épocas de la primera bajada por semilla y la ablación (cuadro nuevo `patience_variants`).
+  - El paso 3 de la tabla de pasos se llamaba «entrenamiento más largo; sin dropout ni L2»; ahora es «la learning rate baja más tarde (paciencia de ReduceLROnPlateau 6 → 8)».
+  - Resumen y conclusiones corregidos.
+  - **Slides:** el frame de parada pasa a «De 0,617 a 0,646: la learning rate bajaba demasiado pronto» (1 min); las conclusiones bajan a 1 min. Siguen siendo 10 frames y 10 min.
+- **Scripts:** `build_results.py`, op `first_drop` en `history_values` (primera época con la lr reducida).
+- **Verificado:** `make bundle D=02`: 0 errores y 1 aviso (longitud del informe, ~12,2 páginas estimadas). Compilado con Tectonic: informe de 12 páginas y slides de 13, sin desbordes nuevos ni marcas de contenido ausente.
+
+### CHG-027: La brecha de las redes anchas, interpretada como ruido (2026-10-17)
+El usuario preguntó si 4 × 1024 no era mejor modelo, al tener la misma validación y menos brecha (8,8 frente a 12,1 pp).
+- **No lo es.** La brecha es un diagnóstico, no el objetivo: con la misma validación, una brecha menor solo significa que se ajusta menos el train. Además, aquí la diferencia es ruido: la de 4 × 256 se debe sobre todo a la semilla 1 (17,2 pp; las otras dos, 9,6 y 9,5 pp) y depende de la época conservada. La elección de 4 × 256 se justifica por ser el modelo más simple con la validación empatada.
+- **Entrega 2:**
+  - Informe: la sección de capacidad deja de decir «la red más ancha no memoriza más» y explica que la diferencia de brecha es ruido, con las brechas por semilla (variantes de una semilla `final-s1..3` en `delivery.yaml`). La decisión se argumenta por simplicidad (400 653 frente a 3 961 869 parámetros).
+  - Slide de capacidad: «empatan en validación: se elige la más simple».
+- **Bitácora:** corrección añadida a EXP-024.
 
 ---
 
@@ -845,8 +955,15 @@ Al copiar el dataset desde Windows a WSL, cada TIF llegó acompañado de un `<no
 
 ### ISS-008: EXP-005 describía como permanente el colapso a 224×224 · resuelta (→ corrección en EXP-005)
 EXP-005 decía que a 224×224 "la pérdida de train se queda en ≈ 2,28 desde la época 2 y la accuracy en ≈ 0,21". El historial (`history/EXP-005_r224.json`) muestra que eso dura unas 11 épocas: después la pérdida baja a 2,03 y la train acc llega a 0,315 (el valor de `experiments.csv`). **Detectado** al redactar la fase 2 de la entrega 1 (CHG-018), que ahora habla de "las diez primeras épocas" con la mediana de esas épocas. La conclusión (problema de optimización, no de varianza) no cambia.
+
+### ISS-009: La tabla de combinaciones de la entrega 2 decía "Quitando" · resuelta (→ CHG-020)
+La tabla de EXP-020 en la entrega 2 se generaba con `write_ablation`, pensada para la ablación de la entrega 1. Su cabecera de columna es "Quitando", pero la mayoría de sus filas *añaden* técnicas ("+ Dropout 0,1"). Además, no mostraba la accuracy de train ni la brecha, que son lo que se discute en esta entrega. Se sustituye por el cuadro de variantes `combine_variants`. `write_ablation` no cambia.
+
 ### ISS-010: `check_bundle.py` no detectaba `\res{}` con `$` dentro de modo matemático · resuelta (→ CHG-020)
 Algunas macros ya traen su propio modo matemático, como la lr (`$3{,}6\cdot 10^{-3}$`) o el factor L2. Escribirlas dentro de `$...$` anida los `$` y rompe la compilación en pdfLaTeX, y la comprobación no lo veía. Apareció al redactar la entrega 2 (`$\lambda = \res{l2-1e-5-l2}$`). También se evitan los números con coma decimal dentro de `$...$` (`$p = 0,5$`), porque en modo matemático la coma añade un espacio.
+
+### ISS-011: Las tablas de variantes de la entrega 2 se salían del margen · resuelta (→ CHG-021)
+Se vio al compilar por primera vez. `phase1_variants`, `augmentation_variants` y `combine_variants` tienen 7 columnas y se salían del margen derecho entre 55 y 71 pt, incluso con `\scriptsize`; `baseline_vs_final` se salía 27 pt. Se escalan al ancho del texto con `\resizebox{\linewidth}{!}{...}` en los borradores. Queda un desborde de 7 pt en `phase_summary`, inapreciable. `check_bundle.py` no mide anchos: solo se ven compilando.
 
 ### ISS-012: EXP-021 cambiaba dos factores a la vez y su ganancia se atribuía a «entrenar más» · resuelta (→ EXP-028, CHG-026)
 EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlateau (6 → 8) a la vez. Eso rompe la regla de un factor por experimento, y la bitácora, el informe y las slides atribuían la ganancia a un entrenamiento más largo. El usuario preguntó de dónde salía el salto. La ablación (EXP-028) lo atribuye entero a la paciencia de ReduceLROnPlateau.
@@ -1036,6 +1153,9 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R30]** Keskar et al. (2017). *On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima*. ICLR.
 - **[R31]** Loshchilov, Hutter (2017). *SGDR: Stochastic Gradient Descent with Warm Restarts*. ICLR. (schedule coseno; citada desde EXP-011, añadida a la lista en CHG-018)
 - **[R32]** Loshchilov, Hutter (2019). *Decoupled Weight Decay Regularization*. ICLR. (AdamW; citada desde EXP-012, añadida a la lista en CHG-018)
+- **[R33]** van Laarhoven (2017). *L2 Regularization versus Batch and Weight Normalization*. arXiv:1706.05350. (delante de BN, L2 no restringe la función y solo cambia la lr efectiva; citada en CHG-020)
+- **[R34]** Li, Chen, Hu, Yang (2019). *Understanding the Disharmony between Dropout and Batch Normalization by Variance Shift*. CVPR. (citada en CHG-020)
+- **[R35]** Santurkar, Tsipras, Ilyas, Madry (2018). *How Does Batch Normalization Help Optimization?* NeurIPS. (citada en CHG-020)
 - **[R36]** Overleaf. *My main file is in a subfolder, but this is not allowed on Overleaf* (documentación de ayuda). https://www.overleaf.com/help/243-my-main-file-is-in-a-subfolder-but-this-is-not-allowed-on-overleaf-but-i-dont-want-to-change-my-folder-structure-and-slash-input-paths
 - **[R37]** Overleaf. *Uploading files to a project* (documentación). https://docs.overleaf.com/managing-projects-and-files/adding-files-to-a-project/uploading-files-to-a-project
 - **[R38]** Szegedy, Vanhoucke, Ioffe, Shlens, Wojna (2016). *Rethinking the Inception Architecture for Computer Vision*. CVPR. (§7: label smoothing)

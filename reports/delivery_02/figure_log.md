@@ -15,14 +15,19 @@
 - Included: EXP-010_bs256_sqrt_60ep, EXP-013_l2_1e-3, EXP-013_l2_1e-4, EXP-013_l2_1e-5
 - Omitted: EXP-013 L2 and BatchNorm variants (other techniques)
 
-## batchnorm (bars)
-- Criterion: all variants of the step and their base, 3 seeds each
-- Included: EXP-010_bs256_sqrt_60ep, EXP-013_bn_before, EXP-013_bn_after, EXP-013_bn_before_lr3x, EXP-013_bn_after_lr3x
+## batchnorm (dumbbell)
+- Criterion: all variants of the step and their base, every seed
+- Included: EXP-010_bs256_sqrt_60ep, EXP-010_bs256_sqrt_60ep_seed2, EXP-010_bs256_sqrt_60ep_seed3, EXP-013_bn_before, EXP-013_bn_before_seed2, EXP-013_bn_before_seed3, EXP-013_bn_after, EXP-013_bn_after_seed2, EXP-013_bn_after_seed3, EXP-013_bn_before_lr3x, EXP-013_bn_before_lr3x_seed2, EXP-013_bn_before_lr3x_seed3, EXP-013_bn_after_lr3x, EXP-013_bn_after_lr3x_seed2, EXP-013_bn_after_lr3x_seed3
 - Omitted: none
 
-## augmentation (bars)
-- Criterion: all variants of the step and their base, 3 seeds each
-- Included: EXP-019_none_patience15, EXP-019_flip, EXP-019_rot90, EXP-019_d4, EXP-019_color, EXP-019_d4_color
+## augmentation (dumbbell)
+- Criterion: all variants of the step and their base, every seed
+- Included: EXP-019_none_patience15, EXP-019_none_patience15_seed2, EXP-019_none_patience15_seed3, EXP-019_flip, EXP-019_flip_seed2, EXP-019_flip_seed3, EXP-019_rot90, EXP-019_rot90_seed2, EXP-019_rot90_seed3, EXP-019_d4, EXP-019_d4_seed2, EXP-019_d4_seed3, EXP-019_color, EXP-019_color_seed2, EXP-019_color_seed3, EXP-019_d4_color, EXP-019_d4_color_seed2, EXP-019_d4_color_seed3
+- Omitted: none
+
+## capacity_reg (capacity_reg)
+- Criterion: every cell of the grid, every seed
+- Included: EXP-021_final, EXP-021_final_seed2, EXP-021_final_seed3, EXP-024_w512_none, EXP-024_w512_none_seed2, EXP-024_w512_none_seed3, EXP-024_w1024_none, EXP-024_w1024_none_seed2, EXP-024_w1024_none_seed3, EXP-024_w256_dropout0.2, EXP-024_w256_dropout0.2_seed2, EXP-024_w256_dropout0.2_seed3, EXP-024_w512_dropout0.2, EXP-024_w512_dropout0.2_seed2, EXP-024_w512_dropout0.2_seed3, EXP-024_w1024_dropout0.2, EXP-024_w1024_dropout0.2_seed2, EXP-024_w1024_dropout0.2_seed3, EXP-024_w256_dropout0.5, EXP-024_w256_dropout0.5_seed2, EXP-024_w256_dropout0.5_seed3, EXP-024_w512_dropout0.5, EXP-024_w512_dropout0.5_seed2, EXP-024_w512_dropout0.5_seed3, EXP-024_w1024_dropout0.5, EXP-024_w1024_dropout0.5_seed2, EXP-024_w1024_dropout0.5_seed3, EXP-024_w256_l2_1e-4, EXP-024_w256_l2_1e-4_seed2, EXP-024_w256_l2_1e-4_seed3, EXP-024_w512_l2_1e-4, EXP-024_w512_l2_1e-4_seed2, EXP-024_w512_l2_1e-4_seed3, EXP-024_w1024_l2_1e-4, EXP-024_w1024_l2_1e-4_seed2, EXP-024_w1024_l2_1e-4_seed3
 - Omitted: none
 
 ## progress (progress)
@@ -30,7 +35,17 @@
 - Included: EXP-010_bs256_sqrt_60ep, EXP-013_bn_before_lr3x, EXP-019_rot90, EXP-021_final
 - Omitted: none
 
+## stopping (stopping)
+- Criterion: seed 1 of the final model = the run reproduced by ffNN_example.ipynb
+- Included: EXP-021_final
+- Omitted: seeds 2 and 3 (best epochs 31 and 32; same pattern)
+
 ## per_class_recall (per_class_recall)
 - Criterion: all 13 classes
 - Included: EXP-010_bs256_sqrt_60ep, EXP-021_final, EXP-021_final_seed2, EXP-021_final_seed3
+- Omitted: none
+
+## confusion (confusion)
+- Criterion: mean of the row-normalised matrices of every seed
+- Included: EXP-021_final, EXP-021_final_seed2, EXP-021_final_seed3
 - Omitted: none

@@ -1,0 +1,19 @@
+% >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
+\begin{tabular}{lcccccc}
+\toprule
+Variante & Mean recall & Accuracy & Accuracy train & Brecha (pp) & Recall mín. & Mejor época / épocas \\
+\midrule
+Sin regularización (entrega 1) & 0,578 $\pm$ 0,007 & 0,616 $\pm$ 0,006 & 0,756 $\pm$ 0,033 & 14,0 & 0,270 $\pm$ 0,029 & 28 / 38 \\
+Dropout 0,1 & 0,555 $\pm$ 0,016 & 0,605 $\pm$ 0,012 & 0,672 $\pm$ 0,038 & 6,8 & 0,206 $\pm$ 0,041 & 31 / 41 \\
+Dropout 0,2 & 0,559 $\pm$ 0,011 & 0,605 $\pm$ 0,011 & 0,669 $\pm$ 0,015 & 6,4 & 0,182 $\pm$ 0,000 & 47 / 57 \\
+Dropout 0,3 & 0,530 $\pm$ 0,016 & 0,579 $\pm$ 0,013 & 0,615 $\pm$ 0,019 & 3,7 & 0,155 $\pm$ 0,018 & 41 / 51 \\
+Dropout 0,5 & 0,394 $\pm$ 0,014 & 0,479 $\pm$ 0,010 & 0,489 $\pm$ 0,019 & 1,0 & 0,000 $\pm$ 0,000 & 18 / 28 \\
+L2 1e-5 & 0,575 $\pm$ 0,021 & 0,614 $\pm$ 0,012 & 0,775 $\pm$ 0,026 & 16,1 & 0,299 $\pm$ 0,046 & 35 / 45 \\
+L2 1e-4 & 0,577 $\pm$ 0,007 & 0,611 $\pm$ 0,006 & 0,769 $\pm$ 0,055 & 15,9 & 0,278 $\pm$ 0,028 & 34 / 44 \\
+L2 1e-3 & 0,469 $\pm$ 0,012 & 0,550 $\pm$ 0,008 & 0,581 $\pm$ 0,017 & 3,1 & 0,030 $\pm$ 0,052 & 24 / 34 \\
+BN antes de la activación & 0,578 $\pm$ 0,014 & 0,608 $\pm$ 0,002 & 0,836 $\pm$ 0,034 & 22,8 & 0,281 $\pm$ 0,024 & 22 / 32 \\
+BN después de la activación & 0,578 $\pm$ 0,006 & 0,613 $\pm$ 0,004 & 0,821 $\pm$ 0,036 & 20,8 & 0,277 $\pm$ 0,007 & 25 / 35 \\
+BN antes, lr $\times$3 & 0,590 $\pm$ 0,009 & 0,612 $\pm$ 0,005 & 0,797 $\pm$ 0,075 & 18,5 & 0,323 $\pm$ 0,058 & 22 / 32 \\
+BN después, lr $\times$3 & 0,569 $\pm$ 0,011 & 0,602 $\pm$ 0,006 & 0,700 $\pm$ 0,007 & 9,8 & 0,243 $\pm$ 0,053 & 19 / 29 \\
+\bottomrule
+\end{tabular}

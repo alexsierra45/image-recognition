@@ -1,9 +1,21 @@
-% Progreso (~1 min). Fuente: delivery.yaml, experiments.csv.
-\begin{frame}{Progreso por paso}
-  \begin{figure}
-    \centering
-    \safegraphics[width=0.8\textwidth,height=0.62\textheight,keepaspectratio]{figures/progress.png}{Mean recall de validación tras cada paso}
-    \caption{\footnotesize Mean recall de \res{baseline-mean-recall} (entrega 1) a \res{best-mean-recall} (final).}
-  \end{figure}
-  \speakernote{1}{BatchNorm, rotaciones y entrenar más tiempo: con augmentation la validación sigue subiendo durante más épocas (+\res{gain-longer}~pp).}
+% Progreso y brecha (~1 min), en el orden del informe (report_05_final). Fuentes: delivery.yaml, EXP-021.
+\begin{frame}{Progreso y brecha}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.49\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{figures/progress.png}{Progreso por paso}
+        \caption{\footnotesize \figcaptionshort{progress}}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{figures/overfitting_curves.png}{Curvas de train y validación}
+        \caption{\footnotesize \figcaptionshort{overfitting_curves}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \keymessage{Mean recall \res{baseline-mean-recall} $\rightarrow$ \res{best-mean-recall}; brecha \res{phase0-gap-acc} $\rightarrow$ \res{final-gap-acc}~pp: se reduce, pero no desaparece.}
+  \speakernote{1}{BatchNorm, rotaciones y bajar la lr más tarde (+\res{gain-rlr8}~pp; se explica en la diapositiva siguiente). El modelo regularizado aprende más despacio y supera al de la entrega 1 cuando este ya ha parado. Con las mismas paciencias, la brecha llegaba a \res{phase2-gap-acc}~pp; entrenar más recupera algo de memorización a cambio de mejor validación.}
 \end{frame}

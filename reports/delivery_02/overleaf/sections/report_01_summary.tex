@@ -1,9 +1,0 @@
-% Fuentes: LOGBOOK.md (DEC-009, EXP-013, EXP-019..EXP-021), experiments.csv.
-\section*{Resumen}
-Se regulariza la red densa (ffNN) de la entrega anterior, que clasifica recortes de imágenes aéreas de
-xView~\cite{xview} en \res{n-classes} clases y mostraba una brecha de \res{phase0-gap-acc}~pp entre la \emph{accuracy}
-de entrenamiento y la de validación. Se prueban penalizaciones de norma (L2), Dropout, BatchNorm y \emph{data
-augmentation}, una técnica cada vez y con \res{final-seeds} semillas por variante. Dropout y L2 no ayudan: reducen
-train y validación a la vez. BatchNorm y las rotaciones de 90$^\circ$ sí: el modelo final alcanza un \emph{mean
-recall} de \res{best-mean-recall}~$\pm$~\res{best-mean-recall-std} (+\res{gain-total}~pp sobre la entrega anterior)
-y una \emph{accuracy} de \res{best-val-acc}~$\pm$~\res{best-val-acc-std}.

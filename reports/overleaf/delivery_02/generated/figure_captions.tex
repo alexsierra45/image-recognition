@@ -1,0 +1,24 @@
+% >>> ARCHIVO GENERADO por scripts/build_figures.py. Se sobrescribe siempre (se carga desde results_macros.tex). <<<
+\renewcommand{\figcaption}[1]{\ifcsname figcap@#1\endcsname\csname figcap@#1\endcsname\else\textcolor{red}{\textbf{[??caption \detokenize{#1}]}}\fi}
+% \figcaptionshort{id}: short caption for the slides (caption_slides_es; falls back to the long one)
+\providecommand{\figcaptionshort}[1]{\ifcsname figcapshort@#1\endcsname\csname figcapshort@#1\endcsname\else\figcaption{#1}\fi}
+\expandafter\def\csname figcap@overfitting_curves\endcsname{Accuracy de train (discontinua) y de validación (continua) por época del modelo de la entrega 1 y del de esta entrega; media de 3 semillas, banda = mínimo y máximo. Por época solo se registra la accuracy de train (no el mean recall); la del modelo regularizado se mide con augmentation.}
+\expandafter\def\csname figcapshort@overfitting_curves\endcsname{Train (discontinua) y validación (continua), entregas 1 y 2.}
+\expandafter\def\csname figcap@dropout_curve\endcsname{Curva de validación del dropout sobre el modelo de la entrega 1: mean recall de train (discontinua) y de validación (continua), media de 3 semillas.}
+\expandafter\def\csname figcapshort@dropout_curve\endcsname{Mean recall de train y de validación según el dropout.}
+\expandafter\def\csname figcap@l2_curve\endcsname{Curva de validación de la penalización L2 sobre el modelo de la entrega 1: mean recall de train (discontinua) y de validación (continua), media de 3 semillas.}
+\expandafter\def\csname figcapshort@l2_curve\endcsname{Mean recall de train y de validación según el factor L2.}
+\expandafter\def\csname figcap@batchnorm\endcsname{BatchNorm antes o después de la activación, con la learning rate de la entrega 1 o triplicada: mean recall de validación (punto relleno: media de 3 semillas; puntos pequeños: cada semilla) y de train (punto hueco); la línea que los une marca su distancia en mean recall. Punteado: el modelo sin BatchNorm; en negrita, la variante elegida.}
+\expandafter\def\csname figcapshort@batchnorm\endcsname{Mean recall de validación (relleno) y de train (hueco).}
+\expandafter\def\csname figcap@augmentation\endcsname{Data augmentation sobre el modelo con BatchNorm: mean recall de validación (punto relleno: media de 3 semillas; puntos pequeños: cada semilla) y de train (punto hueco); la línea que los une marca su distancia en mean recall. Punteado: sin augmentation; en negrita, la variante elegida.}
+\expandafter\def\csname figcapshort@augmentation\endcsname{Mean recall de validación (relleno) y de train (hueco).}
+\expandafter\def\csname figcap@capacity_reg\endcsname{Capacidad $\times$ regularización sobre el modelo con BatchNorm y rotaciones (3 semillas por celda). Izquierda: mean recall de validación según la anchura de las 4 capas ocultas, una línea por regularizador (banda: mínimo y máximo de las semillas; estrella: la configuración elegida). Derecha: brecha entre la accuracy de train y la de validación.}
+\expandafter\def\csname figcapshort@capacity_reg\endcsname{Izq.: mean recall de validación. Dcha.: brecha train-val (pp).}
+\expandafter\def\csname figcap@progress\endcsname{Mean recall y accuracy de validación tras cada paso de la entrega (media de 3 semillas).}
+\expandafter\def\csname figcapshort@progress\endcsname{Mean recall y accuracy de validación tras cada paso.}
+\expandafter\def\csname figcap@stopping\endcsname{Modelo final (semilla 1): accuracy de train (la única métrica de train que se registra por época; medida con augmentation) y de validación y mean recall de validación por época. Punteado: bajadas de la lr; estrella: época conservada; cruz: parada.}
+\expandafter\def\csname figcapshort@stopping\endcsname{Semilla 1. Sombreado: tras la mejor época solo mejora train.}
+\expandafter\def\csname figcap@per_class_recall\endcsname{Recall de validación por clase: modelo de la entrega 1 frente al de esta entrega (media de 3 semillas en ambos).}
+\expandafter\def\csname figcapshort@per_class_recall\endcsname{Recall de validación por clase: entrega 1 frente a entrega 2.}
+\expandafter\def\csname figcap@confusion\endcsname{Matriz de confusión de validación del modelo final, normalizada por filas (cada fila suma 1): media de las matrices de las 3 semillas.}
+\expandafter\def\csname figcapshort@confusion\endcsname{Validación, normalizada por filas (media de 3 semillas).}

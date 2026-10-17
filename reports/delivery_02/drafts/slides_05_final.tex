@@ -1,11 +1,34 @@
-% Resultado final (~1 min). Fuentes: EXP-021.
+% Punto de parada, resultado final y matriz de confusión, en el orden del informe (report_05_final). La matriz va
+% sola, justo antes de las conclusiones (DEC-012). Fuentes: EXP-021. Versión de 10 frames (CHG-025).
+\begin{frame}{De \res{phase2-mean-recall} a \res{best-mean-recall}: la learning rate bajaba demasiado pronto}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.42\textwidth}
+      \begin{itemize}
+        \item Con rotaciones, la validación oscila mucho entre épocas
+        \item Con paciencia \res{final-rlr-patience}, la lr no baja hasta la época \res{stop-first-lr-drop}, y esa bajada da el salto
+        \item Después solo mejora train
+      \end{itemize}
+      \vspace{0.2cm}
+      \decisionblock{Paciencia de ReduceLROnPlateau \res{phase2-rlr-patience} $\rightarrow$ \res{final-rlr-patience}: +\res{gain-rlr8}~pp. La de EarlyStopping no influye (+\res{gain-es25}~pp).}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \centering
+        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/stopping.png}{Punto de parada}
+        \caption{\footnotesize \figcaptionshort{stopping}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+  \speakernote{1}{Semilla 1, la que reproduce el notebook. Con paciencia \res{phase2-rlr-patience}, el ruido de la validación disparaba la bajada de la lr en las épocas \res{drop-rlr6-s1}, \res{drop-rlr6-s2} y \res{drop-rlr6-s3}; con \res{final-rlr-patience}, en \res{drop-rlr8-s1}, \res{drop-rlr8-s2} y \res{drop-rlr8-s3}. La ablación separa las dos paciencias que cambiaron a la vez: todo el salto es de ReduceLROnPlateau. Se apoya en dos de las tres semillas.}
+\end{frame}
+
 \begin{frame}{Resultado final}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.35\textwidth}
       \begin{itemize}
         \item Mean recall: \textbf{\res{best-mean-recall}} $\pm$ \res{best-mean-recall-std} (+\res{gain-total}~pp)
         \item Accuracy: \res{best-val-acc} (+\res{gain-total-acc}~pp)
-        \item Brecha: de \res{phase0-gap-acc} a \res{final-gap-acc}~pp; la peor clase sigue siendo \res{final-worst-class}
+        \item \res{class-min-name} sube a \res{final-recall-helipad}; \res{final-worst-class} baja a \res{final-worst-recall}
       \end{itemize}
     \end{column}
     \begin{column}{0.6\textwidth}
@@ -16,5 +39,14 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Con el mismo presupuesto la brecha bajaba a \res{phase2-gap-acc}~pp; entrenar más recupera parte a cambio de mejor validación.}
+  \speakernote{0,75}{\res{final-hidden} [Dense, BatchNorm, LeakyReLU] sobre \res{final-res}~$\times$~\res{final-res}, rotaciones, sin Dropout ni L2. \res{class-min-name} tiene solo \res{valid-count-helipad} imágenes de validación: muy ruidoso. Cifras algo optimistas: la validación eligió hiperparámetros y época.}
+\end{frame}
+
+\begin{frame}{Matriz de confusión}
+  \begin{figure}
+    \centering
+    \safegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{figures/confusion.png}{Matriz de confusión}
+    \caption{\footnotesize \figcaptionshort{confusion}}
+  \end{figure}
+  \speakernote{0,75}{Dos grupos de errores. Vehículos entre sí: Truck va a Small car (\res{final-conf-truck-small-car}), Dump truck (\res{final-conf-truck-dump-truck}) y Bus (\res{final-conf-truck-bus}). Y Building como cajón de los objetos pequeños sobre fondo: Storage tank va a Building en \res{final-conf-storage-tank-building}.}
 \end{frame}

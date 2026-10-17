@@ -10,24 +10,29 @@ date: auto
 baseline_experiment: EXP-010_bs256_sqrt_60ep     # final model of delivery 1 (same split, same pipeline)
 final_experiment: EXP-021_final
 previous_delivery: 1
+stopping_run: EXP-021_final      # seed 1, the run reproduced by the notebook
 highlight_phases: [1, 2, 3]
 
-format: {metric: 3, std: 3, pp: 1, seconds: 1, ratio: 1}
+format: {metric: 3, std: 3, pp: 1, seconds: 1, ratio: 1, pct: 0}
 
 # Steps of this delivery (configuration kept after each step).
 phases:
   - {phase: 0, variant: EXP-010_bs256_sqrt_60ep, key: phase0, label_es: "Modelo de la entrega 1 (EXP-010)"}
   - {phase: 1, variant: EXP-013_bn_before_lr3x, key: phase1, label_es: "Dropout y L2 descartados; BatchNorm antes de la activación y lr ×3 (EXP-013)"}
   - {phase: 2, variant: EXP-019_rot90, key: phase2, label_es: "Augmentation: rotaciones de 90° (EXP-019)"}
-  - {phase: 3, variant: EXP-021_final, key: final, label_es: "Modelo final: entrenamiento más largo; sin dropout ni L2 (EXP-020, EXP-021)"}
+  - {phase: 3, variant: EXP-021_final, key: final, label_es: "Modelo final: la learning rate baja más tarde (paciencia de ReduceLROnPlateau 6 → 8; EXP-021, EXP-028)"}
 
 variants:
+  big3layer: EXP-006_h1024-512-256        # delivery 1, phase 3: more capacity only widened the gap
   dropout01: EXP-013_dropout0.1
+  dropout03: EXP-013_dropout0.3
   dropout02: EXP-013_dropout0.2
   dropout05: EXP-013_dropout0.5
+  l2-1e-5: EXP-013_l2_1e-5
   l2-1e-4: EXP-013_l2_1e-4
   l2-1e-3: EXP-013_l2_1e-3
   bn-samelr: EXP-013_bn_before
+  bn-after: EXP-013_bn_after
   bn-after-lr3x: EXP-013_bn_after_lr3x
   no-aug: EXP-019_none_patience15
   flip: EXP-019_flip
@@ -39,6 +44,27 @@ variants:
   c-l2-1e-5: EXP-020_l2_1e-5
   c-l2-1e-4: EXP-020_l2_1e-4
   c-no-bn: EXP-020_no_bn
+  ls005: EXP-022_ls0.05
+  shift1: EXP-025_shift1
+  shift2: EXP-025_shift2
+  pool-control: EXP-027_res32pool_control
+  rlr8: EXP-028_rlr8_es15
+  es25: EXP-028_rlr6_es25
+  pool-half: EXP-027_res32pool_shift1
+  final-s1: [EXP-021_final]          # one seed each, for the per-seed gaps quoted in the capacity section
+  final-s2: [EXP-021_final_seed2]
+  final-s3: [EXP-021_final_seed3]
+  w512: EXP-024_w512_none
+  w1024: EXP-024_w1024_none
+  w256-d02: EXP-024_w256_dropout0.2
+  w512-d02: EXP-024_w512_dropout0.2
+  w1024-d02: EXP-024_w1024_dropout0.2
+  w256-d05: EXP-024_w256_dropout0.5
+  w1024-d05: EXP-024_w1024_dropout0.5
+  w512-l2: EXP-024_w512_l2_1e-4
+  w1024-l2: EXP-024_w1024_l2_1e-4
+  ls01: EXP-022_ls0.1
+  ls02: EXP-022_ls0.2
 
 deltas:
   - {key: gain-bn, a: phase1, b: phase0, metric: mean_recall}
@@ -51,18 +77,134 @@ deltas:
   - {key: loss-dropout05, a: dropout05, b: phase0, metric: mean_recall}
   - {key: loss-no-bn, a: c-no-bn, b: phase2, metric: mean_recall}
   - {key: loss-color, a: color, b: no-aug, metric: mean_recall}
+  - {key: gain-flip, a: flip, b: no-aug, metric: mean_recall}
+  - {key: gain-d4, a: d4, b: no-aug, metric: mean_recall}
+  - {key: loss-dropout01, a: dropout01, b: phase0, metric: mean_recall}
+  - {key: loss-c-dropout01, a: c-dropout01, b: phase2, metric: mean_recall}
+  - {key: loss-c-dropout02, a: c-dropout02, b: phase2, metric: mean_recall}
+  - {key: drop-train-rot90, a: no-aug, b: phase2, metric: train_acc}
+  - {key: gain-bn-train-acc, a: bn-samelr, b: phase0, metric: train_acc}
+  - {key: gain-bn-train-mr, a: bn-samelr, b: phase0, metric: train_mean_recall}
+  - {key: loss-ls01, a: ls01, b: final, metric: mean_recall}
+  - {key: loss-ls01-acc, a: ls01, b: final, metric: val_acc}
+  - {key: loss-shift1, a: shift1, b: final, metric: mean_recall}
+  - {key: loss-shift2, a: shift2, b: final, metric: mean_recall}
+  - {key: loss-half, a: pool-half, b: pool-control, metric: mean_recall}
+  - {key: gain-rlr8, a: rlr8, b: phase2, metric: mean_recall}
+  - {key: gain-es25, a: es25, b: phase2, metric: mean_recall}
+  - {key: loss-pool-control, a: pool-control, b: final, metric: mean_recall}
+  - {key: cost-d02-w256, a: w256-d02, b: final, metric: mean_recall}
+  - {key: cost-d02-w512, a: w512-d02, b: w512, metric: mean_recall}
+  - {key: cost-d02-w1024, a: w1024-d02, b: w1024, metric: mean_recall}
+  - {key: cost-d05-w256, a: w256-d05, b: final, metric: mean_recall}
+  - {key: cost-d05-w1024, a: w1024-d05, b: w1024, metric: mean_recall}
+
+# Single values from the history of a run.
+history_values:
+  - {key: drop-rlr6-s1, run: EXP-019_rot90, field: history.learning_rate, op: first_drop, decimals: 0}
+  - {key: drop-rlr6-s2, run: EXP-019_rot90_seed2, field: history.learning_rate, op: first_drop, decimals: 0}
+  - {key: drop-rlr6-s3, run: EXP-019_rot90_seed3, field: history.learning_rate, op: first_drop, decimals: 0}
+  - {key: drop-rlr8-s1, run: EXP-021_final, field: history.learning_rate, op: first_drop, decimals: 0}
+  - {key: drop-rlr8-s2, run: EXP-021_final_seed2, field: history.learning_rate, op: first_drop, decimals: 0}
+  - {key: drop-rlr8-s3, run: EXP-021_final_seed3, field: history.learning_rate, op: first_drop, decimals: 0}
+
+# Averages of the predictions of several models (tools/ensemble_eval.py -> experiments/ensembles/<id>.json).
+ensembles:
+  - {key: ens, id: EXP-023_ens_EXP-021}   # the 3 seeds of the final model
+
+ensemble_groups:
+  - {key: tta, ids: [EXP-026_tta_EXP-021_final, EXP-026_tta_EXP-021_final_seed2, EXP-026_tta_EXP-021_final_seed3]}
+
+# Recall of single classes quoted in the text: <variant key>-recall-<class>.
+class_recalls:
+  - {variant: phase0, class: Helipad}
+  - {variant: phase0, class: Truck}
+  - {variant: dropout05, class: Helipad}
+  - {variant: no-aug, class: Truck}
+  - {variant: no-aug, class: Cargo plane}
+  - {variant: no-aug, class: Motorboat}
+  - {variant: no-aug, class: Dump truck}
+  - {variant: phase2, class: Truck}
+  - {variant: phase2, class: Cargo plane}
+  - {variant: phase2, class: Motorboat}
+  - {variant: phase2, class: Dump truck}
+  - {variant: final, class: Helipad}
+  - {variant: ls01, class: Helipad}
+  - {variant: final, class: Storage tank}
+  - {variant: ls01, class: Storage tank}
+
+# Confusions of the final model quoted in the text (share of the actual class, mean over seeds).
+confusions:
+  - {actual: Truck, pred: Small car}
+  - {actual: Truck, pred: Dump truck}
+  - {actual: Truck, pred: Bus}
+  - {actual: Storage tank, pred: Building}
+
+# Tables of variants (mean +- std over the 3 seeds of each variant).
+tables:
+  - name: phase1_variants
+    columns: [label, mean_recall, val_acc, train_acc, gap, min_recall, epochs]
+    align: lcccccc
+    rows:
+      - {label: "Sin regularización (entrega 1)", variant: EXP-010_bs256_sqrt_60ep}
+      - {label: "Dropout 0,1", variant: EXP-013_dropout0.1}
+      - {label: "Dropout 0,2", variant: EXP-013_dropout0.2}
+      - {label: "Dropout 0,3", variant: EXP-013_dropout0.3}
+      - {label: "Dropout 0,5", variant: EXP-013_dropout0.5}
+      - {label: "L2 1e-5", variant: EXP-013_l2_1e-5}
+      - {label: "L2 1e-4", variant: EXP-013_l2_1e-4}
+      - {label: "L2 1e-3", variant: EXP-013_l2_1e-3}
+      - {label: "BN antes de la activación", variant: EXP-013_bn_before}
+      - {label: "BN después de la activación", variant: EXP-013_bn_after}
+      - {label: "BN antes, lr ×3", variant: EXP-013_bn_before_lr3x}
+      - {label: "BN después, lr ×3", variant: EXP-013_bn_after_lr3x}
+  - name: augmentation_variants
+    columns: [label, mean_recall, val_acc, train_acc, gap, min_recall, epochs]
+    align: lcccccc
+    rows:
+      - {label: "Sin augmentation", variant: EXP-019_none_patience15}
+      - {label: "Volteos", variant: EXP-019_flip}
+      - {label: "Rotaciones de 90°", variant: EXP-019_rot90}
+      - {label: "D4 (volteos y rotaciones)", variant: EXP-019_d4}
+      - {label: "Brillo y contraste", variant: EXP-019_color}
+      - {label: "D4 + brillo y contraste", variant: EXP-019_d4_color}
+  - name: combine_variants
+    columns: [label, mean_recall, val_acc, train_acc, gap, min_recall, epochs]
+    align: lcccccc
+    rows:
+      - {label: "BN + rotaciones (referencia)", variant: EXP-019_rot90}
+      - {label: "+ Dropout 0,1", variant: EXP-020_dropout0.1}
+      - {label: "+ Dropout 0,2", variant: EXP-020_dropout0.2}
+      - {label: "+ L2 1e-5", variant: EXP-020_l2_1e-5}
+      - {label: "+ L2 1e-4", variant: EXP-020_l2_1e-4}
+      - {label: "Sin BatchNorm (lr 1,2e-3)", variant: EXP-020_no_bn}
+  - name: patience_variants
+    columns: [label, mean_recall, val_acc, min_recall, epochs]
+    align: lcccc
+    rows:
+      - {label: "EarlyStopping 15, ReduceLROnPlateau 6 (rotaciones, EXP-019)", variant: EXP-019_rot90}
+      - {label: "Solo ReduceLROnPlateau 6 → 8", variant: EXP-028_rlr8_es15}
+      - {label: "Solo EarlyStopping 15 → 25", variant: EXP-028_rlr6_es25}
+      - {label: "Las dos: modelo final (EXP-021)", variant: EXP-021_final}
+  - name: shift_variants
+    columns: [label, mean_recall, val_acc, train_acc, gap, min_recall, epochs]
+    align: lcccccc
+    rows:
+      - {label: "Modelo final: rotaciones, entrada de 16 (EXP-021)", variant: EXP-021_final}
+      - {label: "+ desplazamientos de hasta 1 px", variant: EXP-025_shift1}
+      - {label: "+ desplazamientos de hasta 2 px", variant: EXP-025_shift2}
+      - {label: "Control: entrada de 32 + promedio 2×2 (= 16)", variant: EXP-027_res32pool_control}
+      - {label: "Control + desplazamientos de 1/2 px", variant: EXP-027_res32pool_shift1}
+  - name: ls_variants
+    columns: [label, mean_recall, val_acc, train_acc, gap, min_recall, epochs]
+    align: lcccccc
+    rows:
+      - {label: "Modelo final, sin label smoothing (EXP-021)", variant: EXP-021_final}
+      - {label: "Label smoothing 0,05", variant: EXP-022_ls0.05}
+      - {label: "Label smoothing 0,1", variant: EXP-022_ls0.1}
+      - {label: "Label smoothing 0,2", variant: EXP-022_ls0.2}
 
 ratios: []
-
-# Table "changes on top of BN + rotations" (compared with the phase2 variant).
-ablation_base: phase2
-ablation:
-  - {label: "+ Dropout 0,1", variant: c-dropout01}
-  - {label: "+ Dropout 0,2", variant: c-dropout02}
-  - {label: "+ L2 1e-5", variant: c-l2-1e-5}
-  - {label: "+ L2 1e-4", variant: c-l2-1e-4}
-  - {label: "Sin BatchNorm", variant: c-no-bn}
-  - {label: "Sin augmentation", variant: no-aug}
 
 key_messages_es:
   - "Dropout y L2 no reducen el sobreajuste sin bajar también la validación."

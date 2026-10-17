@@ -1,0 +1,41 @@
+% Fuentes: EXP-013, EXP-019..EXP-021; DEC-009. Bibliografía: LOGBOOK.md, "Referencias externas".
+\section{Conclusiones y siguientes pasos}
+\begin{itemize}
+  \item \textbf{Lo que funciona:} la \emph{augmentation} geométrica, que codifica la invarianza a la orientación de
+  las imágenes aéreas y es la única técnica que reduce la brecha subiendo la validación (+\res{gain-rot90}~pp), y
+  BatchNorm, que permite triplicar la \emph{learning rate} y pesa sobre todo combinado con ella (sin él,
+  \res{loss-no-bn}~pp). Con la \emph{learning rate} bajando más tarde (paciencia de \emph{ReduceLROnPlateau}: +\res{gain-rlr8}~pp; la de \emph{EarlyStopping} no influye), suman +\res{gain-total}~pp de \emph{mean recall} y
+  +\res{gain-total-acc}~pp de \emph{accuracy} sobre la entrega anterior.
+  \item \textbf{Lo que no:} Dropout, L2 y \emph{label smoothing} cierran la brecha bajando el entrenamiento, no
+  subiendo la validación, y Dropout y L2 tampoco ayudan en redes más anchas, de hasta \res{w1024-params} parámetros; la variación de brillo y contraste y
+  los desplazamientos empeoran. Promediar las \res{ens-n-members} semillas
+  aporta poco (+\res{ens-gain}~pp, no concluyente) y la \emph{test-time augmentation}, nada.
+  \item \textbf{Diagnóstico:} la brecha de la entrega anterior no era sobre todo varianza que recortar. El límite es
+  el sesgo de una red densa sobre píxeles, que no comparte pesos entre posiciones ni tiene invarianzas
+  espaciales~\cite{goodfellow}. A través de los datos se le pudo dar la invarianza a la orientación, pero no la de
+  traslación: a \res{final-res}~$\times$~\res{final-res} píxeles, desplazar la imagen la estropea.
+  \item \textbf{Límite:} la brecha baja de \res{phase0-gap-acc} a \res{final-gap-acc}~pp, pero no desaparece, y los
+  vehículos (\res{final-worst-class}: \res{final-worst-recall}) siguen siendo lo más difícil.
+  \item \textbf{Siguientes pasos:} redes convolucionales propias y arquitecturas conocidas entrenadas desde cero, que
+  incorporan en la arquitectura la invarianza a traslaciones; el tratamiento del desbalance de clases queda para una
+  entrega posterior.
+\end{itemize}
+
+Todas las cifras proceden de \texttt{experiments/} (\texttt{experiments.csv} y el historial de cada run); el
+razonamiento de cada decisión está en la bitácora del proyecto.
+
+\begin{thebibliography}{9}\small
+\bibitem{xview} D. Lam et al. \emph{xView: Objects in Context in Overhead Imagery}. arXiv:1802.07856, 2018.
+\bibitem{goodfellow} I. Goodfellow, Y. Bengio, A. Courville. \emph{Deep Learning}. MIT Press, 2016.
+\bibitem{bouthillier} X. Bouthillier et al. \emph{Accounting for Variance in Machine Learning Benchmarks}. MLSys, 2021.
+\bibitem{srivastava} N. Srivastava, G. Hinton, A. Krizhevsky, I. Sutskever, R. Salakhutdinov. \emph{Dropout: A Simple Way to Prevent Neural Networks from Overfitting}. JMLR 15, 2014.
+\bibitem{loshchilov} I. Loshchilov, F. Hutter. \emph{Decoupled Weight Decay Regularization}. ICLR, 2019.
+\bibitem{ioffe} S. Ioffe, C. Szegedy. \emph{Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift}. ICML, 2015.
+\bibitem{santurkar} S. Santurkar, D. Tsipras, A. Ilyas, A. Madry. \emph{How Does Batch Normalization Help Optimization?} NeurIPS, 2018.
+\bibitem{li2019} X. Li, S. Chen, X. Hu, J. Yang. \emph{Understanding the Disharmony between Dropout and Batch Normalization by Variance Shift}. CVPR, 2019.
+\bibitem{laarhoven} T. van Laarhoven. \emph{L2 Regularization versus Batch and Weight Normalization}. arXiv:1706.05350, 2017.
+\bibitem{szegedy} C. Szegedy, V. Vanhoucke, S. Ioffe, J. Shlens, Z. Wojna. \emph{Rethinking the Inception Architecture for Computer Vision}. CVPR, 2016.
+\bibitem{muller} R. Müller, S. Kornblith, G. Hinton. \emph{When Does Label Smoothing Help?} NeurIPS, 2019.
+\bibitem{krizhevsky} A. Krizhevsky, I. Sutskever, G. Hinton. \emph{ImageNet Classification with Deep Convolutional Neural Networks}. NeurIPS, 2012.
+\bibitem{cawley} G. Cawley, N. Talbot. \emph{On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation}. JMLR 11, 2010.
+\end{thebibliography}

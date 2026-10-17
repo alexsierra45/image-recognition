@@ -1,61 +1,41 @@
-% DECISIONES (~1 min cada una). Fuentes: EXP-013, EXP-019, EXP-020.
+% DECISIONES (~1 min cada una), en el orden del informe (report_04_decisions). Fuentes: EXP-013, EXP-019, EXP-020,
+% EXP-024. Versión de 10 frames / 10 min (CHG-025): label smoothing, desplazamientos y TTA van a las conclusiones.
 
-\begin{frame}{Dropout y L2: no ayudan}
+\begin{frame}{Dropout y L2: cierran la brecha bajando el train}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
-      \begin{itemize}
-        \item \textbf{Hipótesis}: penalizar la complejidad cierra la brecha
-        \item \textbf{Evidencia}: train y validación bajan juntas
-        \item \textbf{Resultado}: dropout \res{dropout05-dropout}: \res{loss-dropout05}~pp; las intensidades suaves, sin efecto
-      \end{itemize}
-      \vspace{0.2cm}
-      \decisionblock{Sin dropout ni L2: el límite es el sesgo del modelo, no la varianza.}
-    \end{column}
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.49\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/dropout_curve.png}{Curva de validación del dropout}
+        \safegraphics[width=\textwidth,height=0.48\textheight,keepaspectratio]{figures/dropout_curve.png}{Curva de validación del dropout}
         \caption{\footnotesize \figcaptionshort{dropout_curve}}
       \end{figure}
     \end{column}
-  \end{columns}
-  \speakernote{1}{La curva de validación clásica: estamos en el lado del subajuste. Con L2 pasa lo mismo.}
-\end{frame}
-
-\begin{frame}{L2 y combinaciones}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
-      \begin{itemize}
-        \item \textbf{Hipótesis}: con augmentation, una penalización suave podría sumar
-        \item \textbf{Evidencia}: L2 baja train y validación igual que el dropout
-        \item \textbf{Resultado}: sobre BN + rotaciones, ninguna combinación mejora
-      \end{itemize}
-      \vspace{0.2cm}
-      \decisionblock{Modelo: BatchNorm + rotaciones, sin dropout ni L2.}
-    \end{column}
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.49\textwidth}
       \begin{figure}
         \centering
-        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/l2_curve.png}{Curva de validación de L2}
+        \safegraphics[width=\textwidth,height=0.48\textheight,keepaspectratio]{figures/l2_curve.png}{Curva de validación de L2}
         \caption{\footnotesize \figcaptionshort{l2_curve}}
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Detalle de las combinaciones en el informe (cuadro de cambios sobre BN + rotaciones).}
+  \begin{itemize}
+    \item Al regularizar más, train y validación bajan juntas: ningún valor mejora la validación
+  \end{itemize}
+  \decisionblock{Sin Dropout ni L2 (y, sobre BN + rotaciones, tampoco ayudan).}
+  \speakernote{1,25}{Dropout entrena muchas subredes que comparten pesos (Srivastava et al.); L2 encoge los pesos. Con $p$~$=$~\res{dropout05-dropout}, mean recall \res{dropout05-mean-recall} y \res{class-min-name} a recall \res{dropout05-recall-helipad}. Es el lado del subajuste de la curva: el límite parece el sesgo del modelo, no la varianza. Delante de BatchNorm, L2 solo cambia la lr efectiva (van Laarhoven).}
 \end{frame}
 
-\begin{frame}{BatchNorm}
+\begin{frame}{BatchNorm: optimiza más que regulariza}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.4\textwidth}
       \begin{itemize}
-        \item \textbf{Hipótesis}: estabiliza y permite una lr mayor
-        \item \textbf{Evidencia}: con la misma lr, empata
-        \item \textbf{Resultado}: antes de la activación y lr \res{phase1-lr}: +\res{gain-bn}~pp
+        \item Con la misma lr empata, y el train sube: la brecha crece
+        \item Antes de la activación y lr $\times$3: +\res{gain-bn}~pp
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{BatchNorm antes de la activación; sin él, con augmentation, se pierden \res{loss-no-bn}~pp.}
+      \decisionblock{BatchNorm antes de la activación, lr \res{phase1-lr}. Con augmentation, quitarlo cuesta \res{loss-no-bn}~pp.}
     \end{column}
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.58\textwidth}
       \begin{figure}
         \centering
         \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/batchnorm.png}{BatchNorm}
@@ -63,21 +43,21 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Por sí solo no reduce la brecha (\res{phase1-gap-acc}~pp), pero es lo que más pesa al combinarlo con la augmentation.}
+  \speakernote{1}{BatchNorm (Ioffe y Szegedy) hace la salida independiente de la escala de los pesos y permite una lr mayor. Solo aporta del orden del ruido; su peso aparece al combinarlo con la augmentation.}
 \end{frame}
 
 \begin{frame}{Data augmentation: rotaciones de 90$^\circ$}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.4\textwidth}
       \begin{itemize}
-        \item \textbf{Hipótesis}: en imágenes aéreas no hay ``arriba''; rotar conserva la etiqueta
-        \item \textbf{Evidencia}: train baja de \res{no-aug-train-acc} a \res{phase2-train-acc}; validación sube
-        \item \textbf{Resultado}: +\res{gain-rot90}~pp; brillo y contraste empeoran
+        \item En imágenes aéreas no hay ``arriba'': rotar conserva la etiqueta
+        \item Rotaciones, volteos y D4: train baja y validación sube, la brecha se acorta
+        \item Brillo y contraste: empeoran
       \end{itemize}
       \vspace{0.2cm}
-      \decisionblock{Rotaciones de 90$^\circ$ (empatan con volteos y D4).}
+      \decisionblock{Rotaciones de 90$^\circ$: +\res{gain-rot90}~pp.}
     \end{column}
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.58\textwidth}
       \begin{figure}
         \centering
         \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/augmentation.png}{Data augmentation}
@@ -85,27 +65,20 @@
       \end{figure}
     \end{column}
   \end{columns}
-  \speakernote{1}{Codifica una invarianza que la ffNN no tiene. Sobre este modelo, dropout y L2 siguen sin ayudar.}
+  \speakernote{1}{La única técnica que reduce la brecha (a \res{phase2-gap-acc}~pp) subiendo la validación: codifica una invarianza que la ffNN no tiene. Volteos y D4 empatan dentro del ruido. Con augmentation, la mejor época llega más tarde.}
 \end{frame}
 
-\begin{frame}{Brecha entre train y validación}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.4\textwidth}
-      \begin{itemize}
-        \item Entrega 1: brecha de \res{phase0-gap-acc}~pp
-        \item Con rotaciones, a igual número de épocas: \res{phase2-gap-acc}~pp
-        \item Entrenando más: \res{final-gap-acc}~pp, con mejor validación
-      \end{itemize}
-      \vspace{0.2cm}
-      \keymessage{La regularización mejora la generalización, pero no elimina la brecha.}
-    \end{column}
-    \begin{column}{0.55\textwidth}
-      \begin{figure}
-        \centering
-        \safegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{figures/overfitting_curves.png}{Curvas de train y validación}
-        \caption{\footnotesize \figcaptionshort{overfitting_curves}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-  \speakernote{1}{La train del modelo regularizado se mide con augmentation durante la época; con augmentation conviene entrenar más.}
+\begin{frame}{¿Y con una red más grande? Capacidad $\times$ regularización}
+  \begin{figure}
+    \centering
+    \safegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{figures/capacity_reg.png}{Capacidad por regularización}
+    \caption{\footnotesize \figcaptionshort{capacity_reg}}
+  \end{figure}
+  \vspace{-0.3cm}
+  \begin{itemize}
+    \item Dropout 0,2 cuesta menos cuanto más ancha es la red (\res{cost-d02-w256} $\rightarrow$ \res{cost-d02-w1024}~pp), pero nunca supera a no regularizar
+    \item Las redes anchas empatan con 4 $\times$ 256 en validación: se elige la más simple
+  \end{itemize}
+  \decisionblock{Se mantiene \res{final-hidden} sin Dropout ni L2.}
+  \speakernote{1,25}{Dropout y L2 se habían juzgado sobre una red elegida para no sobreajustar; aquí se varía a la vez la anchura (hasta \res{w1024-params} parámetros). La interacción existe pero no basta: la mejor celda regularizada (512 con L2, \res{w512-l2-mean-recall}) empata con el modelo final.}
 \end{frame}

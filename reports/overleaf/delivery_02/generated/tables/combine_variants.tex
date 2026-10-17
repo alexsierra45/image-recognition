@@ -1,0 +1,13 @@
+% >>> ARCHIVO GENERADO por scripts/build_results.py (solo el tabular). Se sobrescribe siempre. <<<
+\begin{tabular}{lcccccc}
+\toprule
+Variante & Mean recall & Accuracy & Accuracy train & Brecha (pp) & Recall mín. & Mejor época / épocas \\
+\midrule
+BN + rotaciones (referencia) & 0,617 $\pm$ 0,015 & 0,632 $\pm$ 0,005 & 0,694 $\pm$ 0,026 & 6,2 & 0,244 $\pm$ 0,009 & 43 / 58 \\
++ Dropout 0,1 & 0,577 $\pm$ 0,010 & 0,616 $\pm$ 0,009 & 0,645 $\pm$ 0,014 & 2,9 & 0,177 $\pm$ 0,008 & 58 / 73 \\
++ Dropout 0,2 & 0,550 $\pm$ 0,039 & 0,593 $\pm$ 0,033 & 0,622 $\pm$ 0,044 & 2,9 & 0,151 $\pm$ 0,052 & 53 / 68 \\
++ L2 1e-5 & 0,603 $\pm$ 0,006 & 0,630 $\pm$ 0,001 & 0,677 $\pm$ 0,014 & 4,7 & 0,256 $\pm$ 0,018 & 49 / 64 \\
++ L2 1e-4 & 0,608 $\pm$ 0,012 & 0,630 $\pm$ 0,009 & 0,681 $\pm$ 0,017 & 5,1 & 0,247 $\pm$ 0,014 & 47 / 62 \\
+Sin BatchNorm (lr 1,2e-3) & 0,569 $\pm$ 0,023 & 0,600 $\pm$ 0,017 & 0,658 $\pm$ 0,033 & 5,8 & 0,205 $\pm$ 0,025 & 49 / 64 \\
+\bottomrule
+\end{tabular}
