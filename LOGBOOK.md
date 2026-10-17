@@ -2,7 +2,7 @@
 
 Clasificación de 13 tipos de objeto en recortes 224×224 de imágenes aéreas de xView [R7].
 
-Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambio, experimento, idea, incidencia y decisión, con su justificación teórica. Es la memoria del proyecto: si no está aquí, no pasó.
+Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (hasta la entrega 2 se llamaba `ffNN_example.ipynb`, nombre que conservan las entradas antiguas: DEC-014): todo cambio, experimento, idea, incidencia y decisión, con su justificación teórica. Es la memoria del proyecto: si no está aquí, no pasó.
 
 **Convenciones**
 - IDs: `EXP-###` experimento · `CHG-###` cambio de código sin efecto en el modelo · `ISS-###` incidencia · `IDEA-###` idea pendiente · `DEC-###` decisión.
@@ -17,7 +17,7 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 
 | | |
 |---|---|
-| Etapa del curso | ffNN (red feedforward): **plan de mejora en 9 fases completado** (DEC-006) |
+| Etapa del curso | **Entrega 3: CNN propias frente a arquitecturas conocidas, desde cero** (plan en DEC-017). Entregas 1 y 2 cerradas (etiquetas `delivery-01`, `delivery-02`) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
 | Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
@@ -25,7 +25,7 @@ Bitácora viva del notebook [ffNN_example.ipynb](ffNN_example.ipynb): todo cambi
 | Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Subir el proyecto único `reports/overleaf_project.zip` a Overleaf (DEC-011), compilar la entrega 2 y revisar `review_notes.md`. Entrega 3: CNN propias y arquitecturas conocidas desde cero. El desbalance (fase 7) e IDEA-010 quedan para la entrega 5 |
+| Próximo paso | Entrega 3, fase 0: infraestructura para CNN (`arch` en `experiment_utils.py`, `architectures.py`) y prueba de humo. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -1092,6 +1092,7 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 **Reparto del plan de 9 fases (DEC-006):** fases 0-5 → entrega 1 (DEC-008); fase 6 (dropout, L2, BatchNorm) y fase 8 (augmentation) → entrega 2, con la ablación de la fase 9 como apoyo; fase 7 (desbalance de clases) e IDEA-010 → entrega 5.
 **Entrega 2 (decidido por el usuario siguiendo la recomendación):** EXP-015 (augmentation) se midió sobre el modelo con pesos de clase (EXP-014); para presentar la augmentation solo como regularización se repite sobre el ganador de la fase 6 (EXP-013, sin pesos de clase): EXP-019 en adelante. **El desbalance de clases (fase 7) pasa a la entrega 5.**
 **Consecuencia para la entrega 3:** la entrada de 16×16 (EXP-005) es una decisión propia de la ffNN; las CNN eligen su resolución de nuevo (la caché de 224×224 ya existe).
+**Actualización (2026-10-17, el usuario):** el tratamiento del desbalance de clases no está reservado a la entrega 5: «se puede usar normal». Pasa a ser una fase de la entrega 3, sobre la CNN (D3-5 del plan de DEC-017). Ese mismo día, una sesión paralela lo había probado sobre la ffNN de la entrega 2 (EXP-029/DEC-014, sin commitear); el usuario pidió deshacer esos cambios y se borraron con sus runs, así que sus resultados no se citan y los IDs se reutilizan.
 
 ### DEC-010: El informe y las slides cuentan la misma historia (2026-10-03)
 **Decisión del usuario.** Las slides se presentan guiándose por el informe: los dos documentos usan **las mismas figuras, en el mismo orden**. En el informe, para optimizar el espacio, dos figuras **relacionadas** pueden compartir fila (máximo 2, cada una con su pie y su número); figuras sin relación nunca van juntas. Cada figura se cita en el texto. `check_bundle.py` lo comprueba (CHG-016).
@@ -1116,6 +1117,12 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **Por qué dos factores:** lo que se mide es la interacción. Cambiando un solo factor cada vez, una técnica que solo funciona combinada con otra se infravalora; ya pasó con BatchNorm (+1,3 pp solo, −4,8 pp al quitarlo con augmentation: EXP-013, EXP-020). Es una excepción deliberada a la regla de un factor por experimento. Cada celda de la rejilla sigue comparándose con su base de la misma anchura y sin regularización.
 - **Diseño (EXP-024):** sobre `EXP-021_final`, anchura de las 4 capas ocultas ∈ {256, 512, 1024} × {sin regularización, Dropout 0,2, Dropout 0,5, L2 1e-4}, con 3 semillas. Se mantiene todo lo demás: BN + rotaciones de 90°, lr 3,6e-3 y paciencias 25/8.
 - **Criterio:** se adopta una celda si supera a EXP-021 en más que el ruido entre semillas (~1,5 pp de mean recall) sin perder accuracy. Si no, se mantiene 4 × 256 y la conclusión de la entrega se refuerza: la regularización tampoco ayuda con más capacidad.
+
+### DEC-014: El notebook pasa a llamarse `xview_recognition.ipynb` (2026-10-17)
+**Decisión del usuario** al empezar la entrega 3: «no sé si ffNN_example sea ya el mejor nombre… quiero que se vea la continuidad del trabajo y que luego todo sea reproducible».
+- **Elegida:** `git mv ffNN_example.ipynb xview_recognition.ipynb`. Un solo notebook que evoluciona entrega a entrega; `git log --follow` conserva su historia, y cada entrega deja su versión exacta en una etiqueta (`delivery-01`, `delivery-02` y, al cerrar, `delivery-03`). Su tabla de progreso cubre todas las entregas.
+- **Descartadas:** un notebook nuevo para las CNN, que dejaría `ffNN_example.ipynb` congelado, con la continuidad repartida entre dos archivos; y mantener el nombre, que ya no describe el contenido.
+- Se actualizan las referencias que describen el estado actual (CLAUDE.md, la cabecera de esta bitácora, `tools/run_notebook.py` y el criterio de `build_figures.py`). Las entradas antiguas de la bitácora y las notas de las entregas 1 y 2 conservan el nombre antiguo, porque así se llamaba entonces.
 
 ---
 

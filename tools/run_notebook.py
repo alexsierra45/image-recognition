@@ -1,7 +1,7 @@
 """Run a notebook end to end without a UI, saving outputs into it.
 
 Usage (needs nbclient + nbformat in the interpreter that runs this script, e.g. the project .venv):
-    .venv/Scripts/python.exe tools/run_notebook.py ffNN_example.ipynb --python <kernel interpreter>
+    .venv/Scripts/python.exe tools/run_notebook.py xview_recognition.ipynb --python <kernel interpreter>
 
 The kernel runs with --python (it needs ipykernel), so the notebook can use a different environment than this
 script: today the notebook needs the global Python 3.12 (TensorFlow, cell 1). Cells run in order from the

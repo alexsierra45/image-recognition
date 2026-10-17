@@ -448,7 +448,7 @@ def fig_stopping(data, spec):
     ax.set_title(opt.get('title', 'Stopping point: %s' % r))
     ax.legend(fontsize=6.5, loc='lower right')
     return fig, {'included': [r], 'omitted': ['seeds 2 and 3 (best epochs 31 and 32; same pattern)'],
-                 'criterion': 'seed 1 of the final model = the run reproduced by ffNN_example.ipynb', 'note': ''}
+                 'criterion': 'seed 1 of the final model = the run reproduced by the delivery notebook', 'note': ''}
 
 
 def fig_activation(data, spec):

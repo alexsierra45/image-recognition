@@ -1,9 +1,9 @@
 # CLAUDE.md: image_recognition
 
 ## Contexto
-Proyecto de la asignatura de Visión por Computador (MUIA), trabajo "xview_recognition": clasificar 13 tipos de objeto en recortes 224×224×3 de imágenes aéreas (xView). El notebook [ffNN_example.ipynb](ffNN_example.ipynb) irá ganando complejidad con el curso: ffNN → CNN → arquitecturas conocidas (VGG, ResNet, GoogLeNet…) entrenadas desde cero frente a transfer learning.
+Proyecto de la asignatura de Visión por Computador (MUIA), trabajo "xview_recognition": clasificar 13 tipos de objeto en recortes 224×224×3 de imágenes aéreas (xView). El notebook [xview_recognition.ipynb](xview_recognition.ipynb) (hasta la entrega 2, `ffNN_example.ipynb`: DEC-014) irá ganando complejidad con el curso: ffNN → CNN → arquitecturas conocidas (VGG, ResNet, GoogLeNet…) entrenadas desde cero frente a transfer learning. Cada entrega deja su versión exacta en una etiqueta de git (`delivery-01`, `delivery-02`…).
 
-**Calendario de entregas del curso** (DEC-009). Cada entrega parte del modelo final de la anterior y solo muestra lo que pide su enunciado; los experimentos que se adelanten se guardan para la entrega que les corresponda:
+**Calendario de entregas del curso** (DEC-009). Cada entrega parte del modelo final de la anterior y solo muestra lo que pide su enunciado. El tratamiento del desbalance de clases ya no está reservado a la entrega 5: se puede usar con normalidad (actualización de DEC-009, 2026-10-17):
 1. **ffNN:** arquitectura, algoritmo de optimización y parámetros de entrenamiento; la validación ajusta los hiperparámetros y decide el punto de parada (DEC-008: fases 0-5, final `EXP-010_bs256_sqrt_60ep`).
 2. **Regularización** de esa ffNN para reducir el sobreajuste: penalizaciones de norma, Dropout, BatchNorm, data augmentation. Sin CNN ni transfer learning.
 3. **CNN propias desde cero**, comparadas con arquitecturas conocidas (GoogLeNet, VGG, ResNet…) también desde cero.
@@ -38,7 +38,7 @@ Para proponer los siguientes pasos, usar el skill `next-ideas`.
 - El usuario suele tener el notebook abierto en VS Code: al editarlo desde fuera, avisarle de que lo recargue.
 - No cambiar el modelo ni el entrenamiento sin que el usuario lo pida: proponer primero (como IDEA) y editar después.
 - `git diff` muestra solo el código de las celdas (textconv): usarlo para ver qué cambió.
-- **Ejecutar un experimento sin interfaz** (CHG-005): `source .venv/bin/activate && python tools/run_notebook.py ffNN_example.ipynb --python .venv/bin/python`, en segundo plano. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU en Windows (ISS-005); con la caché y la GPU, minutos.
+- **Ejecutar un experimento sin interfaz** (CHG-005): `source .venv/bin/activate && python tools/run_notebook.py xview_recognition.ipynb --python .venv/bin/python`, en segundo plano. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU en Windows (ISS-005); con la caché y la GPU, minutos.
 
 ## Entregas (informe + slides para Overleaf)
 - Sistema en `reports/` (CHG-011): `make bundle D=NN` regenera macros, tablas y figuras desde `experiments/` (solo lectura), instala `drafts/` en `reports/overleaf/delivery_NN/sections/` sin pisar ediciones y genera el zip. Nueva entrega: comando `/new-delivery <n> <baseline>`.
