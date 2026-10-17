@@ -926,6 +926,44 @@ El usuario preguntó si 4 × 1024 no era mejor modelo, al tener la misma validac
   - Slide de capacidad: «empatan en validación: se elige la más simple».
 - **Bitácora:** corrección añadida a EXP-024.
 
+### CHG-028: Infraestructura para las CNN de la entrega 3 (2026-10-17)
+Fase 0 del plan (DEC-017). Ningún resultado anterior cambia: todas las claves nuevas tienen un valor por defecto que mantiene el comportamiento de las entregas 1-2.
+- **`experiment_utils.py`:**
+  - Clave `arch`: `'mlp'` (por defecto, el código anterior pasa intacto a `_build_mlp`), `'cnn'` o una arquitectura conocida.
+  - Claves de la CNN propia: `conv_blocks`, `convs_per_block`, `kernel`, `downsample` (`max`, `avg` o `stride`), `head` (`gap` o `flatten`), `head_dense` y `head_dropout`. La salida es `Dense(13)` en float32.
+  - Pérdida `logit_adjust` (`la_tau`): clase `LogitAdjustedCE` [R51], serializable. Con una prior uniforme da exactamente ln 13, igual que la entropía cruzada.
+  - `precision` (`float32` o `mixed_float16`) y `eval_batch_size`.
+  - Augmentation nueva: `rcrop` (recorte del 80-100 % del lado, reescalado), `jitter` (brillo, contraste, saturación y ganancia por canal, suaves) y `erase` (Random Erasing [R47]: p 0,5, 2-10 % del área). Las traslaciones ya existían (`shiftK`: relleno por reflejo y recorte).
+  - Mezcla en el lote: `mix` = `mixup` [R49] o `cutmix` [R50] (`mix_alpha`). Mezcla imágenes, etiquetas y pesos de muestra.
+- **`architectures.py`** (nuevo):
+  - `custom_cnn`: bloques [Conv → BN → activación] × n + reducción espacial; cabeza GAP [R45] o Flatten.
+  - `known`: VGG16, ResNet50, InceptionV3 y MobileNetV2 de `keras.applications`, con `weights=None` y `pooling='avg'` (DEC-015).
+- **`sweep.py`:** `run_isolated`, que lanza cada run en un proceso nuevo para que la memoria de la GPU se libere entera entre runs; fase `d3_conv` (EXP-029).
+- **Verificado:**
+  - **Regresión:** con el código nuevo, la config de `EXP-021_final` (semilla 1) da un historial idéntico, época a época, en las 107 épocas (pérdida, accuracy, métricas de validación y lr).
+  - Todas las arquitecturas se construyen y dan salidas (n, 13) que suman 1. Las augmentations nuevas conservan forma y rango, y MixUp y CutMix conservan la suma de las etiquetas.
+- **Prueba de humo** (3 épocas; s/época de la 2.ª en adelante; pico de memoria de GPU):
+
+| Modelo (entrada) | float32 | mixed_float16 | Pico (float32) | Observación |
+|---|---|---|---|---|
+| CNN propia (64) | 13,8 s | 10,7 s (×1,29) | 0,4 GB | dos runs iguales → historial idéntico |
+| CNN propia (112) | 39,3 s | 33,9 s (×1,16) | 1,3 GB | |
+| VGG16 (112) | 66,7 s | 38,2 s (×1,75) | 2,4 GB | en mixed **no entrena**: pérdida 2,32 ≈ entropía de clases, val en el azar |
+| ResNet50 (112) | 83,9 s | 75,9 s (×1,10) | 2,6 GB | |
+| InceptionV3 (112) | 70,2 s | 60,9 s (×1,15) | 2,5 GB | |
+| MobileNetV2 (112) | sin memoria | 56,5 s | 3,1 GB | en mixed se queda en el azar |
+
+- **Decisiones tomadas con estos datos:**
+  - **Se trabaja en float32.** La precisión mixta solo pasa de 1,5× en VGG16, y ahí rompe el entrenamiento.
+  - **El determinismo se mantiene**, aunque cuesta un ~25 %. Sin él, ResNet50 baja de 83,8 a 60,1 s/época y la CNN de 64, de 14,8 a 11,4. XLA no lo compensa: con `enable_op_determinism`, Keras desactiva `jit_compile` («Model doesn't support jit_compile=True»).
+  - **La carga de datos no es el cuello de botella:** 0,4 s por época a 64 y 0,8 s a 112, con rotaciones.
+  - **MobileNetV2 sale de la comparación:** era opcional, se quedó sin memoria en float32 tras 10 runs en el mismo proceso y no entrenó en mixed. El agotamiento de memoria tras muchos runs motiva `run_isolated`.
+- **Presupuesto estimado** (con unas 80-90 épocas por run, en float32 determinista):
+  - CNN propia a 64: unos 20 min por run.
+  - CNN propia a 112: unos 55 min por run.
+  - Arquitecturas conocidas: 1,5-2 h por run.
+  - Se ajusta el plan: la criba de lr de las conocidas se hará con un tope de épocas corto.
+
 ---
 
 ## Incidencias (ISS)
@@ -1124,6 +1162,36 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **Descartadas:** un notebook nuevo para las CNN, que dejaría `ffNN_example.ipynb` congelado, con la continuidad repartida entre dos archivos; y mantener el nombre, que ya no describe el contenido.
 - Se actualizan las referencias que describen el estado actual (CLAUDE.md, la cabecera de esta bitácora, `tools/run_notebook.py` y el criterio de `build_figures.py`). Las entradas antiguas de la bitácora y las notas de las entregas 1 y 2 conservan el nombre antiguo, porque así se llamaba entonces.
 
+### DEC-015: Las arquitecturas conocidas de la entrega 3 salen de `keras.applications`, desde cero (2026-10-17)
+- **Elegidas:** VGG16 [R41], ResNet50 [R42] e InceptionV3 [R38], con `weights=None`. MobileNetV2 [R44] entra como referencia ligera.
+- **Por qué estas:** son las mismas que en la entrega 4 tendrán pesos de ImageNet, así que «desde cero frente a preentrenada» será una comparación directa, con la misma arquitectura.
+- **GoogLeNet:** su versión original, Inception v1 [R43], no existe en Keras. La familia la representa InceptionV3 y se dice así.
+- **Cabeza común:** `include_top=False`, `pooling='avg'` → `Dense(13)`. El clasificador original de VGG16 (Flatten → 4096 → 4096, 50 M de parámetros a 112 px) está pensado para las 1 000 clases de ImageNet, y con una cabeza GAP la comparación entre arquitecturas solo cambia el extractor de características [R45].
+- **Descartadas:** escribir a mano ResNet18 y GoogLeNet v1, más pequeñas y más cercanas a los artículos, pero sin equivalente preentrenado en Keras para la entrega 4.
+- **Plan B:** si VGG16 sin BatchNorm no entrena desde cero, se documenta y se añade una variante con BN.
+
+### DEC-016: Resolución de entrada de las CNN (2026-10-17)
+- La entrada de 16×16 se eligió para la ffNN (EXP-005). Una CNN comparte pesos entre posiciones, así que más píxeles no le multiplican los parámetros como a la red densa, y debería aprovechar mejor el detalle.
+- **Las CNN propias** barren {16, 32, 64, 112}; a 16 se compara a igual entrada con la ffNN.
+- **Las arquitecturas conocidas** se entrenan a 112: InceptionV3 necesita al menos 75 px, la caché de 112 existe (705 MB en RAM) y cabe en la GPU de 6 GB.
+- **224 queda fuera** por coste: unas 4 veces más cómputo, y su caché (2,8 GB, leída con memmap) no cabe holgada en los ~4 GB de RAM libres.
+- La CNN propia final también se mide a 112, para comparar en igualdad de condiciones.
+
+### DEC-017: Plan de la entrega 3 (2026-10-17)
+**Plan aprobado por el usuario**, con un presupuesto de varios días de GPU y 3 semillas en todo lo que decide.
+- **Método:** el de las entregas anteriores. Cada fase parte del ganador de la anterior y cambia un solo factor. Las decisiones del orden del ruido se toman con 3 semillas. Las interacciones esperadas se miden con rejillas pequeñas de dos factores (DEC-013).
+- **Fases de la CNN propia:**
+  - D3-1: la convolución a igual entrada (16×16) frente a la ffNN EXP-021.
+  - D3-2: resolución.
+  - D3-3: optimización (lr y batch).
+  - D3-4: capacidad y reducción espacial (profundidad × anchura; MaxPool, AveragePool o stride 2 [R46]; cabeza GAP [R45] o Flatten).
+  - D3-5: desbalance (pesos con raíz e inversos, sobremuestreo, logit adjustment [R51]).
+  - D3-6: regularización revisada, con una criba de 1 semilla y después las mejores con 3: rotaciones, D4, desplazamientos y recorte con escala; brillo, contraste, saturación y ganancia por canal; Random Erasing [R47]; Cutout [R48]; MixUp [R49]; CutMix [R50]; Dropout en la cabeza; weight decay.
+  - D3-7: CNN propia final.
+- **Arquitecturas conocidas** (DEC-015): criba de lr con 1 semilla y después 3 semillas, con la misma receta que la CNN propia. MixUp y CutMix se prueban también sobre ellas.
+- **D3-8: comparación final.** Se elige el modelo que entrena `xview_recognition.ipynb`.
+- **Reproducibilidad:** se mantiene `enable_op_determinism`. La precisión mixta se adopta solo si acelera al menos 1,5× y conserva el determinismo (prueba de humo, CHG-028).
+
 ---
 
 ## Referencias externas
@@ -1168,6 +1236,17 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R38]** Szegedy, Vanhoucke, Ioffe, Shlens, Wojna (2016). *Rethinking the Inception Architecture for Computer Vision*. CVPR. (§7: label smoothing)
 - **[R39]** Müller, Kornblith, Hinton (2019). *When Does Label Smoothing Help?* NeurIPS.
 - **[R40]** Krizhevsky, Sutskever, Hinton (2012). *ImageNet Classification with Deep Convolutional Neural Networks*. NeurIPS. (§4.1: promedio de la predicción sobre 10 recortes de cada imagen de test)
+- **[R41]** Simonyan, Zisserman (2015). *Very Deep Convolutional Networks for Large-Scale Image Recognition*. ICLR. (VGG)
+- **[R42]** He, Zhang, Ren, Sun (2016). *Deep Residual Learning for Image Recognition*. CVPR. (ResNet)
+- **[R43]** Szegedy et al. (2015). *Going Deeper with Convolutions*. CVPR. (GoogLeNet / Inception v1)
+- **[R44]** Sandler, Howard, Zhu, Zhmoginov, Chen (2018). *MobileNetV2: Inverted Residuals and Linear Bottlenecks*. CVPR.
+- **[R45]** Lin, Chen, Yan (2014). *Network In Network*. ICLR. (global average pooling como cabeza)
+- **[R46]** Springenberg, Dosovitskiy, Brox, Riedmiller (2015). *Striving for Simplicity: The All Convolutional Net*. ICLR (workshop). (convoluciones con stride en lugar de pooling)
+- **[R47]** Zhong, Zheng, Kang, Li, Yang (2020). *Random Erasing Data Augmentation*. AAAI.
+- **[R48]** DeVries, Taylor (2017). *Improved Regularization of Convolutional Neural Networks with Cutout*. arXiv:1708.04552.
+- **[R49]** Zhang, Cisse, Dauphin, Lopez-Paz (2018). *mixup: Beyond Empirical Risk Minimization*. ICLR.
+- **[R50]** Yun, Han, Oh, Chun, Choe, Yoo (2019). *CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features*. ICCV.
+- **[R51]** Menon, Jayasumana, Rawat, Jain, Veit, Kumar (2021). *Long-tail learning via logit adjustment*. ICLR.
 
 ---
 

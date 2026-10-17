@@ -1,4 +1,4 @@
-"""run_experiment(): one call = one training run of a ffNN on the cached xview data, logged to experiments/.
+"""run_experiment(): one call = one training run (ffNN or CNN: cfg['arch']) on the cached xview data, logged to experiments/.
 
 Outputs per run (id = '<EXP-###>_<variant>'):
   experiments/experiments.csv          one summary row
@@ -17,6 +17,8 @@ import numpy as np
 import tensorflow as tf
 import keras
 from keras import layers, regularizers
+
+import architectures
 
 from xview_data import CLASS_NAMES, NUM_CLASSES, ROOT, load_cache, load_train_annotations, split_indices
 
@@ -38,6 +40,7 @@ DEFAULT_CFG = {
     # data
     'res': 224, 'stratify': True, 'seed': 1,
     # model
+    'arch': 'mlp',            # 'mlp' (deliveries 1-2) | 'cnn' (own CNN) | 'vgg16' | 'resnet50' | 'inception_v3' | 'mobilenet_v2'
     'norm': 'raw',            # 'raw' (pixels in [0, 255]) | 'scale' (Rescaling 1/255) | 'standardize' (per-channel train mean/std)
     'input_relu': False,      # the original Activation('relu') right after Flatten (ISS-001)
     'pool': 1,                # >1: AveragePooling2D(pool) right after the input scaling (res 32 + pool 2 = area to 16: EXP-027)
@@ -48,6 +51,16 @@ DEFAULT_CFG = {
     'dropout': 0.0, 'l2': 0.0,
     'label_smoothing': 0.0,   # targets (1 - eps) one-hot + eps / K (EXP-022); 0 -> the plain cross-entropy string loss
     'bn': None,               # None | 'before' (Dense -> BN -> act) | 'after' (Dense -> act -> BN)
+    # own CNN (arch 'cnn', architectures.custom_cnn) and head of every CNN
+    'conv_blocks': [32, 64, 128], 'convs_per_block': 2, 'kernel': 3,
+    'downsample': 'max',      # 'max' | 'avg' | 'stride' (last conv of each block with stride 2)
+    'head': 'gap',            # 'gap' (global average pooling) | 'flatten'
+    'head_dense': 0,          # units of a hidden Dense layer in the head (0 = none)
+    'head_dropout': 0.0,      # Dropout right before the output layer (CNN only)
+    'loss': 'ce',             # 'ce' | 'logit_adjust' (logits + la_tau * log prior during training: Menon et al. 2021)
+    'la_tau': 1.0,
+    'precision': 'float32',   # 'float32' | 'mixed_float16' (softmax kept in float32)
+    'eval_batch_size': 256,   # batch of the per-epoch validation pass and of the final predictions
     # optimisation
     'optimizer': {'name': 'adam', 'lr': 1e-3, 'beta_1': 0.9, 'beta_2': 0.999, 'epsilon': 1e-8, 'amsgrad': True,
                   'clipnorm': 1.0, 'momentum': 0.0, 'nesterov': False, 'weight_decay': 0.0},
@@ -59,7 +72,9 @@ DEFAULT_CFG = {
     # imbalance and augmentation
     'class_weight': None,     # None | 'inverse' | 'sqrt'
     'oversample': None,       # None | alpha: sample class c with prob proportional to n_c**(1 - alpha) (1 = balanced)
-    'augment': [],            # subset of ['flip', 'rot90', 'color', 'shiftK'] (shiftK: random translation by <= K px)
+    'augment': [],            # subset of ['flip', 'rot90', 'color', 'shiftK', 'rcrop', 'jitter', 'erase'] (see augment_batch)
+    'mix': None,              # None | 'mixup' | 'cutmix': mixes images and labels within the batch
+    'mix_alpha': 0.2,         # Beta(alpha, alpha) of the mixing proportion
 }
 
 _DATA = {}
@@ -122,14 +137,63 @@ def augment_batch(x, rng, ops):
         b = rng.uniform(-20, 20, size=(len(x), 1, 1, 1)).astype(np.float32)       # brightness (uint8 units)
         m = x.mean(axis=(1, 2, 3), keepdims=True)
         x = np.clip((x - m) * c + m + b, 0, 255)
+    # delivery 3 (D3-6); each op only draws random numbers when present, so the older ops are unchanged
+    if 'rcrop' in ops:   # random crop of 80-100 % of the side, resized back (scale jitter + translation)
+        n, h = len(x), x.shape[1]
+        side = rng.uniform(0.8, 1.0, size=n)
+        y0 = rng.uniform(0, 1, size=n) * (1 - side)
+        x0 = rng.uniform(0, 1, size=n) * (1 - side)
+        boxes = np.stack([y0, x0, y0 + side, x0 + side], axis=1).astype(np.float32)
+        x = tf.image.crop_and_resize(x, boxes, np.arange(n, dtype=np.int32), (h, h), method='bilinear').numpy()
+    if 'jitter' in ops:  # mild photometric jitter: brightness, contrast, saturation and per-channel gain
+        n = len(x)
+        b = rng.uniform(-10, 10, size=(n, 1, 1, 1)).astype(np.float32)
+        c = rng.uniform(0.9, 1.1, size=(n, 1, 1, 1)).astype(np.float32)
+        s = rng.uniform(0.9, 1.1, size=(n, 1, 1, 1)).astype(np.float32)
+        g = rng.uniform(0.95, 1.05, size=(n, 1, 1, 3)).astype(np.float32)
+        gray = x.mean(axis=3, keepdims=True)
+        x = gray + (x - gray) * s
+        m = x.mean(axis=(1, 2, 3), keepdims=True)
+        x = np.clip(((x - m) * c + m + b) * g, 0, 255)
+    if 'erase' in ops:   # Random Erasing (Zhong et al. 2020): p 0.5, 2-10 % of the area, aspect 0.3-3.3, random values
+        h, w = x.shape[1:3]
+        for i in range(len(x)):
+            if rng.random() < 0.5:
+                area = rng.uniform(0.02, 0.10) * h * w
+                ratio = np.exp(rng.uniform(np.log(0.3), np.log(1 / 0.3)))
+                eh = min(h, max(1, int(round(np.sqrt(area * ratio)))))
+                ew = min(w, max(1, int(round(np.sqrt(area / ratio)))))
+                top, left = rng.integers(0, h - eh + 1), rng.integers(0, w - ew + 1)
+                x[i, top:top + eh, left:left + ew] = rng.uniform(0, 255, size=(eh, ew, x.shape[3]))
     return x
+
+
+def mix_batch(x, y, w, rng, kind, alpha):
+    """MixUp (Zhang et al. 2018) or CutMix (Yun et al. 2019) within the batch: images, one-hot labels and sample
+    weights are mixed with the same proportion lam ~ Beta(alpha, alpha) (one lam per batch)."""
+    lam = float(rng.beta(alpha, alpha))
+    perm = rng.permutation(len(x))
+    if kind == 'mixup':
+        x = lam * x + (1 - lam) * x[perm]
+    else:   # cutmix: paste a box of area (1 - lam) from the permuted batch; lam = exact kept area
+        h, wd = x.shape[1:3]
+        ch, cw = int(round(h * np.sqrt(1 - lam))), int(round(wd * np.sqrt(1 - lam)))
+        cy, cx = rng.integers(h), rng.integers(wd)
+        y0, y1 = np.clip(cy - ch // 2, 0, h), np.clip(cy + ch - ch // 2, 0, h)
+        x0, x1 = np.clip(cx - cw // 2, 0, wd), np.clip(cx + cw - cw // 2, 0, wd)
+        x = x.copy()
+        x[:, y0:y1, x0:x1] = x[perm, y0:y1, x0:x1]
+        lam = 1 - (y1 - y0) * (x1 - x0) / (h * wd)
+    return x, lam * y + (1 - lam) * y[perm], lam * w + (1 - lam) * w[perm]
 
 
 class CachedSequence(keras.utils.PyDataset):
     """Batches from the uint8 cache, converted to float32 per batch. Returns (x, one_hot, sample_weight)."""
 
-    def __init__(self, x, y, idx, batch_size, shuffle, seed, augment=(), sample_w=None, oversample=None):
+    def __init__(self, x, y, idx, batch_size, shuffle, seed, augment=(), sample_w=None, oversample=None, mix=None,
+                 mix_alpha=0.2):
         super().__init__()
+        self.mix, self.mix_alpha = mix, mix_alpha
         self.x, self.y, self.idx, self.bs = x, y, np.asarray(idx), batch_size
         self.shuffle, self.augment, self.sample_w = shuffle, list(augment), sample_w
         self.rng = np.random.default_rng(seed)
@@ -157,6 +221,8 @@ class CachedSequence(keras.utils.PyDataset):
             xb = augment_batch(xb, self.rng, self.augment)
         yb = keras.utils.to_categorical(self.y[b], NUM_CLASSES).astype(np.float32)
         wb = self.sample_w[self.y[b]].astype(np.float32) if self.sample_w is not None else np.ones(len(b), np.float32)
+        if self.mix:
+            xb, yb, wb = mix_batch(xb, yb, wb, self.rng, self.mix, self.mix_alpha)
         return xb, yb, wb
 
 
@@ -200,7 +266,52 @@ def class_weights(y_train, mode):
     return w / np.sum(w * counts / len(y_train))      # mean weight over the training samples = 1 (same loss scale)
 
 
+@keras.saving.register_keras_serializable(package='xview')
+class LogitAdjustedCE(keras.losses.Loss):
+    """Logit-adjusted cross-entropy (Menon et al. 2021) on a softmax output: CE(softmax(log p + tau * log prior)),
+    with log p the log-probabilities of the model. Only training changes; at prediction the model outputs softmax(z).
+    It targets the balanced error, i.e. the mean recall."""
+
+    def __init__(self, log_prior, tau=1.0, name='logit_adjusted_ce', **kw):
+        super().__init__(name=name, **kw)
+        self.log_prior = [float(v) for v in log_prior]
+        self.tau = float(tau)
+
+    def call(self, y_true, y_pred):
+        logp = keras.ops.log(keras.ops.clip(keras.ops.cast(y_pred, 'float32'), 1e-7, 1.0))
+        z = logp + self.tau * keras.ops.convert_to_tensor(self.log_prior, dtype='float32')
+        return -keras.ops.sum(y_true * keras.ops.log_softmax(z, axis=-1), axis=-1)
+
+    def get_config(self):
+        return {**super().get_config(), 'log_prior': self.log_prior, 'tau': self.tau}
+
+
 def build_model(cfg, data):
+    """Dispatch on cfg['arch']: the dense network of deliveries 1-2 (unchanged) or a CNN (delivery 3)."""
+    if cfg['arch'] == 'mlp':
+        return _build_mlp(cfg, data)
+    r = cfg['res']
+    inp = keras.Input(shape=(r, r, 3))
+    x = inp
+    if cfg['norm'] == 'scale':
+        x = layers.Rescaling(1.0 / 255)(x)
+    elif cfg['norm'] == 'standardize':
+        mean, var = channel_stats(data)
+        x = layers.Normalization(mean=mean.tolist(), variance=var.tolist())(x)
+    if cfg['pool'] > 1:
+        x = layers.AveragePooling2D(cfg['pool'])(x)
+    if cfg['arch'] == 'cnn':
+        x = architectures.custom_cnn(x, cfg)
+    else:
+        x = architectures.known(cfg['arch'], x, r // cfg['pool'] if cfg['pool'] > 1 else r)
+    if cfg['head_dropout']:
+        x = layers.Dropout(cfg['head_dropout'])(x)
+    reg = regularizers.l2(cfg['l2']) if cfg['l2'] else None
+    out = layers.Dense(NUM_CLASSES, activation='softmax', kernel_regularizer=reg, dtype='float32')(x)
+    return keras.Model(inp, out)
+
+
+def _build_mlp(cfg, data):
     r = cfg['res']
     act = cfg['activation']
     init = cfg['init'] or {'selu': 'lecun_normal', 'tanh': 'glorot_uniform'}.get(act, 'he_normal')
@@ -253,15 +364,15 @@ class EpochMetrics(keras.callbacks.Callback):
     """Validation in one batched pass: adds val_loss, val_accuracy, val_mean_recall, learning_rate and epoch_time
     to the logs. Must be the first callback, so that ModelCheckpoint / EarlyStopping / ReduceLROnPlateau see them."""
 
-    def __init__(self, x, y, idx):
+    def __init__(self, x, y, idx, batch_size=256):
         super().__init__()
-        self.x, self.y, self.idx = x, y, idx
+        self.x, self.y, self.idx, self.bs = x, y, idx, batch_size
 
     def on_epoch_begin(self, epoch, logs=None):
         self.t0 = time.time()
 
     def on_epoch_end(self, epoch, logs=None):
-        m = classification_metrics(self.y[self.idx], predict_probs(self.model, self.x, self.idx))
+        m = classification_metrics(self.y[self.idx], predict_probs(self.model, self.x, self.idx, self.bs))
         logs['val_loss'], logs['val_accuracy'], logs['val_mean_recall'] = m['loss'], m['acc'], m['mean_recall']
         logs['learning_rate'] = float(keras.ops.convert_to_numpy(self.model.optimizer.learning_rate))
         logs['epoch_time'] = time.time() - self.t0
@@ -296,21 +407,28 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
     for d in (HISTORY_DIR, MODELS_DIR):
         os.makedirs(d, exist_ok=True)
     keras.backend.clear_session()
+    keras.mixed_precision.set_global_policy(cfg['precision'])
     keras.utils.set_random_seed(cfg['seed'])  # python, numpy and TF seeds
     data = get_data(cfg['res'], cfg['stratify'])
     x, y, tr, va = data['x'], data['y'], data['train'], data['valid']
 
     model = build_model(cfg, data)
-    loss = (keras.losses.CategoricalCrossentropy(label_smoothing=cfg['label_smoothing']) if cfg['label_smoothing']
-            else 'categorical_crossentropy')
+    if cfg['loss'] == 'logit_adjust':
+        prior = np.bincount(y[tr], minlength=NUM_CLASSES) / len(tr)
+        loss = LogitAdjustedCE(np.log(prior), cfg['la_tau'])
+    elif cfg['label_smoothing']:
+        loss = keras.losses.CategoricalCrossentropy(label_smoothing=cfg['label_smoothing'])
+    else:
+        loss = 'categorical_crossentropy'
     model.compile(optimizer=build_optimizer(cfg['optimizer']), loss=loss, metrics=['accuracy'])
     sw = class_weights(y[tr], cfg['class_weight']) if cfg['class_weight'] else None
-    train_seq = CachedSequence(x, y, tr, cfg['batch_size'], True, cfg['seed'], cfg['augment'], sw, cfg['oversample'])
+    train_seq = CachedSequence(x, y, tr, cfg['batch_size'], True, cfg['seed'], cfg['augment'], sw, cfg['oversample'],
+                               cfg['mix'], cfg['mix_alpha'])
 
     mon = cfg['monitor']
     mode = 'min' if mon == 'val_loss' else 'max'
     model_path = os.path.join(MODELS_DIR, run_id + '.keras')
-    callbacks = [EpochMetrics(x, y, va), EpochLR(cfg),
+    callbacks = [EpochMetrics(x, y, va, cfg['eval_batch_size']), EpochLR(cfg),
                  keras.callbacks.ModelCheckpoint(model_path, monitor=mon, mode=mode, save_best_only=True),
                  keras.callbacks.EarlyStopping(mon, mode=mode, patience=cfg['es_patience']),
                  keras.callbacks.TerminateOnNaN()]
@@ -326,8 +444,8 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
 
     if os.path.exists(model_path):
         model.load_weights(model_path)
-    val = classification_metrics(y[va], predict_probs(model, x, va))
-    trn = classification_metrics(y[tr], predict_probs(model, x, tr))
+    val = classification_metrics(y[va], predict_probs(model, x, va, cfg['eval_batch_size']))
+    trn = classification_metrics(y[tr], predict_probs(model, x, tr, cfg['eval_batch_size']))
     val['inactive_units'] = inactive_units(model, x, va)
 
     row = {'id': run_id, 'exp_id': exp_id, 'phase': phase, 'change': change, 'params': model.count_params(),

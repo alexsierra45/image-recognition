@@ -29,6 +29,18 @@ def done():
     return set(pd.read_csv(CSV_PATH)['id']) if os.path.exists(CSV_PATH) else set()
 
 
+def run_isolated(run_id, exp_id, phase, change, cfg, notes=''):
+    """As run(), but in a fresh Python process, so the GPU memory of a run is fully released before the next one
+    (CHG-028: MobileNetV2 ran out of memory after 10 runs in one process). Same result as run(): same seed, same code."""
+    if run_id in done():
+        print('skip', run_id, flush=True)
+        return
+    import json
+    import subprocess
+    subprocess.run([sys.executable, os.path.abspath(__file__), '--one', json.dumps([run_id, exp_id, phase, change, cfg, notes])],
+                   check=True)
+
+
 def run(run_id, exp_id, phase, change, cfg, notes=''):
     if run_id in done():
         print('skip', run_id, flush=True)
@@ -474,6 +486,31 @@ def d2_patience_ablation():
         run(seeded('EXP-028_rlr6_es25', seed), 'EXP-028', 'd2', 'rot90, only EarlyStopping patience 15 -> 25 (RLR 6)',
             dict(D2_FINAL, seed=seed, rlr_patience=6))
 
+
+# ---------------------------------------------------------------- delivery 3: CNN from scratch (DEC-015..DEC-017)
+# Base: the delivery-2 recipe (EXP-021: LeakyReLU 0.3, rot90, Adam beta_1 0.95 + AMSGrad + clipnorm 1, ReduceLROnPlateau 8 /
+# EarlyStopping 25 on val_mean_recall, no class weights) with the dense layers replaced by the own CNN
+# (architectures.custom_cnn): 3 blocks of 2 x [Conv3x3 -> BN -> LeakyReLU] with 32, 64 and 128 filters, each followed by
+# 2x2 max pooling, then global average pooling and Dense(13). float32 and op determinism kept (CHG-028).
+D3_BASE = dict(D2_FINAL, arch='cnn', hidden=[], bn=None, conv_blocks=[32, 64, 128], convs_per_block=2, kernel=3,
+               downsample='max', head='gap', eval_batch_size=128)
+
+
+def d3_conv():
+    # D3-1: the convolution at the same 16 x 16 input as the ffNN. (a) same batch 256 and lr 3.6e-3 as EXP-021: only the
+    # architecture changes. (b) batch 64 with the lr scaled by the square-root rule (1.8e-3, as in EXP-010): the batch that
+    # the larger inputs need (memory), so that D3-2 knows what the batch change costs.
+    for seed in SEEDS:
+        run(seeded('EXP-029_cnn16_bs256', seed), 'EXP-029', 'd3', 'own CNN at 16x16, batch 256 (only the architecture changes)',
+            dict(D3_BASE, seed=seed, res=16))
+        run(seeded('EXP-029_cnn16_bs64', seed), 'EXP-029', 'd3', 'own CNN at 16x16, batch 64, lr 1.8e-3 (sqrt rule)',
+            merge_cfg(D3_BASE, seed=seed, res=16, batch_size=64, optimizer={'lr': 1.8e-3}))
+
+
+if __name__ == '__main__' and sys.argv[1:2] == ['--one']:   # one run in this process (run_isolated)
+    import json
+    run_experiment(*json.loads(sys.argv[2]))
+    sys.exit(0)
 
 if __name__ == '__main__':
     for name in sys.argv[1:]:
