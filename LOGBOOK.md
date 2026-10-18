@@ -19,13 +19,13 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 |---|---|
 | Etapa del curso | **Entrega 3: CNN propias frente a arquitecturas conocidas, desde cero** (plan en DEC-017). Entregas 1 y 2 cerradas (etiquetas `delivery-01`, `delivery-02`) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Mejor experimento | **EXP-031_r32_b4** (entrega 3, D3-3): CNN propia, 4 bloques 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32-64-128-256) + MaxPool, GAP → `Dense(13)`, a 32×32; Adam lr 1,8e-3, β₁ 0,95, batch 64; rotaciones. Mejor ffNN: EXP-018 (etiqueta `ffnn-full-plan`) |
+| Mejor experimento | **EXP-035_shift2**, la CNN propia final de la entrega 3: 32×32, 4 bloques 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32-64-128-256) + MaxPool, GAP → `Dense(13)`; logit adjustment τ 1; rotaciones + desplazamientos ±2 px; Adam lr 2,55e-3, β₁ 0,95, batch 128. Mejor ffNN: EXP-018 (etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
 | Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrenaba `ffNN_example.ipynb` hasta CHG-019 (versión en el commit `d557b09`). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
-| Mejor val accuracy / mean recall | **0,772 ± 0,006 / 0,784 ± 0,010** (EXP-031_r32_b4: CNN propia de 4 bloques a 32×32, 3 semillas; empata con 64/5 y 112/5). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
+| Mejor val accuracy / mean recall | **0,779 ± 0,007 / 0,821 ± 0,007** (EXP-035_shift2: CNN propia final, 3 semillas). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Entrega 3: D3-4, optimización (lr y batch) sobre 32×32 con 4 bloques. Después, capacidad (anchura, reducción, cabeza), desbalance, regularización y arquitecturas conocidas. IDEA-010 queda para la entrega 5 |
+| Próximo paso | Entrega 3: CNN propia a 112 px (EXP-037) y criba de lr de VGG16, ResNet50 e InceptionV3 (EXP-038). Después, 3 semillas de las conocidas, MixUp sobre ellas y comparación final. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -65,6 +65,11 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-029 | 2026-10-17 | D3-1 | CNN propia (3 bloques 32-64-128, GAP) a 16×16, batch 256 / 64 (3 semillas) | EXP-021_final | 0,746 ± 0,003 / 0,748 ± 0,006 | 0,741 ± 0,011 / **0,751 ± 0,007** | `EXP-029_cnn16_*` | ejecutado |
 | EXP-030 | 2026-10-17 | D3-2 | Resolución de la CNN propia: 32 / 64 / 112 (16 = EXP-029), batch 64 | EXP-029_cnn16_bs64 | **0,769 ± 0,010** (32) | **0,770 ± 0,006** (32) | `EXP-030_r*` | ejecutado |
 | EXP-031 | 2026-10-18 | D3-3 | Profundidad {3, 4, 5} bloques × resolución {32, 64, 112} (DEC-018) | EXP-030 | 0,772 ± 0,006 (32, 4 bloques) | **0,784 ± 0,010** (32, 4 bloques; empata con 64/5 y 112/5) | `EXP-031_*` | ejecutado |
+| EXP-032 | 2026-10-18 | D3-4 | Optimización: lr ×0,5 / ×2; batch 32 / 128 (regla de la raíz) | EXP-031_r32_b4 | 0,775 ± 0,006 (batch 128) | 0,785 ± 0,012 (batch 128; todas empatan) | `EXP-032_*` | ejecutado |
+| EXP-033 | 2026-10-18 | D3-5 | Capacidad: anchura ×0,5 / ×2, 1 / 3 convs por bloque, AveragePool / stride 2, cabeza Flatten | EXP-032_bs128 | — | sin mejora (se mantiene la base) | `EXP-033_*` | ejecutado |
+| EXP-034 | 2026-10-18 | D3-6 | Desbalance: pesos raíz / inverso, sobremuestreo 0,5 / 1, logit adjustment | EXP-032_bs128 | 0,762 ± 0,015 (logit adj.) | **0,803 ± 0,007** (logit adj.) | `EXP-034_*` | ejecutado |
+| EXP-035 | 2026-10-18 | D3-7 | Regularizadores: criba con 1 semilla y las 3 mejores con 3 semillas | EXP-034_logitadj1 | 0,779 ± 0,007 (desplazamientos) | **0,821 ± 0,007** (desplazamientos ±2 px) | `EXP-035_*` | ejecutado |
+| EXP-036 | 2026-10-18 | D3-7 | AdamW + desplazamientos + borrado combinados | EXP-034_logitadj1 | 0,780 ± 0,013 | 0,820 ± 0,010 | `EXP-036_combo*` | ejecutado (no suma) |
 
 ---
 
@@ -698,6 +703,116 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - **Se elige 32×32 con 4 bloques:** con la validación empatada, el modelo más simple y barato (1,2 M de parámetros frente a 4,7 M; 8 s/época frente a 51, 6 veces menos). Las fases siguientes se abaratan en esa proporción.
   - La celda 112/5 queda como referencia: la receta final se reentrenará a 112 (D3-7) para comparar en igualdad con las arquitecturas conocidas (DEC-016).
 - **Siguiente paso:** D3-4, optimización (lr y batch) sobre 32×32 con 4 bloques.
+
+### EXP-032: Optimización de la CNN propia (entrega 3, D3-4)
+- **Fecha:** 2026-10-18 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-031_r32_b4` (batch 64, lr 1,8e-3) · **Estado:** ejecutado
+- **Hipótesis:** la receta heredada de la ffNN (lr y batch) puede no ser la óptima para la CNN (DEC-017).
+- **Cambio:** un factor cada vez, con 3 semillas: lr ×0,5 (0,9e-3) y ×2 (3,6e-3); batch 32 y 128 con la lr escalada por la regla de la raíz (1,27e-3 y 2,55e-3) [R29].
+- **Resultados:**
+
+| Variante | val mean recall | val acc | min recall | train mean recall | Brecha (pp) | s/época |
+|---|---|---|---|---|---|---|
+| Base: batch 64, lr 1,8e-3 | 0,784 ± 0,010 | 0,772 ± 0,006 | 0,466 | 0,916 | 13,2 | 8,2 |
+| lr 0,9e-3 | 0,776 ± 0,014 | 0,761 ± 0,017 | 0,382 | 0,920 | 14,5 | 8,3 |
+| lr 3,6e-3 | 0,788 ± 0,012 | 0,773 ± 0,006 | 0,425 | 0,883 | 9,3 | 8,4 |
+| batch 32 | 0,785 ± 0,003 | 0,768 ± 0,002 | 0,436 | 0,948 | 17,2 | 16,6 |
+| **batch 128** | **0,785 ± 0,012** | 0,775 ± 0,006 | 0,433 | 0,887 | 10,0 | **4,9** |
+
+- **Conclusión:**
+  - La receta es robusta: todas las variantes empatan dentro del ruido (0,776-0,788).
+  - **Se elige batch 128 con lr 2,55e-3:** misma validación y épocas 1,7 veces más rápidas, como en la entrega 1 (EXP-010).
+  - El batch pequeño sube el train (0,948 con batch 32) sin subir la validación.
+- **Siguiente paso:** D3-5, el resto de la capacidad (EXP-033).
+
+### EXP-033: El resto de la capacidad de la CNN propia (entrega 3, D3-5)
+- **Fecha:** 2026-10-18 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-032_bs128` (4 bloques 32 → 256, 2 convs por bloque, MaxPool, GAP; 32×32, batch 128) · **Estado:** ejecutado
+- **Hipótesis:** ajustar la anchura, las convoluciones por bloque, el tipo de reducción espacial y la cabeza puede afinar la arquitectura elegida por profundidad y resolución.
+- **Cambio:** un factor cada vez, con 3 semillas.
+  - Anchura ×0,5 (16 → 128) y ×2 (64 → 512).
+  - 1 o 3 convoluciones por bloque.
+  - Reducción espacial con AveragePool o con convolución de stride 2 [R46], en lugar de MaxPool.
+  - Cabeza Flatten en lugar de global average pooling [R45].
+- **Resultados:**
+
+| Variante | val mean recall | Δ (pp) | val acc | train mean recall | Brecha (pp) | Parámetros | s/época |
+|---|---|---|---|---|---|---|---|
+| Base | **0,785 ± 0,012** | — | 0,775 | 0,887 | 10,0 | 1 178 477 | 4,9 |
+| Anchura ×0,5 | 0,753 ± 0,009 | −3,2 | 0,754 | 0,901 | 13,5 | 296 637 | 4,2 |
+| Anchura ×2 | 0,778 ± 0,008 | −0,7 | 0,772 | 0,899 | 11,8 | 4 697 805 | 9,2 |
+| 1 conv por bloque | 0,756 ± 0,009 | −2,9 | 0,739 | 0,926 | 17,0 | 393 197 | 3,9 |
+| 3 convs por bloque | 0,778 ± 0,013 | −0,7 | 0,771 | 0,855 | 7,1 | 1 963 757 | 9,1 |
+| AveragePool | 0,770 ± 0,014 | −1,5 | 0,777 | 0,825 | 3,9 | 1 178 477 | 6,4 |
+| Convolución con stride 2 | 0,754 ± 0,010 | −3,1 | 0,749 | 0,889 | 12,5 | 1 178 477 | 5,7 |
+| Cabeza Flatten | 0,774 ± 0,008 | −1,1 | 0,757 | 0,940 | 17,6 | 1 188 461 | 5,2 |
+
+- **Conclusión:**
+  - **Se mantiene la base:** ningún cambio la mejora.
+  - Reducir la capacidad cuesta unos 3 pp (anchura ×0,5, 1 conv por bloque); aumentarla empata (anchura ×2, 3 convs).
+  - **MaxPool supera a las alternativas.** La convolución con stride 2 pierde 3,1 pp. El AveragePool pierde 1,5 pp y ajusta menos el train (0,825): promediar diluye los objetos pequeños (explicación plausible, no verificada).
+  - **El global average pooling supera a Flatten.** Flatten memoriza más (brecha de 17,6 pp) y generaliza peor: la regularización estructural de [R45].
+- **Siguiente paso:** D3-6, el desbalance de clases (EXP-034).
+
+### EXP-034: Desbalance de clases en la CNN propia (entrega 3, D3-6)
+- **Fecha:** 2026-10-18 · **Etapa:** CNN (entrega 3; DEC-009 actualizada) · **Base:** `EXP-032_bs128` · **Estado:** ejecutado
+- **Hipótesis:** como en la ffNN (EXP-014: pesos con raíz, +3,2 pp), reponderar o remuestrear sube el recall de las clases pequeñas y el mean recall. Logit adjustment está diseñado para minimizar el error balanceado, es decir, para maximizar el mean recall [R51].
+- **Cambio:** un tratamiento cada vez, con 3 semillas.
+  - Pesos de clase con raíz e inversos [R10, R11].
+  - Sobremuestreo con α = 0,5 y α = 1 (balanceado).
+  - Logit adjustment con τ = 1: entropía cruzada de softmax(log p + τ log π), solo en entrenamiento; `LogitAdjustedCE`, CHG-028.
+- **Resultados:**
+
+| Tratamiento | val mean recall | Δ (pp) | val acc | min recall | Brecha (pp) |
+|---|---|---|---|---|---|
+| Ninguno (base) | 0,785 ± 0,012 | — | 0,775 ± 0,006 | 0,433 | 10,0 |
+| Pesos con raíz | 0,790 ± 0,007 | +0,5 | 0,765 ± 0,009 | 0,421 | 13,0 |
+| Pesos inversos | 0,796 ± 0,004 | +1,1 | 0,755 ± 0,012 | 0,370 | 8,8 |
+| Sobremuestreo α 0,5 | 0,797 ± 0,006 | +1,2 | 0,774 ± 0,002 | 0,416 | 8,4 |
+| Sobremuestreo α 1 | 0,789 ± 0,003 | +0,4 | 0,762 ± 0,004 | 0,406 | 10,1 |
+| **Logit adjustment τ 1** | **0,803 ± 0,007** | **+1,8** | 0,762 ± 0,015 | 0,406 | 10,9 |
+
+  Recall por clase con logit adjustment, frente a la base (pp): Helipad +12, Pylon +8, Fishing vessel +5, Storage tank +5, Dump truck +4, Cargo plane +3; Building −8, Small car −4, Truck −3.
+- **Conclusión:**
+  - **Solo logit adjustment supera el ruido** (+1,8 pp, frente a ~1,5), a costa de 1,3 pp de accuracy: pasa predicciones de las clases grandes a las pequeñas.
+  - El sobremuestreo con α 0,5 empata dentro del ruido sin perder accuracy; es la segunda opción.
+  - Las ganancias son mucho menores que en la ffNN (EXP-014): elegir la época por mean recall ya compensa parte del desbalance.
+  - **Se adopta logit adjustment, τ = 1**, con el criterio de mejorar la métrica guía por encima del ruido.
+- **Siguiente paso:** D3-7, criba de regularizadores (EXP-035). `LogitAdjustedCE` acepta ahora también label smoothing; antes, con logit adjustment, el label smoothing se habría ignorado en silencio.
+
+### EXP-035: Regularización revisada en la CNN propia (entrega 3, D3-7)
+- **Fecha:** 2026-10-18 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-034_logitadj1` (rotaciones; logit adjustment) · **Estado:** ejecutado
+- **Hipótesis:** sobre un modelo con otro sesgo, la pregunta de la entrega 2 tiene otra respuesta. En particular, los desplazamientos, que rompían la ffNN (EXP-025), deberían funcionar con la convolución.
+- **Cambio, en dos pasos:**
+  - (1) Criba de 10 regularizadores con 1 semilla, comparados con la semilla 1 de la base (0,809):
+    - Geométricos, añadidos a las rotaciones: D4, desplazamientos ±2 px, recorte con escala.
+    - Fotométricos suaves: brillo, contraste, saturación y ganancia por canal.
+    - De oclusión: Random Erasing [R47].
+    - De mezcla: MixUp con α 0,2 [R49] y CutMix con α 1 [R50].
+    - Clásicos: Dropout 0,3 en la cabeza, AdamW con weight decay 1e-4 [R32] y label smoothing 0,1.
+  - (2) Las 3 mejores, con 3 semillas.
+- **Resultados de la criba** (Δ en pp frente a la semilla 1 de la base: mean recall / accuracy):
+  - AdamW: +0,7 / +0,2. Desplazamientos: +0,6 / +0,3. Borrado: +0,4 / +0,2. Recorte: +0,2 / −1,0. Dropout: +0,2 / −1,1.
+  - D4: −0,1 / −0,8. MixUp: −0,2 / 0,0. Color: −0,5 / −0,9. Label smoothing: −0,9 / −2,4.
+  - **CutMix: −1,6 / −3,5**, y su mean recall de train baja a 0,807: el parche pegado tapa objetos pequeños y centrados.
+- **Confirmación** (3 semillas):
+
+| Variante | val mean recall | Δ (pp) | val acc | min recall | train mean recall | Brecha (pp) |
+|---|---|---|---|---|---|---|
+| Base (rotaciones) | 0,803 ± 0,007 | — | 0,762 ± 0,015 | 0,406 | 0,901 | 10,9 |
+| AdamW (wd 1e-4) | 0,810 ± 0,008 | +0,7 | 0,770 ± 0,004 | 0,421 | 0,920 | 12,6 |
+| **+ desplazamientos ±2 px** | **0,821 ± 0,007** | **+1,8** | **0,779 ± 0,007** | 0,357 | 0,864 | **5,1** |
+| + borrado | 0,805 ± 0,016 | +0,2 | 0,772 ± 0,006 | 0,413 | 0,939 | 14,8 |
+| Las tres (EXP-036) | 0,820 ± 0,010 | +1,7 | 0,780 ± 0,013 | 0,373 | 0,877 | 6,5 |
+
+- **Conclusión:**
+  - **Los desplazamientos se confirman:** +1,8 pp de mean recall (por encima del ruido) y +1,7 de accuracy, y la brecha se reduce a la mitad.
+  - Es la invarianza que la ffNN no podía aprender por los datos: en la ffNN a 16 px, 1 px de desplazamiento costaba −6 pp (EXP-025); aquí, 2 px a 32 px (el mismo 6 % del lado) suman. La convolución convierte la traslación en algo que la red puede aprovechar.
+  - AdamW y el borrado quedan dentro del ruido, y combinarlos con los desplazamientos no suma (EXP-036: 0,820).
+  - **Se adoptan rotaciones + desplazamientos**, la opción más simple.
+  - **La CNN propia final** (D3-7) es `EXP-035_shift2`:
+    - Arquitectura: 32×32, 4 bloques de 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32 → 256), MaxPool y GAP.
+    - Entrenamiento: logit adjustment, rotaciones + desplazamientos, Adam con batch 128 y lr 2,55e-3.
+    - Resultado: **mean recall 0,821 ± 0,007 y accuracy 0,779 ± 0,007**, frente a 0,646 / 0,643 de la ffNN de la entrega 2 (+17,5 y +13,6 pp).
+- **Siguiente paso:** la misma receta a 112 px con 5 bloques (EXP-037), para comparar en igualdad con las arquitecturas conocidas; después, la criba de lr de esas arquitecturas (EXP-038).
 
 ---
 

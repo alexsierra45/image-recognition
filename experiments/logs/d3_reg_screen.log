@@ -1,0 +1,15 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792326977.655061 1066065 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792326978.760293 1066065 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_reg_screen ====
+EXP-035_d4                   regulariser screen (1 seed): d4          params=1178477   ep=38/63 train_acc=0.821 val_acc=0.765 mean_recall=0.809 min_rec=0.371 327s
+EXP-035_shift2               regulariser screen (1 seed): shift2      params=1178477   ep=45/70 train_acc=0.828 val_acc=0.775 mean_recall=0.816 min_rec=0.330 366s
+EXP-035_rcrop                regulariser screen (1 seed): rcrop       params=1178477   ep=62/87 train_acc=0.861 val_acc=0.763 mean_recall=0.811 min_rec=0.389 428s
+EXP-035_jitter               regulariser screen (1 seed): jitter      params=1178477   ep=48/73 train_acc=0.906 val_acc=0.764 mean_recall=0.805 min_rec=0.443 403s
+EXP-035_erase                regulariser screen (1 seed): erase       params=1178477   ep=53/78 train_acc=0.896 val_acc=0.775 mean_recall=0.814 min_rec=0.394 355s
+EXP-035_mixup                regulariser screen (1 seed): mixup       params=1178477   ep=66/91 train_acc=0.924 val_acc=0.773 mean_recall=0.808 min_rec=0.421 482s
+EXP-035_cutmix               regulariser screen (1 seed): cutmix      params=1178477   ep=50/75 train_acc=0.758 val_acc=0.738 mean_recall=0.793 min_rec=0.204 380s
+EXP-035_dropout0.3           regulariser screen (1 seed): dropout0.3  params=1178477   ep=49/74 train_acc=0.863 val_acc=0.762 mean_recall=0.811 min_rec=0.389 384s
+EXP-035_adamw                regulariser screen (1 seed): adamw       params=1178477   ep=73/98 train_acc=0.909 val_acc=0.774 mean_recall=0.817 min_rec=0.443 501s
+EXP-035_ls0.1                regulariser screen (1 seed): ls0.1       params=1178477   ep=49/74 train_acc=0.924 val_acc=0.749 mean_recall=0.801 min_rec=0.398 365s

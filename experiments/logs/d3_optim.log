@@ -1,0 +1,17 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792303270.590451  871325 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792303271.628554  871325 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_optim ====
+EXP-032_lr0.9e-3             own CNN 32/4 blocks: lr0.9e-3            params=1178477   ep=37/62 train_acc=0.936 val_acc=0.771 mean_recall=0.792 min_rec=0.430 518s
+EXP-032_lr3.6e-3             own CNN 32/4 blocks: lr3.6e-3            params=1178477   ep=45/70 train_acc=0.897 val_acc=0.775 mean_recall=0.796 min_rec=0.452 595s
+EXP-032_bs32                 own CNN 32/4 blocks: bs32                params=1178477   ep=53/78 train_acc=0.969 val_acc=0.769 mean_recall=0.782 min_rec=0.462 1302s
+EXP-032_bs128                own CNN 32/4 blocks: bs128               params=1178477   ep=38/63 train_acc=0.896 val_acc=0.779 mean_recall=0.798 min_rec=0.407 311s
+EXP-032_lr0.9e-3_seed2       own CNN 32/4 blocks: lr0.9e-3            params=1178477   ep=38/63 train_acc=0.940 val_acc=0.771 mean_recall=0.764 min_rec=0.498 522s
+EXP-032_lr3.6e-3_seed2       own CNN 32/4 blocks: lr3.6e-3            params=1178477   ep=37/62 train_acc=0.876 val_acc=0.778 mean_recall=0.794 min_rec=0.434 519s
+EXP-032_bs32_seed2           own CNN 32/4 blocks: bs32                params=1178477   ep=43/68 train_acc=0.940 val_acc=0.770 mean_recall=0.786 min_rec=0.421 1133s
+EXP-032_bs128_seed2          own CNN 32/4 blocks: bs128               params=1178477   ep=34/59 train_acc=0.867 val_acc=0.779 mean_recall=0.779 min_rec=0.439 295s
+EXP-032_lr0.9e-3_seed3       own CNN 32/4 blocks: lr0.9e-3            params=1178477   ep=28/53 train_acc=0.843 val_acc=0.741 mean_recall=0.773 min_rec=0.217 443s
+EXP-032_lr3.6e-3_seed3       own CNN 32/4 blocks: lr3.6e-3            params=1178477   ep=36/61 train_acc=0.826 val_acc=0.766 mean_recall=0.775 min_rec=0.389 519s
+EXP-032_bs32_seed3           own CNN 32/4 blocks: bs32                params=1178477   ep=41/66 train_acc=0.912 val_acc=0.766 mean_recall=0.788 min_rec=0.425 1095s
+EXP-032_bs128_seed3          own CNN 32/4 blocks: bs128               params=1178477   ep=43/68 train_acc=0.863 val_acc=0.769 mean_recall=0.776 min_rec=0.452 342s

@@ -272,18 +272,21 @@ class LogitAdjustedCE(keras.losses.Loss):
     with log p the log-probabilities of the model. Only training changes; at prediction the model outputs softmax(z).
     It targets the balanced error, i.e. the mean recall."""
 
-    def __init__(self, log_prior, tau=1.0, name='logit_adjusted_ce', **kw):
+    def __init__(self, log_prior, tau=1.0, label_smoothing=0.0, name='logit_adjusted_ce', **kw):
         super().__init__(name=name, **kw)
         self.log_prior = [float(v) for v in log_prior]
         self.tau = float(tau)
+        self.label_smoothing = float(label_smoothing)
 
     def call(self, y_true, y_pred):
         logp = keras.ops.log(keras.ops.clip(keras.ops.cast(y_pred, 'float32'), 1e-7, 1.0))
         z = logp + self.tau * keras.ops.convert_to_tensor(self.log_prior, dtype='float32')
+        if self.label_smoothing:   # targets (1 - eps) one-hot + eps / K, as in CategoricalCrossentropy
+            y_true = y_true * (1 - self.label_smoothing) + self.label_smoothing / len(self.log_prior)
         return -keras.ops.sum(y_true * keras.ops.log_softmax(z, axis=-1), axis=-1)
 
     def get_config(self):
-        return {**super().get_config(), 'log_prior': self.log_prior, 'tau': self.tau}
+        return {**super().get_config(), 'log_prior': self.log_prior, 'tau': self.tau, 'label_smoothing': self.label_smoothing}
 
 
 def build_model(cfg, data):
@@ -415,7 +418,7 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
     model = build_model(cfg, data)
     if cfg['loss'] == 'logit_adjust':
         prior = np.bincount(y[tr], minlength=NUM_CLASSES) / len(tr)
-        loss = LogitAdjustedCE(np.log(prior), cfg['la_tau'])
+        loss = LogitAdjustedCE(np.log(prior), cfg['la_tau'], cfg['label_smoothing'])
     elif cfg['label_smoothing']:
         loss = keras.losses.CategoricalCrossentropy(label_smoothing=cfg['label_smoothing'])
     else:

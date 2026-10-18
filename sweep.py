@@ -538,6 +538,97 @@ def d3_depth_res():
                              dict(D3_BS64, seed=seed, res=res, conv_blocks=D3_DEPTHS[depth]))
 
 
+# EXP-031 (3 seeds): depth rescues the large inputs (112: 3 blocks 0.675 -> 5 blocks 0.788). 32/4 blocks (0.784 +- 0.010),
+# 64/5 and 112/5 tie; 32 x 32 with 4 blocks is kept (6x cheaper than 112/5). 112/5 stays as the reference at 112.
+D3_B4 = dict(D3_BS64, res=32, conv_blocks=D3_DEPTHS[4])
+
+
+def d3_optim():
+    # D3-4: learning rate (x0.5, x2) and batch (32, 128, lr by the square-root rule); base = EXP-031_r32_b4 (batch 64,
+    # lr 1.8e-3). One factor at a time, 3 seeds.
+    variants = [('lr0.9e-3', {'optimizer': {'lr': 0.9e-3}}), ('lr3.6e-3', {'optimizer': {'lr': 3.6e-3}}),
+                ('bs32', {'batch_size': 32, 'optimizer': {'lr': 1.27e-3}}),
+                ('bs128', {'batch_size': 128, 'optimizer': {'lr': 2.55e-3}})]
+    for seed in SEEDS:
+        for tag, ch in variants:
+            run(seeded('EXP-032_%s' % tag, seed), 'EXP-032', 'd3', 'own CNN 32/4 blocks: %s' % tag,
+                merge_cfg(D3_B4, seed=seed, **ch))
+
+
+# EXP-032 (3 seeds): lr x0.5 / x2 and batch 32 / 128 all tie within noise (0.776-0.788). Batch 128 (lr 2.55e-3, square-root
+# rule) is kept: same validation, 1.7x faster epochs.
+D3_B4_128 = merge_cfg(D3_B4, batch_size=128, optimizer={'lr': 2.55e-3})
+
+
+def d3_capacity():
+    # D3-5: the rest of the capacity on EXP-032_bs128, one factor at a time, 3 seeds: width (x0.5 / x2), convolutions per
+    # block (1 / 3), spatial reduction (average pooling / stride-2 convolution; Springenberg et al. 2015) and head
+    # (Flatten instead of global average pooling; Lin et al. 2014).
+    variants = [('w16', {'conv_blocks': [16, 32, 64, 128]}), ('w64', {'conv_blocks': [64, 128, 256, 512]}),
+                ('convs1', {'convs_per_block': 1}), ('convs3', {'convs_per_block': 3}),
+                ('avgpool', {'downsample': 'avg'}), ('stride', {'downsample': 'stride'}),
+                ('flatten', {'head': 'flatten'})]
+    for seed in SEEDS:
+        for tag, ch in variants:
+            run(seeded('EXP-033_%s' % tag, seed), 'EXP-033', 'd3', 'own CNN 32/4 blocks/batch 128: %s' % tag,
+                dict(D3_B4_128, seed=seed, **ch))
+
+
+# EXP-033 (3 seeds): the base architecture wins. Halving the width or 1 conv per block costs ~3 pp; doubling the width or
+# 3 convs per block tie (-0.7); average pooling -1.5 (fits train less), stride-2 convolution -3.1, Flatten head -1.1 (gap
+# 17.6 pp). Kept: 4 blocks x 2 [Conv3x3 -> BN -> LeakyReLU] 32-64-128-256, max pooling, GAP (EXP-032_bs128).
+
+
+def d3_imbalance():
+    # D3-6: class imbalance (update of DEC-009), one treatment at a time on EXP-032_bs128, 3 seeds: class weights (square
+    # root, inverse), oversampling (alpha 0.5 and 1 = balanced) and logit adjustment (tau 1; Menon et al. 2021).
+    variants = [('cw_sqrt', {'class_weight': 'sqrt'}), ('cw_inverse', {'class_weight': 'inverse'}),
+                ('over0.5', {'oversample': 0.5}), ('over1.0', {'oversample': 1.0}),
+                ('logitadj1', {'loss': 'logit_adjust', 'la_tau': 1.0})]
+    for seed in SEEDS:
+        for tag, ch in variants:
+            run(seeded('EXP-034_%s' % tag, seed), 'EXP-034', 'd3', 'own CNN, imbalance: %s' % tag,
+                dict(D3_B4_128, seed=seed, **ch))
+
+
+# EXP-034 (3 seeds): logit adjustment tau 1 is the only treatment above the noise (0.803 +- 0.007, +1.8 pp; -1.3 pp of
+# accuracy); oversampling 0.5 ties (+1.2, no accuracy loss); class weights +0.5 / +1.1. Kept: logit adjustment.
+D3_LA = dict(D3_B4_128, loss='logit_adjust', la_tau=1.0)
+
+
+def d3_reg_screen():
+    # D3-7, step 1: screening of regularisers, ONE seed each, compared with seed 1 of the base (EXP-034_logitadj1: 0.810).
+    # The base already has rot90; geometric/photometric/occlusion ops are added to it. Mixing: MixUp alpha 0.2, CutMix
+    # alpha 1 (the values of the papers). Classic: Dropout 0.3 before the output, AdamW (decoupled weight decay 1e-4),
+    # label smoothing 0.1 (discarded on the ffNN, EXP-022; retried because the model's bias is different).
+    variants = [('d4', {'augment': ['rot90', 'flip']}), ('shift2', {'augment': ['rot90', 'shift2']}),
+                ('rcrop', {'augment': ['rot90', 'rcrop']}), ('jitter', {'augment': ['rot90', 'jitter']}),
+                ('erase', {'augment': ['rot90', 'erase']}), ('mixup', {'mix': 'mixup', 'mix_alpha': 0.2}),
+                ('cutmix', {'mix': 'cutmix', 'mix_alpha': 1.0}), ('dropout0.3', {'head_dropout': 0.3}),
+                ('adamw', {'optimizer': {'name': 'adamw', 'weight_decay': 1e-4}}), ('ls0.1', {'label_smoothing': 0.1})]
+    for tag, ch in variants:
+        run('EXP-035_%s' % tag, 'EXP-035', 'd3', 'regulariser screen (1 seed): %s' % tag, merge_cfg(D3_LA, seed=1, **ch))
+
+
+# EXP-035 (1 seed vs 0.809 of the base's seed 1): nothing stands out; best AdamW +0.7, shift2 +0.6, erase +0.4; CutMix
+# -1.6 (covers the small centred objects), label smoothing -0.9, colour jitter -0.5, MixUp and D4 ~0.
+D3_REG = {'adamw': {'optimizer': {'name': 'adamw', 'weight_decay': 1e-4}}, 'shift2': {'augment': ['rot90', 'shift2']},
+          'erase': {'augment': ['rot90', 'erase']}}
+
+
+def d3_reg_confirm():
+    # D3-7, step 2: the three best of the screen with 3 seeds (seed 1 = EXP-035_<tag>) and their combination (3 seeds),
+    # because regularisers interact (DEC-013).
+    combo = {'optimizer': {'name': 'adamw', 'weight_decay': 1e-4}, 'augment': ['rot90', 'shift2', 'erase']}
+    for seed in SEEDS:
+        for tag, ch in D3_REG.items():
+            if seed > 1:
+                run('EXP-035_%s_seed%d' % (tag, seed), 'EXP-035', 'd3', 'regulariser confirm: %s' % tag,
+                    merge_cfg(D3_LA, seed=seed, **ch))
+        run(seeded('EXP-036_combo', seed), 'EXP-036', 'd3', 'AdamW + shift2 + erase (on logit adjustment)',
+            merge_cfg(D3_LA, seed=seed, **combo))
+
+
 if __name__ == '__main__' and sys.argv[1:2] == ['--one']:   # one run in this process (run_isolated)
     import json
     run_experiment(*json.loads(sys.argv[2]))

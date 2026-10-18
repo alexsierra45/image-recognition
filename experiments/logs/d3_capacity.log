@@ -1,0 +1,26 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792310957.803479  923826 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792310959.360447  923826 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_capacity ====
+EXP-033_w16                  own CNN 32/4 blocks/batch 128: w16       params=296637    ep=44/69 train_acc=0.882 val_acc=0.752 mean_recall=0.762 min_rec=0.398 280s
+EXP-033_w64                  own CNN 32/4 blocks/batch 128: w64       params=4697805   ep=38/63 train_acc=0.829 val_acc=0.775 mean_recall=0.774 min_rec=0.357 577s
+EXP-033_convs1               own CNN 32/4 blocks/batch 128: convs1    params=393197    ep=33/58 train_acc=0.824 val_acc=0.727 mean_recall=0.767 min_rec=0.217 178s
+EXP-033_convs3               own CNN 32/4 blocks/batch 128: convs3    params=1963757   ep=62/87 train_acc=0.834 val_acc=0.761 mean_recall=0.763 min_rec=0.412 614s
+EXP-033_avgpool              own CNN 32/4 blocks/batch 128: avgpool   params=1178477   ep=66/91 train_acc=0.806 val_acc=0.778 mean_recall=0.754 min_rec=0.439 449s
+EXP-033_stride               own CNN 32/4 blocks/batch 128: stride    params=1178477   ep=38/63 train_acc=0.842 val_acc=0.750 mean_recall=0.747 min_rec=0.385 306s
+EXP-033_flatten              own CNN 32/4 blocks/batch 128: flatten   params=1188461   ep=47/72 train_acc=0.939 val_acc=0.762 mean_recall=0.768 min_rec=0.434 351s
+EXP-033_w16_seed2            own CNN 32/4 blocks/batch 128: w16       params=296637    ep=47/72 train_acc=0.909 val_acc=0.755 mean_recall=0.745 min_rec=0.448 293s
+EXP-033_w64_seed2            own CNN 32/4 blocks/batch 128: w64       params=4697805   ep=38/63 train_acc=0.864 val_acc=0.767 mean_recall=0.787 min_rec=0.475 584s
+EXP-033_convs1_seed2         own CNN 32/4 blocks/batch 128: convs1    params=393197    ep=53/78 train_acc=0.929 val_acc=0.740 mean_recall=0.751 min_rec=0.389 410s
+EXP-033_convs3_seed2         own CNN 32/4 blocks/batch 128: convs3    params=1963757   ep=43/68 train_acc=0.830 val_acc=0.773 mean_recall=0.782 min_rec=0.385 841s
+EXP-033_avgpool_seed2        own CNN 32/4 blocks/batch 128: avgpool   params=1178477   ep=70/95 train_acc=0.839 val_acc=0.781 mean_recall=0.777 min_rec=0.430 859s
+EXP-033_stride_seed2         own CNN 32/4 blocks/batch 128: stride    params=1178477   ep=49/74 train_acc=0.858 val_acc=0.749 mean_recall=0.749 min_rec=0.430 513s
+EXP-033_flatten_seed2        own CNN 32/4 blocks/batch 128: flatten   params=1188461   ep=50/75 train_acc=0.927 val_acc=0.758 mean_recall=0.783 min_rec=0.448 426s
+EXP-033_w16_seed3            own CNN 32/4 blocks/batch 128: w16       params=296637    ep=37/62 train_acc=0.877 val_acc=0.755 mean_recall=0.752 min_rec=0.457 279s
+EXP-033_w64_seed3            own CNN 32/4 blocks/batch 128: w64       params=4697805   ep=73/98 train_acc=0.976 val_acc=0.772 mean_recall=0.773 min_rec=0.475 934s
+EXP-033_convs1_seed3         own CNN 32/4 blocks/batch 128: convs1    params=393197    ep=62/87 train_acc=0.973 val_acc=0.748 mean_recall=0.750 min_rec=0.398 303s
+EXP-033_convs3_seed3         own CNN 32/4 blocks/batch 128: convs3    params=1963757   ep=54/79 train_acc=0.864 val_acc=0.780 mean_recall=0.787 min_rec=0.439 635s
+EXP-033_avgpool_seed3        own CNN 32/4 blocks/batch 128: avgpool   params=1178477   ep=57/82 train_acc=0.804 val_acc=0.773 mean_recall=0.778 min_rec=0.434 435s
+EXP-033_stride_seed3         own CNN 32/4 blocks/batch 128: stride    params=1178477   ep=66/91 train_acc=0.923 val_acc=0.749 mean_recall=0.765 min_rec=0.398 495s
+EXP-033_flatten_seed3        own CNN 32/4 blocks/batch 128: flatten   params=1188461   ep=46/71 train_acc=0.933 val_acc=0.752 mean_recall=0.770 min_rec=0.412 377s

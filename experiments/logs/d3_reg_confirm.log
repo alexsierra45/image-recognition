@@ -1,0 +1,14 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792331044.521667 1106104 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792331046.803187 1106104 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_reg_confirm ====
+EXP-036_combo                AdamW + shift2 + erase (on logit adjustm params=1178477   ep=76/101 train_acc=0.862 val_acc=0.792 mean_recall=0.831 min_rec=0.380 509s
+EXP-035_adamw_seed2          regulariser confirm: adamw               params=1178477   ep=46/71 train_acc=0.904 val_acc=0.769 mean_recall=0.812 min_rec=0.448 342s
+EXP-035_shift2_seed2         regulariser confirm: shift2              params=1178477   ep=42/67 train_acc=0.814 val_acc=0.775 mean_recall=0.817 min_rec=0.335 319s
+EXP-035_erase_seed2          regulariser confirm: erase               params=1178477   ep=74/99 train_acc=0.961 val_acc=0.765 mean_recall=0.786 min_rec=0.439 454s
+EXP-036_combo_seed2          AdamW + shift2 + erase (on logit adjustm params=1178477   ep=60/85 train_acc=0.862 val_acc=0.780 mean_recall=0.815 min_rec=0.380 431s
+EXP-035_adamw_seed3          regulariser confirm: adamw               params=1178477   ep=44/69 train_acc=0.874 val_acc=0.767 mean_recall=0.800 min_rec=0.371 333s
+EXP-035_shift2_seed3         regulariser confirm: shift2              params=1178477   ep=57/82 train_acc=0.849 val_acc=0.788 mean_recall=0.829 min_rec=0.407 391s
+EXP-035_erase_seed3          regulariser confirm: erase               params=1178477   ep=64/89 train_acc=0.902 val_acc=0.776 mean_recall=0.815 min_rec=0.407 416s
+EXP-036_combo_seed3          AdamW + shift2 + erase (on logit adjustm params=1178477   ep=60/85 train_acc=0.809 val_acc=0.766 mean_recall=0.815 min_rec=0.357 422s
