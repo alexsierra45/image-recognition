@@ -19,13 +19,13 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 |---|---|
 | Etapa del curso | **Entrega 3: CNN propias frente a arquitecturas conocidas, desde cero** (plan en DEC-017). Entregas 1 y 2 cerradas (etiquetas `delivery-01`, `delivery-02`) |
 | Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
-| Mejor experimento | **EXP-018**: 16×16 `/255` → 4 × [`Dense(256)` → BN → ReLU] → `Dense(13)`; Adam lr = 3,6e-3, β₁ = 0,95, batch 256; `class_weight` con raíz; augmentation D4 (versión del notebook: etiqueta `ffnn-full-plan`) |
+| Mejor experimento | **EXP-031_r32_b4** (entrega 3, D3-3): CNN propia, 4 bloques 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32-64-128-256) + MaxPool, GAP → `Dense(13)`, a 32×32; Adam lr 1,8e-3, β₁ 0,95, batch 64; rotaciones. Mejor ffNN: EXP-018 (etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
 | Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrenaba `ffNN_example.ipynb` hasta CHG-019 (versión en el commit `d557b09`). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
-| Mejor val accuracy / mean recall | **0,635 ± 0,003 / 0,651 ± 0,009** (3 semillas; semilla 1, la del notebook: 0,637 / 0,644). Split estratificado, no comparable con EXP-000 |
+| Mejor val accuracy / mean recall | **0,772 ± 0,006 / 0,784 ± 0,010** (EXP-031_r32_b4: CNN propia de 4 bloques a 32×32, 3 semillas; empata con 64/5 y 112/5). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Entrega 3, fase 0: infraestructura para CNN (`arch` en `experiment_utils.py`, `architectures.py`) y prueba de humo. IDEA-010 queda para la entrega 5 |
+| Próximo paso | Entrega 3: D3-4, optimización (lr y batch) sobre 32×32 con 4 bloques. Después, capacidad (anchura, reducción, cabeza), desbalance, regularización y arquitecturas conocidas. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -62,6 +62,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-026 | 2026-10-16 | E2 | TTA con las 4 rotaciones (sin entrenar), por semilla | EXP-021_final | 0,647 ± 0,007 | 0,643 ± 0,010 | `ensembles/EXP-026_tta_*` | ejecutado (descartado) |
 | EXP-027 | 2026-10-16 | E2 | Medio píxel: entrada de 32 + promedio 2×2, con y sin desplazamiento de 1 px | EXP-021_final | 0,626 ± 0,006 | 0,620 ± 0,012 (control 0,631) | `EXP-027_*` | ejecutado (descartado) |
 | EXP-028 | 2026-10-16 | E2 | Ablación de las paciencias de EXP-021: solo RLR 6 → 8 / solo ES 15 → 25 | EXP-019_rot90 | 0,643 ± 0,011 / 0,632 ± 0,005 | 0,646 ± 0,015 / 0,617 ± 0,015 | `EXP-028_*` | ejecutado (todo el salto es la paciencia de RLR) |
+| EXP-029 | 2026-10-17 | D3-1 | CNN propia (3 bloques 32-64-128, GAP) a 16×16, batch 256 / 64 (3 semillas) | EXP-021_final | 0,746 ± 0,003 / 0,748 ± 0,006 | 0,741 ± 0,011 / **0,751 ± 0,007** | `EXP-029_cnn16_*` | ejecutado |
+| EXP-030 | 2026-10-17 | D3-2 | Resolución de la CNN propia: 32 / 64 / 112 (16 = EXP-029), batch 64 | EXP-029_cnn16_bs64 | **0,769 ± 0,010** (32) | **0,770 ± 0,006** (32) | `EXP-030_r*` | ejecutado |
+| EXP-031 | 2026-10-18 | D3-3 | Profundidad {3, 4, 5} bloques × resolución {32, 64, 112} (DEC-018) | EXP-030 | 0,772 ± 0,006 (32, 4 bloques) | **0,784 ± 0,010** (32, 4 bloques; empata con 64/5 y 112/5) | `EXP-031_*` | ejecutado |
 
 ---
 
@@ -635,6 +638,67 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
   - El modelo final no cambia (EXP-021 y la variante (a) dan las mismas mejores épocas; solo difiere cuándo para). Lo que cambia es cómo se explica.
   - Fundamento: ReduceLROnPlateau reacciona a una métrica ruidosa, y la paciencia es su único filtro frente a ese ruido. Es una explicación empírica a partir de los historiales: no hay una referencia específica.
 
+### EXP-029: La convolución a igual entrada que la ffNN (entrega 3, D3-1)
+- **Fecha:** 2026-10-17 · **Etapa:** CNN (entrega 3, DEC-017) · **Base:** `EXP-021_final` (ffNN de la entrega 2, 16×16) · **Estado:** ejecutado
+- **Hipótesis:** el límite de la ffNN era su sesgo: cada píxel tiene su peso y no hay invarianza a traslaciones (EXP-024..027). Una CNN, con conectividad local, pesos compartidos y pooling [R8 §9.2], debería mejorar a igual entrada y con parámetros parecidos.
+- **Cambio:**
+  - (a) Las capas densas se sustituyen por la CNN propia: 3 bloques de 2 × [Conv3×3 → BN → LeakyReLU 0,3] con 32, 64 y 128 filtros, MaxPool 2×2 tras cada bloque, global average pooling [R45] y Dense(13). El resto de la receta de EXP-021 no cambia: 16×16, rotaciones, Adam β₁ 0,95, batch 256, lr 3,6e-3 y paciencias 25/8.
+  - (b) Igual que (a), con batch 64 y lr 1,8e-3 (regla de la raíz, como en EXP-010). Es el batch que exigirán las resoluciones mayores, por memoria.
+  - 3 semillas cada una.
+- **Resultados:**
+
+| Variante | val mean recall | val acc | min recall | train mean recall | Brecha (acc, pp) | Mejor época | s/época | Parámetros |
+|---|---|---|---|---|---|---|---|---|
+| ffNN EXP-021 (base) | 0,646 ± 0,015 | 0,643 ± 0,011 | 0,258 | 0,774 | 12,1 | 67 | 1,0 | 400 653 |
+| (a) CNN, batch 256 | 0,741 ± 0,011 | 0,746 ± 0,003 | 0,425 | 0,870 | 11,3 | 41 | 1,6 | 290 029 |
+| (b) CNN, batch 64 | **0,751 ± 0,007** | 0,748 ± 0,006 | 0,394 | 0,910 | 15,2 | 48 | 6,2 | 290 029 |
+
+- **Conclusión:**
+  - **Se confirma, y con margen.** Solo con la arquitectura, a la misma entrada de 16×16 y con menos parámetros, el mean recall sube 9,5 pp y la accuracy 10,3. Es más que toda la entrega 2 junta (+6,8 pp), y confirma el diagnóstico: lo que fallaba era el sesgo de la red densa.
+  - El recall mínimo pasa de 0,258 a 0,425.
+  - **El batch 64 empata con el 256** (+1,0 pp, dentro del ruido), así que se puede usar en las resoluciones mayores sin coste en resultados, aunque cada época tarda 4 veces más.
+  - La brecha no cambia mucho: con batch 64 el train sube más.
+- **Siguiente paso:** D3-2, la resolución (EXP-030), con batch 64.
+
+### EXP-030: Resolución de entrada de la CNN propia (entrega 3, D3-2)
+- **Fecha:** 2026-10-17 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-029_cnn16_bs64` · **Estado:** ejecutado
+- **Hipótesis:** una CNN comparte pesos entre posiciones, así que más píxeles no le multiplican los parámetros como a la ffNN y debería aprovechar más detalle (DEC-016).
+- **Cambio:** solo la resolución de entrada, 32, 64 y 112 (16 es EXP-029), con la misma red de 3 bloques, batch 64 y 3 semillas.
+- **Resultados:**
+
+| Entrada | val mean recall | val acc | min recall | train mean recall | Brecha (acc, pp) | Mejor época | s/época |
+|---|---|---|---|---|---|---|---|
+| 16 (EXP-029) | 0,751 ± 0,007 | 0,748 ± 0,006 | 0,394 | 0,910 | 15,2 | 48 | 6,2 |
+| **32** | **0,770 ± 0,006** | 0,769 ± 0,010 | 0,401 | 0,871 | 9,0 | 58 | 6,7 |
+| 64 | 0,745 ± 0,017 | 0,745 ± 0,007 | 0,357 | 0,784 | 3,5 | 61 | 14,0 |
+| 112 | 0,675 ± 0,018 | 0,689 ± 0,016 | 0,330 | 0,706 | 2,4 | 66 | 42,8 |
+
+- **Conclusión:**
+  - **32 × 32 es la mejor** (+1,9 pp sobre 16). Por encima, más píxeles empeoran.
+  - **No es sobreajuste, es subajuste:** al subir la resolución baja también el mean recall de train (0,871 → 0,706) y la brecha casi desaparece.
+  - **Explicación (cálculo, no medida):** el campo receptivo teórico de la última capa es de 36 px con 3 bloques. Cada Conv3×3 suma 2 × el paso acumulado, y cada MaxPool 2×2 suma 1 × el paso y lo duplica. A 32 px ese campo cubre toda la imagen; a 112 solo un trozo, y el global average pooling promedia rasgos locales sin ver nunca el objeto entero. El campo receptivo efectivo es además menor que el teórico [R52].
+  - **Resolución y profundidad interactúan:** una imagen mayor necesita una red más profunda. Con 4 bloques el campo es de 76 px y con 5, de 156.
+- **Siguiente paso:** la rejilla profundidad × resolución (EXP-031), adelantada a la optimización (DEC-018).
+
+### EXP-031: Profundidad × resolución de la CNN propia (entrega 3, D3-3)
+- **Fecha:** 2026-10-18 · **Etapa:** CNN (entrega 3, DEC-018) · **Base:** `EXP-030` (3 bloques) · **Estado:** ejecutado
+- **Hipótesis:** con más bloques, el campo receptivo (76 px con 4 y 156 con 5) cubre las imágenes grandes y desaparece el subajuste de EXP-030 a 64 y 112.
+- **Cambio:** rejilla de dos factores a propósito (DEC-013, DEC-018): bloques {4, 5} (filtros 32 → 256 o 32 → 512, duplicándose; 1 178 477 y 4 724 845 parámetros) × resolución {32, 64, 112}. Las celdas de 3 bloques son EXP-030. 3 semillas, cada run en su propio proceso.
+- **Resultados** (val mean recall, media ± desviación típica; entre paréntesis, val acc, mean recall de train y s/época):
+
+| Entrada | 3 bloques (290 029) | 4 bloques (1 178 477) | 5 bloques (4 724 845) |
+|---|---|---|---|
+| 32 | 0,770 ± 0,006 (0,769; 0,871; 6,7 s) | **0,784 ± 0,010** (0,772; 0,916; 8,2 s) | 0,781 ± 0,004 (0,764; 0,920; 9,9 s) |
+| 64 | 0,745 ± 0,017 (0,745; 0,784; 14,0 s) | 0,778 ± 0,011 (0,776; 0,895; 15,4 s) | 0,787 ± 0,013 (0,776; 0,904; 17,6 s) |
+| 112 | 0,675 ± 0,018 (0,689; 0,706; 42,8 s) | 0,775 ± 0,024 (0,767; 0,835; 48,1 s) | 0,788 ± 0,002 (0,781; 0,916; 51,4 s) |
+
+- **Conclusión:**
+  - **Se confirma la interacción.** A 112, la profundidad recupera +11,3 pp (de 0,675 con 3 bloques a 0,788 con 5), y el mean recall de train sube con ella (0,706 → 0,916): el subajuste de EXP-030 era de campo receptivo. A 32, la profundidad aporta menos (+1,4 pp con 4 bloques), porque 4 bloques ya cubren la imagen.
+  - **Las tres mejores celdas empatan dentro del ruido:** 32/4 (0,784), 64/5 (0,787) y 112/5 (0,788), a 0,4 pp entre ellas.
+  - **Se elige 32×32 con 4 bloques:** con la validación empatada, el modelo más simple y barato (1,2 M de parámetros frente a 4,7 M; 8 s/época frente a 51, 6 veces menos). Las fases siguientes se abaratan en esa proporción.
+  - La celda 112/5 queda como referencia: la receta final se reentrenará a 112 (D3-7) para comparar en igualdad con las arquitecturas conocidas (DEC-016).
+- **Siguiente paso:** D3-4, optimización (lr y batch) sobre 32×32 con 4 bloques.
+
 ---
 
 ## Registro de cambios (CHG)
@@ -1192,6 +1256,14 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **D3-8: comparación final.** Se elige el modelo que entrena `xview_recognition.ipynb`.
 - **Reproducibilidad:** se mantiene `enable_op_determinism`. La precisión mixta se adopta solo si acelera al menos 1,5× y conserva el determinismo (prueba de humo, CHG-028).
 
+### DEC-018: La rejilla profundidad × resolución se adelanta a la optimización (2026-10-17)
+- **Motivo:** EXP-030 muestra que, con 3 bloques, la resolución alta da subajuste, y el campo receptivo explica por qué: resolución y profundidad interactúan. Elegir la resolución con una sola profundidad fijaría 32 px por una limitación de la red, no de los datos. Además, la comparación en igualdad con las arquitecturas conocidas (a 112, DEC-016) necesita una CNN propia que funcione a 112.
+- **Cambio en el plan de DEC-017:**
+  - La fase D3-3 pasa a ser la rejilla de profundidad {3, 4, 5} bloques (filtros 32 → … → 512, duplicándose) × resolución {32, 64, 112}, con 3 semillas (EXP-031), al estilo de DEC-013.
+  - La optimización (lr y batch) va después, sobre la celda ganadora.
+  - Anchura, tipo de reducción espacial y cabeza siguen en la fase de capacidad.
+- **Coste:** unas 11 h de GPU (18 runs nuevos, cada uno en su propio proceso).
+
 ---
 
 ## Referencias externas
@@ -1247,6 +1319,7 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R49]** Zhang, Cisse, Dauphin, Lopez-Paz (2018). *mixup: Beyond Empirical Risk Minimization*. ICLR.
 - **[R50]** Yun, Han, Oh, Chun, Choe, Yoo (2019). *CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features*. ICCV.
 - **[R51]** Menon, Jayasumana, Rawat, Jain, Veit, Kumar (2021). *Long-tail learning via logit adjustment*. ICLR.
+- **[R52]** Luo, Li, Urtasun, Zemel (2016). *Understanding the Effective Receptive Field in Deep Convolutional Neural Networks*. NeurIPS. (el campo receptivo efectivo es mucho menor que el teórico)
 
 ---
 

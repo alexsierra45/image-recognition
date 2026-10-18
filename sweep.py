@@ -507,6 +507,37 @@ def d3_conv():
             merge_cfg(D3_BASE, seed=seed, res=16, batch_size=64, optimizer={'lr': 1.8e-3}))
 
 
+# EXP-029 (3 seeds): the CNN at the ffNN's 16 x 16 input reaches 0.741 +- 0.011 (batch 256) / 0.751 +- 0.007 (batch 64)
+# mean recall vs 0.646 of the ffNN (EXP-021): +9.5 pp from the architecture alone, with fewer parameters. Batch 64 ties
+# with 256, so it is kept for the larger inputs (memory).
+D3_BS64 = merge_cfg(D3_BASE, batch_size=64, optimizer={'lr': 1.8e-3})
+
+
+def d3_resolution():
+    # D3-2: input resolution (DEC-016); 16 is EXP-029_cnn16_bs64. Seeds in the outer loop: partial results usable.
+    for seed in SEEDS:
+        for res in (32, 64, 112):
+            run(seeded('EXP-030_r%d' % res, seed), 'EXP-030', 'd3', 'own CNN at %dx%d (batch 64)' % (res, res),
+                dict(D3_BS64, seed=seed, res=res))
+
+
+# EXP-030 (3 seeds, batch 64): 32 x 32 is best (0.770 +- 0.006); 64 and 112 are worse (0.745, 0.675) with LOWER train
+# mean recall (0.784, 0.706) and a tiny gap: underfitting. With 3 blocks the receptive field is ~30 px, the whole image
+# at 32 but a fragment at 112, so resolution and depth interact -> two-factor grid (DEC-013), brought forward.
+D3_DEPTHS = {3: [32, 64, 128], 4: [32, 64, 128, 256], 5: [32, 64, 128, 256, 512]}
+
+
+def d3_depth_res():
+    # D3-3 (re-ordered, DEC-018): depth {3, 4, 5} blocks x input {32, 64, 112}, 3 seeds; 3 blocks = EXP-030 / EXP-029.
+    # Each run in its own process (run_isolated): the 112-px cells are the largest runs so far.
+    for seed in SEEDS:
+        for res in (32, 64, 112):
+            for depth in (4, 5):
+                run_isolated(seeded('EXP-031_r%d_b%d' % (res, depth), seed), 'EXP-031', 'd3',
+                             'own CNN, %d blocks, %dx%d (batch 64)' % (depth, res, res),
+                             dict(D3_BS64, seed=seed, res=res, conv_blocks=D3_DEPTHS[depth]))
+
+
 if __name__ == '__main__' and sys.argv[1:2] == ['--one']:   # one run in this process (run_isolated)
     import json
     run_experiment(*json.loads(sys.argv[2]))

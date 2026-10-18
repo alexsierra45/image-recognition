@@ -1,0 +1,14 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792249164.286070  621751 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792249165.384461  621751 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_resolution ====
+EXP-030_r32                  own CNN at 32x32 (batch 64)              params=290029    ep=66/91 train_acc=0.880 val_acc=0.770 mean_recall=0.769 min_rec=0.394 647s
+EXP-030_r64                  own CNN at 64x64 (batch 64)              params=290029    ep=76/101 train_acc=0.802 val_acc=0.751 mean_recall=0.764 min_rec=0.330 1466s
+EXP-030_r112                 own CNN at 112x112 (batch 64)            params=290029    ep=73/98 train_acc=0.726 val_acc=0.698 mean_recall=0.689 min_rec=0.326 4189s
+EXP-030_r32_seed2            own CNN at 32x32 (batch 64)              params=290029    ep=44/69 train_acc=0.831 val_acc=0.757 mean_recall=0.765 min_rec=0.380 455s
+EXP-030_r64_seed2            own CNN at 64x64 (batch 64)              params=290029    ep=52/77 train_acc=0.775 val_acc=0.746 mean_recall=0.742 min_rec=0.344 1059s
+EXP-030_r112_seed2           own CNN at 112x112 (batch 64)            params=290029    ep=35/60 train_acc=0.692 val_acc=0.671 mean_recall=0.655 min_rec=0.326 2576s
+EXP-030_r32_seed3            own CNN at 32x32 (batch 64)              params=290029    ep=64/89 train_acc=0.865 val_acc=0.778 mean_recall=0.777 min_rec=0.430 574s
+EXP-030_r64_seed3            own CNN at 64x64 (batch 64)              params=290029    ep=56/81 train_acc=0.763 val_acc=0.737 mean_recall=0.730 min_rec=0.398 1113s
+EXP-030_r112_seed3           own CNN at 112x112 (batch 64)            params=290029    ep=90/115 train_acc=0.723 val_acc=0.698 mean_recall=0.682 min_rec=0.339 4937s

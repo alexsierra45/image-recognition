@@ -1,0 +1,11 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792247426.950813  601634 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792247427.852596  601634 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_conv ====
+EXP-029_cnn16_bs256          own CNN at 16x16, batch 256 (only the ar params=290029    ep=38/63 train_acc=0.845 val_acc=0.744 mean_recall=0.749 min_rec=0.380 100s
+EXP-029_cnn16_bs64           own CNN at 16x16, batch 64, lr 1.8e-3 (s params=290029    ep=51/76 train_acc=0.912 val_acc=0.744 mean_recall=0.743 min_rec=0.362 471s
+EXP-029_cnn16_bs256_seed2    own CNN at 16x16, batch 256 (only the ar params=290029    ep=41/66 train_acc=0.860 val_acc=0.744 mean_recall=0.729 min_rec=0.416 104s
+EXP-029_cnn16_bs64_seed2     own CNN at 16x16, batch 64, lr 1.8e-3 (s params=290029    ep=52/77 train_acc=0.913 val_acc=0.756 mean_recall=0.754 min_rec=0.425 475s
+EXP-029_cnn16_bs256_seed3    own CNN at 16x16, batch 256 (only the ar params=290029    ep=45/70 train_acc=0.872 val_acc=0.749 mean_recall=0.746 min_rec=0.480 112s
+EXP-029_cnn16_bs64_seed3     own CNN at 16x16, batch 64, lr 1.8e-3 (s params=290029    ep=40/65 train_acc=0.875 val_acc=0.746 mean_recall=0.755 min_rec=0.394 415s
