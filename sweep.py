@@ -680,6 +680,13 @@ def d3_known():
                          merge_cfg(D3_FINAL112, arch=arch, seed=seed, optimizer={'lr': KNOWN_LR[arch]}))
 
 
+def magerit_ref():
+    # CHG-029: EXP-035_shift2 (seed 1, run on WSL / RTX 4050) repeated unchanged on Magerit, to measure the drift that
+    # the new GPU and software (numpy 2.5, Python 3.13) introduce before comparing new runs with the old ones.
+    run_isolated('CHG-029_ref_EXP-035_shift2', 'CHG-029', 'd3', 'EXP-035_shift2 (seed 1) repeated on Magerit',
+                 merge_cfg(D3_LA, seed=1, **D3_REG['shift2']))
+
+
 if __name__ == '__main__' and sys.argv[1:2] == ['--one']:   # one run in this process (run_isolated)
     import json
     run_experiment(*json.loads(sys.argv[2]))
