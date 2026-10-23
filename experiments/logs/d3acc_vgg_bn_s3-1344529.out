@@ -1,0 +1,20 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n8.hpc.lan job=1344529 gres=3 commit=1ba8e75 start=2026-10-23T22:01:40+00:00
+cmd: python sweep.py d3acc_vgg_bn_s3
+name, memory.total [MiB], driver_version
+NVIDIA L40S, 46068 MiB, 545.23.08
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792792904.543941 4099893 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792792909.270025 4099893 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3acc_vgg_bn_s3 ====
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792792917.548497 4099922 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792792922.595960 4099922 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-045_vgg16_bn_seed3       vgg16 + BN after every conv, lr 1e-3, ac params=14734029  ep=56/81 train_acc=0.909 val_acc=0.806 mean_recall=0.810 min_rec=0.489 2032s
+end=2026-10-23T22:36:09+00:00 exit=0

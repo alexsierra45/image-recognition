@@ -1,0 +1,38 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n11.hpc.lan job=1344521 gres=3 commit=1ba8e75 start=2026-10-23T20:29:04+00:00
+cmd: python sweep.py d3acc_112_s3
+name, memory.total [MiB], driver_version
+NVIDIA L40S, 46068 MiB, 545.23.08
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792787348.385142 3115873 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792787353.175751 3115873 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3acc_112_s3 ====
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792787361.951483 3115903 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792787366.802195 3115903 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-043_cnn112_seed3         own CNN at 112 px, accuracy recipe       params=4724845   ep=82/107 train_acc=0.900 val_acc=0.799 mean_recall=0.811 min_rec=0.480 1415s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792788797.448287 3118376 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792788802.952051 3118376 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-044_vgg16_seed3          vgg16 from scratch, lr 0.001, accuracy r params=14721357  ep=70/95 train_acc=0.926 val_acc=0.750 mean_recall=0.759 min_rec=0.471 1389s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792790210.109674 3120654 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792790214.884690 3120654 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-044_resnet50_seed3       resnet50 from scratch, lr 0.0003, accura params=23614349  ep=62/87 train_acc=0.930 val_acc=0.805 mean_recall=0.810 min_rec=0.493 1704s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792791939.756511 3122851 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792791944.675041 3122851 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-044_inception_v3_seed3   inception_v3 from scratch, lr 0.0003, ac params=21829421  ep=39/64 train_acc=0.898 val_acc=0.797 mean_recall=0.812 min_rec=0.529 1377s
+end=2026-10-23T22:08:57+00:00 exit=0
