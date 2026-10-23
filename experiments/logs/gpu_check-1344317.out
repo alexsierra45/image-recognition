@@ -1,0 +1,38 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n2.hpc.lan job=1344317 gpus=0
+Fri Oct 23 12:46:09 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 545.23.08              Driver Version: 545.23.08    CUDA Version: 12.3     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-PCIE-40GB          On  | 00000000:D8:00.0 Off |                    0 |
+| N/A   26C    P0              33W / 250W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792759573.591473 1256446 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1792759574.338853 1256446 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792759580.396313 1256446 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1792759587.396733 1256446 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 38374 MB memory:  -> device: 0, name: NVIDIA A100-PCIE-40GB, pci bus id: 0000:d8:00.0, compute capability: 8.0
+I0000 00:00:1792759590.270693 1256446 cuda_dnn.cc:461] Loaded cuDNN version 92700
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+python 3.13.5 | tf 2.21.0 | keras 3.12.4 | backend tensorflow
+build {'cuda_compute_capabilities': ['sm_60', 'sm_70', 'sm_80', 'sm_89', 'compute_90'], 'cuda_version': '12.5.1', 'cudnn_version': '9', 'is_cuda_build': True}
+GPUs: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+20 conv 3x3 (64x224x224x3 -> 64): 0.613 s en /job:localhost/replica:0/task:0/device:GPU:0

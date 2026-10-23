@@ -1,5 +1,5 @@
 # Dataset (se descarga del enlace del enunciado)
-xview_recognition/
+xview_recognition
 
 # Pesos y predicciones: pesados y regenerables
 *.keras
@@ -18,7 +18,7 @@ __pycache__/
 .claude/settings.local.json
 
 # Caché de imágenes en .npy (se regenera desde el dataset, CHG-007)
-cache/
+cache
 
 # Paquetes de Overleaf de las entregas (se regeneran con make bundle)
 reports/*/*.zip

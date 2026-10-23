@@ -18,14 +18,14 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 | | |
 |---|---|
 | Etapa del curso | **Entrega 3: CNN propias frente a arquitecturas conocidas, desde cero** (plan en DEC-017). Entregas 1 y 2 cerradas (etiquetas `delivery-01`, `delivery-02`) |
-| Entorno | WSL2, `.venv` con TF 2.21 en **GPU** (CHG-006); caché `uint8` del dataset y barridos con `sweep.py` (CHG-007) |
+| Entorno | **Magerit** (CHG-029): `.venv` con Python 3.13.5 y TF 2.21; runs por SLURM en `standard-gpu` (`slurm/run.sbatch`); GPU verificada (A100, trabajo 1344317). Antes, WSL2 con una RTX 4050 (CHG-006). Caché `uint8` (en SCRATCH) y barridos con `sweep.py` (CHG-007) |
 | Mejor experimento | **EXP-035_shift2**, la CNN propia final de la entrega 3: 32×32, 4 bloques 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32-64-128-256) + MaxPool, GAP → `Dense(13)`; logit adjustment τ 1; rotaciones + desplazamientos ±2 px; Adam lr 2,55e-3, β₁ 0,95, batch 128. Mejor ffNN: EXP-018 (etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
 | Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrenaba `ffNN_example.ipynb` hasta CHG-019 (versión en el commit `d557b09`). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
 | Mejor val accuracy / mean recall | **0,779 ± 0,007 / 0,821 ± 0,007** (EXP-035_shift2: CNN propia final, 3 semillas). InceptionV3 desde cero empata: 0,795 ± 0,002 / 0,825 ± 0,005 (EXP-039). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Entrega 3: decidir qué hacer con VGG16 tras el colapso de la semilla 3 (ISS-014: relanzar, plan B con BN o 2 semillas). Después, MixUp, comparación final (D3-8), notebook y documentos. IDEA-010 queda para la entrega 5 |
+| Próximo paso | **Primero, validar Magerit** (CHG-029): GPU ya verificada; falta medir la deriva frente a WSL con un run de referencia. Entrega 3: decidir qué hacer con VGG16 tras el colapso de la semilla 3 (ISS-014: relanzar, plan B con BN o 2 semillas). Después, MixUp, comparación final (D3-8), notebook y documentos. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -1206,6 +1206,21 @@ Fase 0 del plan (DEC-017). Ningún resultado anterior cambia: todas las claves n
   - Arquitecturas conocidas: 1,5-2 h por run.
   - Se ajusta el plan: la criba de lr de las conocidas se hará con un tope de épocas corto.
 
+### CHG-029: El proyecto pasa a Magerit (CeSViMa, UPM) con SLURM (2026-10-23)
+No cambia el modelo ni el código de entrenamiento: cambia dónde y cómo se ejecuta. Resuelve ISS-015. Las normas del centro están en la guía oficial [R53], y las reglas generales para Claude, en `~/.claude/CLAUDE.md` (fuera del repositorio).
+- **Entorno:** nodo de acceso `login3.hpc.lan` (CentOS 8, sin CUDA, 10 min de CPU por proceso [R53, "Descripción general"]). Los runs van por SLURM a las GPU de `standard-gpu`: A100, L40S o V100. La cuenta `y404` tiene acceso a `debug`, `debug-gpu`, `standard` y `standard-gpu`, y la QoS `standard` permite como máximo 8 GPU y 6 d 16 h (comprobado con `sacctmgr`).
+- **`.venv`** recreado con el módulo `Python/3.13.5-GCCcore-14.3.0` y un `requirements.txt` nuevo, con las versiones de CHG-006 fijadas: TF 2.21.0, Keras 3.12.4, cuDNN 9.27, rasterio 1.4.4, scikit-learn 1.7.2, matplotlib 3.10.9, pandas 2.3.3 y nbclient 0.11.0. Además, numpy 2.5.4 y pyyaml. `activate` añade al `LD_LIBRARY_PATH` las librerías CUDA de pip, igual que en CHG-006. Comprobado en el nodo de acceso con un entorno vacío (`env -i`), sin el módulo cargado: importan TF, Keras, rasterio, sklearn, pandas, nbclient y yaml.
+- **Datos:** `xview_recognition` es ahora un enlace simbólico a `/home/y404/PROJECT/xview_recognition`, el dataset del curso en solo lectura, para no gastar la cuota de 1 TB del grupo [R53]. `cache` es un enlace simbólico a `/home/y404/SCRATCH/y404034/image-recognition-cache` (permisos 700), porque la caché se regenera con `xview_data.load_cache` (CHG-007). En `.gitignore`, `xview_recognition/` y `cache/` pasan a `xview_recognition` y `cache`: el patrón con barra final no ignora un enlace simbólico.
+- **`slurm/run.sbatch`:** `python <args>` dentro del `.venv` en `standard-gpu`, con 1 L40S, 8 CPU, 4 GB por CPU y 2 h; se ajusta desde la línea de `sbatch`. El log va a `experiments/logs/%x-%j.out` y empieza con el nodo, la GPU, el driver y el commit. Sirve tanto para `tools/run_notebook.py` como para `sweep.py`.
+- **`slurm/gpu_check.sbatch`:** prueba de 10 min en `debug-gpu` que imprime las versiones, `nvidia-smi` y las GPU que ve TF, y cronometra una convolución. **Ejecutada:** trabajo `1344317`, COMPLETED en 26 s en `r2n2`; log en `experiments/logs/gpu_check-1344317.out`.
+  - SLURM asignó una A100-PCIE-40GB con `--gres=gpu:1`. El driver es el 545.23.08 (CUDA 12.3).
+  - TF 2.21.0 está compilado con CUDA 12.5.1 y las librerías de pip son de CUDA 12.9. Aun así, `list_physical_devices('GPU')` devuelve la GPU y 20 Conv2D 3×3 (64×224×224×3 → 64) tardan 0,61 s en `GPU:0`.
+  - El aviso `Could not load symbol cuStreamGetGreenCtx` aparece porque ese símbolo no existe en el driver 12.3, y no impidió ejecutar en GPU. Funciona gracias a la compatibilidad entre versiones menores de CUDA 12 (NVIDIA, *CUDA Compatibility*).
+  - Riesgo no comprobado: si algo compila PTX con el `ptxas` 12.9 de pip (XLA, `jit_compile`), el driver 12.3 podría rechazarlo. Ahora no aplica, porque `enable_op_determinism` desactiva `jit_compile` (DEC-018).
+- **`tools/setup.sh`** ejecutado: el hook pre-commit y el textconv de notebooks vuelven a estar activos.
+- **`CLAUDE.md`:** se reescribe la sección "Entorno" (Magerit, venv, SLURM, enlaces; WSL queda como antecedente) y la forma de ejecutar el notebook sin interfaz.
+- **Comparabilidad con los runs de WSL (EXP-001..EXP-039):** con otra GPU y otro numpy no se espera reproducir los resultados bit a bit, porque `enable_op_determinism` solo garantiza el determinismo con el mismo hardware y software [R20]. Hay que comparar dentro de un mismo entorno, o medir la deriva con un run de referencia (p. ej. relanzar `EXP-035_shift2` con la semilla 1). Los tiempos por época de DEC-018 también quedan por volver a medir.
+
 ---
 
 ## Incidencias (ISS)
@@ -1258,6 +1273,14 @@ EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlate
 - **Causa probable:** el mismo colapso que EXP-038 vio con lr 3e-4 y 3e-3: VGG16 sin BatchNorm solo entrena en una ventana estrecha de lr, y 1e-3 está en el borde de esa ventana, de modo que depende de la inicialización. Es el problema de entrenar VGG profundas desde cero sin normalización [R41], que BN resuelve [R6].
 - **Impacto:** VGG16 queda con 2 semillas válidas en EXP-039. Se cumple la condición que EXP-038 fijó para el plan B (añadir la variante con BN).
 - **Pendiente de decisión del usuario:** relanzar la semilla 3 (~1-1,5 h; no arregla la fragilidad), aplicar el plan B con BN, o dejar VGG16 con 2 semillas y el colapso documentado.
+
+### ISS-015: El entorno del proyecto no funcionaba en Magerit · resuelta (→ CHG-029)
+- **Fecha:** 2026-10-23. Al clonar el repositorio en Magerit:
+  - **El `.venv` era de Python 3.14.2 y solo tenía el kernel de Jupyter.** PyPI no tiene TensorFlow para 3.14 (`pip index versions tensorflow` → "No matching distribution"), así que la celda 1 fallaba en VS Code con `ModuleNotFoundError: No module named 'tensorflow'`, y esa salida quedó guardada en el notebook de trabajo.
+  - **Faltaba el dataset `xview_recognition/`.**
+  - **El primer `pip install` falló** con `OSError: [Errno 28] No queda espacio en el dispositivo`: `/tmp` del nodo de acceso es un disco local de 8 GB con 1,2 GB libres. Se resolvió con `TMPDIR` en SCRATCH.
+  - **El módulo `Python/3.12.3` no lleva RPATH:** su venv no arranca sin el módulo cargado (`libpython3.12.so.1.0: cannot open shared object file`), así que no sirve como kernel de VS Code. 3.13.5 sí lleva RPATH (`readelf -d`) y tiene TF 2.21.
+- **Efecto secundario:** la caché de pip llegó a 4,5 GB en `~/.cache/pip`, que cuenta en la cuota del grupo. Se vació con `pip cache purge`.
 
 ---
 
@@ -1509,6 +1532,7 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
 - **[R50]** Yun, Han, Oh, Chun, Choe, Yoo (2019). *CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features*. ICCV.
 - **[R51]** Menon, Jayasumana, Rawat, Jain, Veit, Kumar (2021). *Long-tail learning via logit adjustment*. ICLR.
 - **[R52]** Luo, Li, Urtasun, Zemel (2016). *Understanding the Effective Receptive Field in Deep Convolutional Neural Networks*. NeurIPS. (el campo receptivo efectivo es mucho menor que el teórico)
+- **[R53]** CeSViMa (UPM). *Guía de usuario de Magerit*: descripción general, ejecución de trabajos, aplicaciones y preguntas frecuentes. https://docs.cesvima.upm.es/magerit/ (consultada el 2026-10-23)
 
 ---
 

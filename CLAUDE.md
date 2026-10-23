@@ -13,12 +13,20 @@ Proyecto de la asignatura de Visión por Computador (MUIA), trabajo "xview_recog
 Esta carpeta es la raíz del proyecto. **No usar material de la carpeta padre.** La documentación que haga falta la añade el usuario a [references/](references/README.md).
 
 ## Entorno
-- **Ahora (CHG-006)**: WSL2 (Ubuntu), proyecto en `~/muia/vision-computer/image-recognition`. Kernel = `.venv/` de esta carpeta (Python 3.10, TF 2.21 con CUDA, Keras 3.12, backend TensorFlow) y **GPU RTX 4050 (6 GB)**. La celda 1 original ya detecta la GPU. `.venv/bin/activate` exporta `LD_LIBRARY_PATH` con las librerías CUDA de pip: activar siempre el `.venv` (`source .venv/bin/activate`) antes de ejecutar Python, o TF no verá la GPU.
-- Para recrear el `.venv`: `python3 -m venv .venv`, `pip install "tensorflow[and-cuda]" rasterio scikit-learn matplotlib pandas ipykernel nbclient nbformat`, y añadir a `activate` el `export LD_LIBRARY_PATH` de CHG-006.
-- El backend torch de CHG-003/DEC-004 (Windows) ya no se usa.
-- **Caché** (CHG-007): `cache/<split>_<res>.npy` (`uint8`, no versionado), creada por `xview_data.load_cache`. Con la caché, una época a 224 tarda ~19 s; a resoluciones bajas con batch 16 el límite es la sobrecarga por paso (~6 ms). WSL tiene 7,6 GB de RAM: la caché de 224 (2,8 GB) se lee con memmap.
-- **Barridos** (DEC-006): `sweep.py phaseN` → `experiment_utils.run_experiment` → `experiments/experiments.csv`, `experiments/history/`, `experiments/models/`, `experiments/plots/`. Lanzarlos en segundo plano con un log en `experiments/logs/`.
-- Dataset en `xview_recognition/` (no versionado): 18 746 imágenes de train, `uint8` en [0, 255], muy desbalanceado (Building 3 594, Helipad 111). Las rutas del notebook son relativas a esta carpeta.
+- **Ahora (CHG-029): supercomputador Magerit (CeSViMa, UPM)**, proyecto en `~/image-recognition`. Las reglas generales de Magerit están en `~/.claude/CLAUDE.md`. **Nada de entrenar en el nodo de acceso** (`login*`: sin CUDA, 10 min de CPU por proceso). Todo run va por SLURM y **cada `sbatch` necesita la autorización del usuario**.
+- **`.venv`:** módulo `Python/3.13.5-GCCcore-14.3.0` (tiene RPATH, así que el venv arranca sin cargar el módulo y vale como kernel de VS Code) + `requirements.txt` (TF 2.21, Keras 3.12.4, mismas versiones que CHG-006).
+  - Para recrearlo: `module load apps/2021 Python/3.13.5-GCCcore-14.3.0 && python -m venv .venv && TMPDIR=/home/y404/SCRATCH/y404034/tmp .venv/bin/pip install --no-compile -r requirements.txt`, y después añadir a `activate` el `export LD_LIBRARY_PATH` de CHG-006.
+  - Activarlo siempre (`source .venv/bin/activate`) antes de ejecutar Python.
+- **Lanzar runs:**
+  - `sbatch slurm/run.sbatch <script> <args>`: standard-gpu, 1 L40S, 8 CPU, 32 GB, 2 h; se ajusta con opciones de `sbatch`.
+  - Notebook: `sbatch --job-name=EXP-0NN slurm/run.sbatch tools/run_notebook.py xview_recognition.ipynb --python .venv/bin/python`.
+  - Barrido: `sbatch --job-name=sweep slurm/run.sbatch sweep.py phaseN`.
+  - Logs en `experiments/logs/<job>-<id>.out`. Seguimiento con `squeue -u $USER`, `sacct -j <id>` y `history.csv` del run.
+  - Comprobar la GPU: `sbatch slurm/gpu_check.sbatch` (debug-gpu, 10 min).
+- **Dataset:** `xview_recognition` es un enlace simbólico a `/home/y404/PROJECT/xview_recognition` (solo lectura, publicado por el profesor; no copiarlo, la cuota de 1 TB es del grupo). 18 746 imágenes de train, `uint8` en [0, 255], muy desbalanceado (Building 3 594, Helipad 111). Las rutas del notebook son relativas a esta carpeta.
+- **Caché** (CHG-007): `cache/<split>_<res>.npy` (`uint8`, no versionado), creada por `xview_data.load_cache`. `cache` es un enlace simbólico a `/home/y404/SCRATCH/y404034/image-recognition-cache`: la caché se puede regenerar y en SCRATCH no ocupa la cuota del proyecto. En WSL una época a 224 tardaba ~19 s; en Magerit está *pendiente de medir*.
+- **Barridos** (DEC-006): `sweep.py phaseN` → `experiment_utils.run_experiment` → `experiments/experiments.csv`, `experiments/history/`, `experiments/models/`, `experiments/plots/`.
+- **Antes (CHG-006, hasta 2026-10-22):** WSL2 con una RTX 4050 de 6 GB y Python 3.10; los runs EXP-001..EXP-039 se hicieron ahí. El backend torch de CHG-003/DEC-004 (Windows) ya no se usa.
 
 ## Regla principal: la bitácora
 [LOGBOOK.md](LOGBOOK.md) es la memoria del proyecto y la fuente de verdad. El usuario quiere que no se pierda nada.
@@ -38,7 +46,7 @@ Para proponer los siguientes pasos, usar el skill `next-ideas`.
 - El usuario suele tener el notebook abierto en VS Code: al editarlo desde fuera, avisarle de que lo recargue.
 - No cambiar el modelo ni el entrenamiento sin que el usuario lo pida: proponer primero (como IDEA) y editar después.
 - `git diff` muestra solo el código de las celdas (textconv): usarlo para ver qué cambió.
-- **Ejecutar un experimento sin interfaz** (CHG-005): `source .venv/bin/activate && python tools/run_notebook.py xview_recognition.ipynb --python .venv/bin/python`, en segundo plano. Para seguir el progreso: el log por celdas que imprime y `experiments/runs/<run_id>/history.csv` (una línea por época). Un run de EXP-000 tardó ~75 min en CPU en Windows (ISS-005); con la caché y la GPU, minutos.
+- **Ejecutar un experimento sin interfaz** (CHG-005, CHG-029): `tools/run_notebook.py` dentro de un trabajo de SLURM (ver "Entorno"), nunca en el nodo de acceso. Para seguir el progreso: el log por celdas, que queda en `experiments/logs/`, y `experiments/runs/<run_id>/history.csv` (una línea por época). El kernel de VS Code corre en el nodo de acceso: sirve para leer y editar, no para entrenar.
 
 ## Entregas (informe + slides para Overleaf)
 - Sistema en `reports/` (CHG-011): `make bundle D=NN` regenera macros, tablas y figuras desde `experiments/` (solo lectura), instala `drafts/` en `reports/overleaf/delivery_NN/sections/` sin pisar ediciones y genera el zip. Nueva entrega: comando `/new-delivery <n> <baseline>`.
