@@ -707,6 +707,30 @@ for _s in SEEDS:   # one SLURM job per seed: sbatch ... slurm/run.sbatch sweep.p
     globals()['d3acc_32_s%d' % _s] = lambda s=_s: d3acc_32([s])
 
 
+# EXP-040..EXP-042 (3 seeds, monitor val_accuracy): no treatment 0.779 +- 0.004; oversampling 0.5 ties (0.777, mixed signs);
+# logit adjustment -0.9 pp in all 3 seeds (0.770); rotations + shifts +-2 px +1.1 pp in all 3 seeds (0.790 +- 0.003), gap
+# 12.3 -> 8.5 pp. FINAL OWN CNN (32 px, accuracy): EXP-042_shift2. The 112-px recipe is D3_FINAL112 without logit adjustment.
+D3A_FINAL32 = merge_cfg(D3A_B4_128, **D3_REG['shift2'])
+D3A_FINAL112 = merge_cfg(D3A_FINAL32, res=112, conv_blocks=D3_DEPTHS[5], augment=['rot90', 'shift7'], batch_size=64,
+                         optimizer={'lr': 1.8e-3})
+
+
+def d3acc_112(seeds=SEEDS):
+    # EXP-043: the own CNN at 112 px with the accuracy recipe (EXP-037 without logit adjustment). EXP-044: VGG16, ResNet50 and
+    # InceptionV3 from scratch with that recipe and the lrs of EXP-038 (unchanged by accuracy, DEC-019). One SLURM job per
+    # seed, so the four models of a seed share the GPU and the comparison between them is paired.
+    for seed in seeds:
+        run_isolated(seeded('EXP-043_cnn112', seed), 'EXP-043', 'd3acc', 'own CNN at 112 px, accuracy recipe',
+                     dict(D3A_FINAL112, seed=seed))
+        for arch in KNOWN:
+            run_isolated(seeded('EXP-044_%s' % arch, seed), 'EXP-044', 'd3acc', '%s from scratch, lr %g, accuracy recipe' % (arch, KNOWN_LR[arch]),
+                         merge_cfg(D3A_FINAL112, arch=arch, seed=seed, optimizer={'lr': KNOWN_LR[arch]}))
+
+
+for _s in SEEDS:
+    globals()['d3acc_112_s%d' % _s] = lambda s=_s: d3acc_112([s])
+
+
 def magerit_ref():
     # CHG-029: EXP-035_shift2 (seed 1, run on WSL / RTX 4050) repeated unchanged on Magerit, to measure the drift that
     # the new GPU and software (numpy 2.5, Python 3.13) introduce before comparing new runs with the old ones.

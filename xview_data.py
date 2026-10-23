@@ -5,6 +5,7 @@ stored as uint8 in cache/<split>_<res>.npy and memory-mapped afterwards (IDEA-00
 """
 import json
 import os
+import socket
 import warnings
 
 import numpy as np
@@ -67,7 +68,8 @@ def _resize(batch, res):
 def _build_cache(path, filenames, res, chunk=512):
     os.makedirs(CACHE_DIR, exist_ok=True)
     src_224 = os.path.join(CACHE_DIR, os.path.basename(path).replace('_%d.npy' % res, '_224.npy'))
-    tmp = path + '.tmp.npy'
+    # one temp file per builder (ISS-016): concurrent SLURM jobs build identical bytes and the last os.replace wins
+    tmp = '%s.%s-%d.tmp.npy' % (path, socket.gethostname(), os.getpid())
     arr = np.lib.format.open_memmap(tmp, mode='w+', dtype=np.uint8, shape=(len(filenames), res, res, 3))
     base = np.load(src_224, mmap_mode='r') if res != 224 and os.path.exists(src_224) else None
     for start in range(0, len(filenames), chunk):

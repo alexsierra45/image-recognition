@@ -1,0 +1,19 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n8.hpc.lan job=1344424 gres=3 commit=2847644 start=2026-10-23T16:57:38+00:00
+cmd: python sweep.py d3acc_32_s2
+name, memory.total [MiB], driver_version
+NVIDIA L40S, 46068 MiB, 545.23.08
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792774663.348384 4041321 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792774669.023580 4041321 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3acc_32_s2 ====
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+EXP-040_base_seed2           EXP-032_bs128, monitor val_accuracy      params=1178477   ep=46/71 train_acc=0.923 val_acc=0.776 mean_recall=0.785 min_rec=0.507 119s
+EXP-041_over0.5_seed2        imbalance on EXP-040: over0.5            params=1178477   ep=49/74 train_acc=0.921 val_acc=0.784 mean_recall=0.787 min_rec=0.407 121s
+EXP-041_logitadj1_seed2      imbalance on EXP-040: logitadj1          params=1178477   ep=72/97 train_acc=0.947 val_acc=0.770 mean_recall=0.809 min_rec=0.439 158s
+EXP-042_shift2_seed2         rot90 + shift2 on EXP-040                params=1178477   ep=55/80 train_acc=0.870 val_acc=0.793 mean_recall=0.810 min_rec=0.430 152s
+end=2026-10-23T17:07:10+00:00 exit=0
