@@ -1,0 +1,18 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792425288.540395    2154 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792425292.266392    2154 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_known ====
+skip EXP-039_vgg16
+skip EXP-039_resnet50
+skip EXP-039_inception_v3
+skip EXP-039_vgg16_seed2
+skip EXP-039_resnet50_seed2
+skip EXP-039_inception_v3_seed2
+skip EXP-039_vgg16_seed3
+skip EXP-039_resnet50_seed3
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792425298.569168    2230 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792425299.802667    2230 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-039_inception_v3_seed3   inception_v3 from scratch, lr 0.0003, fu params=21829421  ep=80/105 train_acc=0.983 val_acc=0.797 mean_recall=0.824 min_rec=0.484 8375s

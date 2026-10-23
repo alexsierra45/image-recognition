@@ -1,0 +1,66 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792334783.052716 1143918 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792334783.977623 1143918 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+==== d3_cnn112 ====
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792334785.717765 1143961 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792334787.040697 1143961 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-037_cnn112               final own-CNN recipe at 112 px, 5 blocks params=4724845   ep=31/56 train_acc=0.788 val_acc=0.759 mean_recall=0.790 min_rec=0.330 2992s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792337816.833426 1155870 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792337819.592338 1155870 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-037_cnn112_seed2         final own-CNN recipe at 112 px, 5 blocks params=4724845   ep=81/106 train_acc=0.878 val_acc=0.789 mean_recall=0.824 min_rec=0.398 5542s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792343394.094306 1177633 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792343396.462361 1177633 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-037_cnn112_seed3         final own-CNN recipe at 112 px, 5 blocks params=4724845   ep=77/102 train_acc=0.886 val_acc=0.793 mean_recall=0.827 min_rec=0.403 5414s
+==== d3_known_screen ====
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792348848.400111 1198834 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792348851.552440 1198834 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_vgg16_lr0.0003       vgg16 from scratch, lr 0.0003 (screen, < params=14721357  ep= 1/11 train_acc=0.066 val_acc=0.066 mean_recall=0.077 min_rec=0.000 763s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792349658.786857 1202041 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792349660.107421 1202041 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_vgg16_lr0.001        vgg16 from scratch, lr 0.001 (screen, <= params=14721357  ep=31/40 train_acc=0.783 val_acc=0.729 mean_recall=0.761 min_rec=0.353 2709s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792352411.875051 1212410 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792352415.584171 1212410 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_vgg16_lr0.003        vgg16 from scratch, lr 0.003 (screen, <= params=14721357  ep= 1/11 train_acc=0.177 val_acc=0.177 mean_recall=0.077 min_rec=0.000 752s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792353223.014291 1215645 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792353224.787016 1215645 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_resnet50_lr0.0003    resnet50 from scratch, lr 0.0003 (screen params=23614349  ep=31/40 train_acc=0.845 val_acc=0.787 mean_recall=0.824 min_rec=0.448 3475s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792356760.600714 1228500 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792356764.826915 1228500 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_resnet50_lr0.001     resnet50 from scratch, lr 0.001 (screen, params=23614349  ep=40/40 train_acc=0.715 val_acc=0.668 mean_recall=0.724 min_rec=0.226 3598s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792360424.216066 1241634 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792360428.722674 1241634 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_resnet50_lr0.003     resnet50 from scratch, lr 0.003 (screen, params=23614349  ep=40/40 train_acc=0.559 val_acc=0.543 mean_recall=0.565 min_rec=0.050 3463s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792363961.176959 1254525 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792363964.366112 1254525 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_inception_v3_lr0.0003 inception_v3 from scratch, lr 0.0003 (sc params=21829421  ep=33/40 train_acc=0.831 val_acc=0.753 mean_recall=0.781 min_rec=0.380 2794s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792366819.872361 1265167 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792366823.453524 1265167 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_inception_v3_lr0.001 inception_v3 from scratch, lr 0.001 (scr params=21829421  ep=37/40 train_acc=0.684 val_acc=0.661 mean_recall=0.700 min_rec=0.145 2770s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792369654.219963 1275778 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792369657.873894 1275778 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+EXP-038_inception_v3_lr0.003 inception_v3 from scratch, lr 0.003 (scr params=21829421  ep=38/40 train_acc=0.456 val_acc=0.449 mean_recall=0.483 min_rec=0.018 2771s

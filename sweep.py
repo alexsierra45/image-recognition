@@ -629,6 +629,57 @@ def d3_reg_confirm():
             merge_cfg(D3_LA, seed=seed, **combo))
 
 
+# EXP-035 (3 seeds): rotations + random shifts of +-2 px: 0.821 +- 0.007 (+1.8 pp), gap halved; AdamW +0.7 and erasing
+# +0.2 within noise; the combination adds nothing (EXP-036, 0.820). FINAL OWN CNN (32 px): EXP-035_shift2.
+D3_FINAL32 = merge_cfg(D3_LA, augment=['rot90', 'shift2'])
+# At 112 px: 5 blocks (EXP-031: depth needed for the receptive field), shifts scaled to the same 6 % of the side (+-7 px),
+# batch 64 for memory with the lr by the square-root rule (EXP-032: batch does not matter).
+D3_FINAL112 = merge_cfg(D3_FINAL32, res=112, conv_blocks=D3_DEPTHS[5], augment=['rot90', 'shift7'], batch_size=64,
+                        optimizer={'lr': 1.8e-3})
+KNOWN = ('vgg16', 'resnet50', 'inception_v3')
+
+
+def d3_cnn112():
+    # The final own-CNN recipe at 112 px, 3 seeds: the own CNN's entry in the comparison with the known architectures.
+    for seed in SEEDS:
+        run_isolated(seeded('EXP-037_cnn112', seed), 'EXP-037', 'd3', 'final own-CNN recipe at 112 px, 5 blocks',
+                     dict(D3_FINAL112, seed=seed))
+
+
+def d3_known_screen():
+    # Learning rate of each known architecture from scratch (DEC-015), same recipe as D3_FINAL112 (logit adjustment,
+    # rotations + shifts, batch 64). Short budget only to rank the lrs: up to 40 epochs, patience 10 / 4, seed 1.
+    for arch in KNOWN:
+        for lr in (3e-4, 1e-3, 3e-3):
+            run_isolated('EXP-038_%s_lr%g' % (arch, lr), 'EXP-038', 'd3', '%s from scratch, lr %g (screen, <= 40 ep)' % (arch, lr),
+                         merge_cfg(D3_FINAL112, arch=arch, epochs=40, es_patience=10, rlr_patience=4, optimizer={'lr': lr}))
+
+
+# EXP-037 (3 seeds): the own CNN at 112 px / 5 blocks: 0.814 +- 0.021, ties with 32 px (0.821) at 10x the cost per epoch.
+# EXP-038 (seed 1, <= 40 epochs): VGG16 only trains at lr 1e-3 (0.761; 3e-4 and 3e-3 collapse to one class from epoch 1);
+# ResNet50 and InceptionV3 are best at the lowest lr, 3e-4 (0.824, 0.781), the edge of the grid -> extend to 1e-4.
+
+
+def d3_known_screen_low():
+    for arch in ('resnet50', 'inception_v3'):
+        run_isolated('EXP-038_%s_lr0.0001' % arch, 'EXP-038', 'd3', '%s from scratch, lr 0.0001 (screen, <= 40 ep)' % arch,
+                     merge_cfg(D3_FINAL112, arch=arch, epochs=40, es_patience=10, rlr_patience=4, optimizer={'lr': 1e-4}))
+
+
+# EXP-038, extended (seed 1, <= 40 epochs): lr 1e-4 is worse than 3e-4 for ResNet50 (0.799 vs 0.824) and InceptionV3
+# (0.768 vs 0.781): 3e-4 is an interior optimum. Chosen: VGG16 1e-3, ResNet50 3e-4, InceptionV3 3e-4.
+KNOWN_LR = {'vgg16': 1e-3, 'resnet50': 3e-4, 'inception_v3': 3e-4}
+
+
+def d3_known():
+    # D3-8: each known architecture from scratch with its lr and the FULL recipe of the own CNN at 112 (D3_FINAL112:
+    # logit adjustment, rotations + shifts, patience 25 / 8, up to 300 epochs), 3 seeds. Seeds in the outer loop.
+    for seed in SEEDS:
+        for arch in KNOWN:
+            run_isolated(seeded('EXP-039_%s' % arch, seed), 'EXP-039', 'd3', '%s from scratch, lr %g, full recipe' % (arch, KNOWN_LR[arch]),
+                         merge_cfg(D3_FINAL112, arch=arch, seed=seed, optimizer={'lr': KNOWN_LR[arch]}))
+
+
 if __name__ == '__main__' and sys.argv[1:2] == ['--one']:   # one run in this process (run_isolated)
     import json
     run_experiment(*json.loads(sys.argv[2]))

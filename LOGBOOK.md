@@ -22,10 +22,10 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 | Mejor experimento | **EXP-035_shift2**, la CNN propia final de la entrega 3: 32×32, 4 bloques 2 × [Conv3×3 → BN → LeakyReLU 0,3] (32-64-128-256) + MaxPool, GAP → `Dense(13)`; logit adjustment τ 1; rotaciones + desplazamientos ±2 px; Adam lr 2,55e-3, β₁ 0,95, batch 128. Mejor ffNN: EXP-018 (etiqueta `ffnn-full-plan`) |
 | Entrega 2 (DEC-009) | Regularización; modelo `EXP-021_final` (BN + rotaciones de 90°): 0,643 ± 0,011 / 0,646 ± 0,015. **`ffNN_example.ipynb` entrena ahora este modelo** (CHG-019, run idéntico a la semilla 1). Documentos ampliados al nivel de la entrega 1 (CHG-020): paquete listo para Overleaf |
 | Entrega 1 (DEC-008) | Fases 0-5; modelo `EXP-010_bs256_sqrt_60ep` (0,616 ± 0,006 / 0,578 ± 0,007), el que entrenaba `ffNN_example.ipynb` hasta CHG-019 (versión en el commit `d557b09`). Documentos ampliados con las ediciones del usuario y la fase 4 (LeakyReLU) con figura (CHG-018) |
-| Mejor val accuracy / mean recall | **0,779 ± 0,007 / 0,821 ± 0,007** (EXP-035_shift2: CNN propia final, 3 semillas). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
+| Mejor val accuracy / mean recall | **0,779 ± 0,007 / 0,821 ± 0,007** (EXP-035_shift2: CNN propia final, 3 semillas). InceptionV3 desde cero empata: 0,795 ± 0,002 / 0,825 ± 0,005 (EXP-039). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Entrega 3: CNN propia a 112 px (EXP-037) y criba de lr de VGG16, ResNet50 e InceptionV3 (EXP-038). Después, 3 semillas de las conocidas, MixUp sobre ellas y comparación final. IDEA-010 queda para la entrega 5 |
+| Próximo paso | Entrega 3: decidir qué hacer con VGG16 tras el colapso de la semilla 3 (ISS-014: relanzar, plan B con BN o 2 semillas). Después, MixUp, comparación final (D3-8), notebook y documentos. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -70,6 +70,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-034 | 2026-10-18 | D3-6 | Desbalance: pesos raíz / inverso, sobremuestreo 0,5 / 1, logit adjustment | EXP-032_bs128 | 0,762 ± 0,015 (logit adj.) | **0,803 ± 0,007** (logit adj.) | `EXP-034_*` | ejecutado |
 | EXP-035 | 2026-10-18 | D3-7 | Regularizadores: criba con 1 semilla y las 3 mejores con 3 semillas | EXP-034_logitadj1 | 0,779 ± 0,007 (desplazamientos) | **0,821 ± 0,007** (desplazamientos ±2 px) | `EXP-035_*` | ejecutado |
 | EXP-036 | 2026-10-18 | D3-7 | AdamW + desplazamientos + borrado combinados | EXP-034_logitadj1 | 0,780 ± 0,013 | 0,820 ± 0,010 | `EXP-036_combo*` | ejecutado (no suma) |
+| EXP-037 | 2026-10-19 | D3-7 | Receta final de la CNN propia a 112 px (5 bloques, desplazamientos ±7 px, batch 64) | EXP-035_shift2 | 0,781 ± 0,018 | 0,814 ± 0,021 (empata con 32 px) | `EXP-037_cnn112*` | ejecutado |
+| EXP-038 | 2026-10-19 | D3-8 | Criba de lr de VGG16, ResNet50 e InceptionV3 desde cero a 112 px (1 semilla, ≤ 40 épocas) | EXP-037 | — | VGG16 1e-3: 0,761; ResNet50 3e-4: 0,824; InceptionV3 3e-4: 0,781 | `EXP-038_*` | ejecutado |
+| EXP-039 | 2026-10-19 | D3-8 | VGG16, ResNet50 e InceptionV3 desde cero, receta completa, 3 semillas | EXP-038 | 0,795 ± 0,002 (InceptionV3) | **0,825 ± 0,005** (InceptionV3; ResNet50 0,818, VGG16 0,758 con 2 semillas: ISS-014) | `EXP-039_*` | ejecutado (empate con la CNN propia) |
 
 ---
 
@@ -814,6 +817,66 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
     - Resultado: **mean recall 0,821 ± 0,007 y accuracy 0,779 ± 0,007**, frente a 0,646 / 0,643 de la ffNN de la entrega 2 (+17,5 y +13,6 pp).
 - **Siguiente paso:** la misma receta a 112 px con 5 bloques (EXP-037), para comparar en igualdad con las arquitecturas conocidas; después, la criba de lr de esas arquitecturas (EXP-038).
 
+### EXP-037: La CNN propia final a 112 px (entrega 3, D3-7)
+- **Fecha:** 2026-10-19 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-035_shift2` (32 px) · **Estado:** ejecutado
+- **Por qué:** las arquitecturas conocidas se comparan a 112 px (DEC-016), así que la CNN propia necesita también su versión a 112 para comparar en igualdad.
+- **Cambio:** la receta final llevada a 112 px.
+  - 5 bloques (32 → 512 filtros), que EXP-031 mostró necesarios por el campo receptivo a esa resolución.
+  - Desplazamientos ±7 px: el mismo 6 % del lado que ±2 px a 32.
+  - Batch 64 por memoria, con lr 1,8e-3 por la regla de la raíz; EXP-032 mostró que el batch no influye.
+  - 3 semillas, cada una en su propio proceso.
+- **Resultados:** mean recall 0,814 ± 0,021 (semillas 0,790 / 0,824 / 0,828), val acc 0,781 ± 0,018, min recall 0,377, brecha 7,0 pp; 4 724 845 parámetros; 52,8 s/época, frente a 4,9 a 32 px.
+- **Conclusión:**
+  - Empata con la versión de 32 px (0,821 ± 0,007), con más dispersión entre semillas y 10 veces más coste por época. Los desplazamientos también funcionan aquí: la celda 112/5 de EXP-031, sin desplazamientos ni logit adjustment, daba 0,788.
+  - **El modelo final de la CNN propia sigue siendo el de 32 px.** Este es su punto de comparación a 112 px con las arquitecturas conocidas.
+
+### EXP-038: Criba de lr de las arquitecturas conocidas desde cero (entrega 3, D3-8)
+- **Fecha:** 2026-10-19 · **Etapa:** CNN conocidas (entrega 3, DEC-015) · **Base:** la receta de `EXP-037` a 112 px (logit adjustment, rotaciones + desplazamientos ±7 px, Adam β₁ 0,95, batch 64) · **Estado:** ejecutado
+- **Por qué:** cada arquitectura tiene su lr óptima, y compararlas con una lr común castigaría a alguna. La criba solo ordena las lr: 1 semilla, como mucho 40 épocas y paciencias 10/4.
+- **Cambio:** lr ∈ {3e-4, 1e-3, 3e-3} para VGG16 [R41], ResNet50 [R42] e InceptionV3 [R38]. Como el óptimo de ResNet50 e InceptionV3 quedó en el borde de la rejilla, se añadió 1e-4 para las dos.
+- **Resultados** (val mean recall, semilla 1; entre paréntesis, mejor época / épocas):
+
+| Modelo (parámetros; s/época) | 1e-4 | 3e-4 | 1e-3 | 3e-3 |
+|---|---|---|---|---|
+| VGG16 (14,7 M; 67 s) | — | 0,077 (1/11) | **0,761** (31/40) | 0,077 (1/11) |
+| ResNet50 (23,6 M; 86 s) | 0,799 (36/40) | **0,824** (31/40) | 0,724 (40/40) | 0,565 (40/40) |
+| InceptionV3 (21,8 M; 68 s) | 0,768 (37/40) | **0,781** (33/40) | 0,700 (37/40) | 0,483 (38/40) |
+
+- **Conclusión:**
+  - **VGG16, sin BatchNorm, solo entrena en una ventana estrecha de lr.**
+    - Con 3e-4, la pérdida se queda plana en 2,314 desde la primera época, prácticamente la entropía de las clases (2,31): predice siempre la misma clase.
+    - Con 3e-3 diverge: la pérdida salta a 13,8 y la red queda muerta.
+    - Es el problema conocido de las VGG profundas sin BN, que sus autores sortearon inicializándolas desde redes menos profundas [R41], y que BatchNorm resolvió después [R6].
+    - Se mantiene el VGG16 de Keras sin BN, porque es el que tendrá pesos de ImageNet en la entrega 4 (DEC-015). Si alguna de las 3 semillas colapsa a 1e-3, se añadirá la variante con BN (plan B).
+  - **ResNet50 e InceptionV3 prefieren lr bajas,** con el óptimo en 3e-4 (1e-4 ya es peor). Las conexiones residuales [R42] y la BN de ambas las hacen entrenables en todo el rango, a diferencia de VGG16.
+  - **ResNet50 empata ya con la CNN propia** (0,824 con 1 semilla y presupuesto corto, frente a 0,821), con 20 veces más parámetros.
+  - **lr elegidas:** VGG16 1e-3, ResNet50 3e-4 e InceptionV3 3e-4.
+- **Siguiente paso:** EXP-039, 3 semillas con la receta completa.
+
+### EXP-039: Las arquitecturas conocidas desde cero con la receta completa (entrega 3, D3-8)
+- **Fecha:** 2026-10-19 · **Etapa:** CNN conocidas (entrega 3, DEC-015) · **Base:** EXP-038 (lr elegidas: VGG16 1e-3, ResNet50 3e-4, InceptionV3 3e-4) · **Estado:** ejecutado
+- **Por qué:** EXP-038 solo ordenaba las lr, con 1 semilla y como mucho 40 épocas. Para compararlas con la CNN propia a 112 px (EXP-037) hace falta el mismo presupuesto y varias semillas.
+- **Cambio:** el único factor respecto a EXP-038 es el presupuesto completo de `D3_FINAL112`: hasta 300 épocas, con paciencias 25 / 8 en lugar de 10 / 4. Se usan 3 semillas, cada run en su propio proceso, en `sweep.py d3_known`.
+- **Resultados** (validación, media ± σ entre semillas; brecha = train acc − val acc):
+
+| Modelo | Semillas válidas | Mean recall | Val acc | Min recall | Brecha | Épocas (mejor) |
+|---|---|---|---|---|---|---|
+| VGG16, lr 1e-3 | 2 de 3 (ISS-014) | 0,758 ± 0,003 | 0,724 ± 0,000 | 0,358 | 10,9 pp | 53 (28), 91 (66) |
+| ResNet50, lr 3e-4 | 3 | 0,818 ± 0,003 | 0,782 ± 0,009 | 0,391 | 9,6 pp | 63–89 (38–64) |
+| InceptionV3, lr 3e-4 | 3 | **0,825 ± 0,005** | **0,795 ± 0,002** | **0,468** | 16,8 pp | 85–105 (60–80) |
+| CNN propia a 112 px (EXP-037) | 3 | 0,814 ± 0,021 | 0,781 ± 0,018 | 0,377 | 7,0 pp | — |
+| CNN propia a 32 px (EXP-035_shift2) | 3 | 0,821 ± 0,007 | 0,779 ± 0,007 | — | — | — |
+
+  - Semillas de mean recall: VGG16 0,756 / 0,760 / colapso (0,077); ResNet50 0,822 / 0,818 / 0,815; InceptionV3 0,820 / 0,831 / 0,824.
+  - Coste: ResNet50 ~84 s/época, VGG16 e InceptionV3 ~67-79 s/época. El barrido entero duró ~14 h de GPU, contando el relanzamiento de ISS-013.
+  - Recall por clase (media de las semillas válidas): la clase más difícil es Truck en todas (VGG16 0,36, ResNet50 0,39, InceptionV3 0,47, CNN propia a 112 0,38), seguida de Bus y Dump truck. El min recall más alto de InceptionV3 es casi todo Truck.
+- **Conclusión:**
+  - **InceptionV3, ResNet50 y la CNN propia empatan en mean recall:** quedan dentro de ~1 pp, menos que el ruido entre semillas (σ hasta 2 pp en EXP-037). La CNN propia a 112 px tiene 4,7 M parámetros, unas 5 veces menos que ResNet50 (23,6 M) e InceptionV3 (21,8 M).
+  - **InceptionV3 destaca en la clase difícil:** Truck sube ~8 pp frente a ResNet50 y la CNN propia. Es la red que más sobreajusta (train acc 0,96, brecha 16,8 pp), así que su ventaja no viene de ajustar peor el train.
+  - **VGG16 queda claramente por detrás** (−6 pp) y es frágil: una de las 3 semillas colapsa a una sola clase con la misma lr que funciona en las otras dos (ISS-014). Era el escenario previsto en EXP-038 para el plan B, la variante con BatchNorm [R6].
+  - El ranking de EXP-038 se mantiene salvo InceptionV3, que con el presupuesto completo pasa de 0,781 a 0,825: con 40 épocas estaba cortada lejos de su mejor época (60-80).
+- **Siguiente paso:** decidir sobre VGG16 (relanzar la semilla 3, aplicar el plan B con BN o dejar las 2 semillas documentadas); después, MixUp y la comparación final de D3-8 para elegir el modelo del notebook.
+
 ---
 
 ## Registro de cambios (CHG)
@@ -1184,6 +1247,17 @@ Se vio al compilar por primera vez. `phase1_variants`, `augmentation_variants` y
 
 ### ISS-012: EXP-021 cambiaba dos factores a la vez y su ganancia se atribuía a «entrenar más» · resuelta (→ EXP-028, CHG-026)
 EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlateau (6 → 8) a la vez. Eso rompe la regla de un factor por experimento, y la bitácora, el informe y las slides atribuían la ganancia a un entrenamiento más largo. El usuario preguntó de dónde salía el salto. La ablación (EXP-028) lo atribuye entero a la paciencia de ReduceLROnPlateau.
+
+### ISS-013: Un reinicio de WSL cortó `EXP-039_inception_v3_seed3` a mitad de entrenamiento · resuelta (→ relanzado, EXP-039)
+- **Fecha:** 2026-10-19. El run empezó a las 16:51 y su último checkpoint es de las 17:32. WSL se reinició hacia las 17:50 (los procesos del sistema arrancan a las 17:51), por causa desconocida, y el proceso de `sweep.py d3_known` murió sin escribir su fila en `experiments.csv` ni su history.
+- **Impacto:** solo ese run. Como `run_isolated` lanza cada run en su propio proceso y `sweep.py` se salta los ids que ya están en el CSV, los 8 runs anteriores quedaron intactos.
+- **Solución:** relanzar `sweep.py d3_known` (log en `experiments/logs/d3_known_resume.log`). Se saltó los 8 runs hechos y entrenó el que faltaba desde cero, sobrescribiendo el checkpoint a medias; terminó a las 20:15 (105 épocas, 8 375 s). No se reanuda desde el checkpoint a mitad de run: el estado del optimizador y de los callbacks no se guarda, y reanudar cambiaría el run respecto a sus semillas hermanas.
+
+### ISS-014: `EXP-039_vgg16_seed3` colapsa a una sola clase con lr 1e-3 · abierta
+- **Fecha:** 2026-10-19. Con la misma lr y receta que las semillas 1 y 2 (0,756 / 0,760), la semilla 3 no aprende: la pérdida de train se queda plana en 2,314 desde la época 2, prácticamente la entropía de las clases (2,31), y la red predice siempre Excavator (val acc 0,042, mean recall 0,077 = 1/13). El early stopping la cortó en la época 26 con la mejor en la 1.
+- **Causa probable:** el mismo colapso que EXP-038 vio con lr 3e-4 y 3e-3: VGG16 sin BatchNorm solo entrena en una ventana estrecha de lr, y 1e-3 está en el borde de esa ventana, de modo que depende de la inicialización. Es el problema de entrenar VGG profundas desde cero sin normalización [R41], que BN resuelve [R6].
+- **Impacto:** VGG16 queda con 2 semillas válidas en EXP-039. Se cumple la condición que EXP-038 fijó para el plan B (añadir la variante con BN).
+- **Pendiente de decisión del usuario:** relanzar la semilla 3 (~1-1,5 h; no arregla la fragilidad), aplicar el plan B con BN, o dejar VGG16 con 2 semillas y el colapso documentado.
 
 ---
 
