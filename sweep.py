@@ -731,6 +731,19 @@ for _s in SEEDS:
     globals()['d3acc_112_s%d' % _s] = lambda s=_s: d3acc_112([s])
 
 
+def d3acc_vgg_bn(seeds=SEEDS):
+    # EXP-045 (plan B of EXP-038 / ISS-014): plain VGG16 collapsed to the majority class with the accuracy recipe (EXP-044,
+    # lr 1e-3, seeds 1 and 2 from epoch 1). Only change: BatchNorm after every convolution (architectures.vgg16_bn), which
+    # keeps the activations normalised and makes training far less sensitive to the lr (Ioffe & Szegedy 2015). Same lr.
+    for seed in seeds:
+        run_isolated(seeded('EXP-045_vgg16_bn', seed), 'EXP-045', 'd3acc', 'vgg16 + BN after every conv, lr 1e-3, accuracy recipe',
+                     merge_cfg(D3A_FINAL112, arch='vgg16_bn', seed=seed, optimizer={'lr': KNOWN_LR['vgg16']}))
+
+
+for _s in SEEDS:
+    globals()['d3acc_vgg_bn_s%d' % _s] = lambda s=_s: d3acc_vgg_bn([s])
+
+
 def magerit_ref():
     # CHG-029: EXP-035_shift2 (seed 1, run on WSL / RTX 4050) repeated unchanged on Magerit, to measure the drift that
     # the new GPU and software (numpy 2.5, Python 3.13) introduce before comparing new runs with the old ones.

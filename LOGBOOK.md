@@ -77,7 +77,8 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-041 | 2026-10-23 | D3-acc | Desbalance con criterio de accuracy: sobremuestreo 0,5 / logit adjustment | EXP-040 | 0,777 / 0,770 | 0,783 / 0,806 | `EXP-041_*` | ejecutado (ninguno se adopta) |
 | **EXP-042** | 2026-10-23 | D3-acc | **Rotaciones + desplazamientos ±2 px: CNN propia final a 32 px (DEC-019)** | EXP-040 | **0,790 ± 0,003** | 0,796 ± 0,013 | `EXP-042_shift2*` | ejecutado |
 | EXP-043 | 2026-10-23 | D3-acc | CNN propia a 112 px con la receta de accuracy | EXP-037 | — | — | `EXP-043_cnn112*` | pendiente |
-| EXP-044 | 2026-10-23 | D3-acc | VGG16 / ResNet50 / InceptionV3 desde cero con la receta de accuracy | EXP-039 | — | — | `EXP-044_*` | pendiente |
+| EXP-044 | 2026-10-23 | D3-acc | VGG16 / ResNet50 / InceptionV3 desde cero con la receta de accuracy | EXP-039 | — | — | `EXP-044_*` | en curso (VGG16 colapsa: 2 de 2) |
+| EXP-045 | 2026-10-23 | D3-acc | VGG16 con BN después de cada convolución (plan B, ISS-014) | EXP-044_vgg16 | — | — | `EXP-045_vgg16_bn*` | pendiente |
 
 ---
 
@@ -924,6 +925,13 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 - **Fecha:** 2026-10-23 · **Base:** EXP-039 · **Estado:** pendiente
 - **Cambio:** igual que EXP-043 (sin *logit adjustment*, monitor `val_accuracy`), con las lr de EXP-038, que el reanálisis no cambia: VGG16 1e-3, ResNet50 3e-4, InceptionV3 3e-4. 3 semillas cada una. Cada semilla es un trabajo de SLURM con los 4 modelos (EXP-043 + EXP-044), para que la comparación entre arquitecturas sea pareada en la misma GPU.
 - **Hipótesis:** el orden InceptionV3 > ResNet50 > CNN propia > VGG16 se mantiene. VGG16 puede volver a colapsar (ISS-014); si pasa, plan B con BN (aprobado por el usuario).
+- **Resultado parcial (VGG16):** `EXP-044_vgg16` y `EXP-044_vgg16_seed2` **colapsan a la clase mayoritaria desde la primera época**: val acc 0,191 (la proporción de Building, 19,2 %), mean recall 0,077 = 1/13. EarlyStopping los cortó en las épocas 26 y 27 (unos 400 s cada uno, trabajos `1344519` y `1344520`, en L40S). Con *logit adjustment* (EXP-039), las mismas semillas sí entrenaban (0,724). Sin él, la lr de 1e-3 queda fuera de la ventana en la que VGG16 sin normalización entrena (ISS-014, EXP-038), así que se activa el plan B (EXP-045). ResNet50 e InceptionV3 siguen en los mismos trabajos.
+
+### EXP-045: VGG16 con BatchNorm después de cada convolución (entrega 3, plan B de ISS-014)
+- **Fecha:** 2026-10-23 · **Base:** `EXP-044_vgg16` · **Estado:** pendiente
+- **Hipótesis:** VGG16 colapsa porque, sin normalización, la escala de las activaciones a lo largo de 13 convoluciones hace que el entrenamiento solo funcione en una ventana estrecha de lr, que depende de la inicialización (EXP-038: 3e-4 y 3e-3 colapsan; 1e-3 colapsa o no según la semilla y la pérdida). Simonyan y Zisserman ya tuvieron que inicializar sus redes profundas desde otras menos profundas para que entrenaran [R41]. BatchNorm normaliza la entrada de cada capa, permite lr más altas y reduce la dependencia de la inicialización [R6]. Se espera que las 3 semillas entrenen y queden cerca de la VGG16 con *logit adjustment* (≥ 0,72) o por encima.
+- **Cambio:** `arch` `vgg16` → `vgg16_bn` (CHG-033): mismas 13 convoluciones, BN después de cada una, sin sesgo en las convoluciones. Comprobado: es la única diferencia de configuración con `EXP-044_vgg16`. Misma lr, 1e-3. 3 semillas. **Éxito:** ninguna semilla colapsa.
+- **Nota para la entrega 4:** `keras.applications` no trae pesos de ImageNet para VGG16-BN. Por eso el transfer learning usará VGG16 sin BN, y la comparación entre entrenar desde cero y usar pesos preentrenados tendrá que decir qué variante es cada una.
 
 ## Registro de cambios (CHG)
 
@@ -1282,6 +1290,9 @@ Resuelve ISS-016. `experiment_utils.csv_lock()` crea `experiments.csv.lock` con 
 - **`xview_data._build_cache`:** el temporal pasa a llamarse `<split>_<res>.npy.<host>-<pid>.tmp.npy`, uno por proceso, y se sigue terminando con `os.replace`, que es atómico. Si varios trabajos construyen la misma caché a la vez, todos producen los mismos bytes (es determinista: el mismo `area` resize sobre la caché de 224) y nadie ve nunca un archivo a medias. Resuelve el segundo riesgo de ISS-016. No cambia el contenido de ninguna caché.
 - **`sweep.py`:** `D3A_FINAL32` (= configuración de EXP-042) y `D3A_FINAL112` (`D3_FINAL112` sin *logit adjustment*, con monitor `val_accuracy`). `d3acc_112` lanza EXP-043 y EXP-044 con `run_isolated`; `d3acc_112_s1`, `_s2` y `_s3` lanzan una semilla cada una.
 
+### CHG-033: VGG16 con BatchNorm (`arch='vgg16_bn'`) (2026-10-23)
+`architectures.vgg16_bn`: las 13 convoluciones de la configuración D de VGG [R41], igual que `keras.applications.VGG16` (anchuras 64-128-256-512-512, 3×3 `same`, ReLU, inicialización Glorot, MaxPool 2×2 después de cada bloque). Añade BatchNormalization después de cada convolución y quita el sesgo de las convoluciones, porque la β de la BN lo sustituye. La cabeza es GAP, como en las demás arquitecturas. `build_model` la acepta como `arch='vgg16_bn'`, y `sweep.d3acc_vgg_bn` (`_s1`..`_s3`) lanza EXP-045. **Verificado:** las 13 convoluciones coinciden con las de VGG16 en filtros, kernel, padding e inicialización, y solo difieren en `use_bias`. Tiene 13 BN y 5 MaxPool, y 14,73 M de parámetros frente a 14,72 M.
+
 ---
 
 ## Incidencias (ISS)
@@ -1335,6 +1346,7 @@ EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlate
 - **Impacto:** VGG16 queda con 2 semillas válidas en EXP-039. Se cumple la condición que EXP-038 fijó para el plan B (añadir la variante con BN).
 - **Pendiente de decisión del usuario:** relanzar la semilla 3 (~1-1,5 h; no arregla la fragilidad), aplicar el plan B con BN, o dejar VGG16 con 2 semillas y el colapso documentado.
 - **Decisión del usuario (2026-10-23):** no relanzar la semilla 3 con el criterio antiguo. VGG16 se reentrena con 3 semillas y el criterio de DEC-019, junto con ResNet50 e InceptionV3. Si alguna semilla vuelve a colapsar, se aplica el plan B (VGG16 con BN).
+- **2026-10-23:** con la receta de accuracy, VGG16 colapsa en las semillas 1 y 2 (EXP-044). Se prepara el plan B (EXP-045, CHG-033).
 
 ### ISS-015: El entorno del proyecto no funcionaba en Magerit · resuelta (→ CHG-029)
 - **Fecha:** 2026-10-23. Al clonar el repositorio en Magerit:

@@ -53,6 +53,22 @@ def custom_cnn(x, cfg):
     return x
 
 
+VGG16_BLOCKS = [(64, 2), (128, 2), (256, 3), (512, 3), (512, 3)]   # (filters, convs) of configuration D, Simonyan & Zisserman
+
+
+def vgg16_bn(x, cfg):
+    """VGG16 (the 13 convolutions of keras.applications.VGG16: same widths, 3x3 'same', ReLU, default glorot init, 2x2 max
+    pooling after each block) with BatchNorm after every convolution, the "vgg16_bn" variant (ISS-014: plain VGG16 only
+    trains from scratch in a narrow lr window). Conv bias dropped, as BN's beta replaces it. Global average pooling head."""
+    for filters, convs in VGG16_BLOCKS:
+        for _ in range(convs):
+            x = layers.Conv2D(filters, 3, padding='same', use_bias=False)(x)
+            x = layers.BatchNormalization()(x)
+            x = layers.Activation('relu')(x)
+        x = layers.MaxPooling2D(2)(x)
+    return layers.GlobalAveragePooling2D()(x)
+
+
 def known(name, x, res):
     """keras.applications backbone without its ImageNet classifier, from scratch, with global average pooling."""
     base = KNOWN[name](include_top=False, weights=None, input_shape=(res, res, 3), pooling='avg')

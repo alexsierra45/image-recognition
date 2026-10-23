@@ -41,7 +41,7 @@ DEFAULT_CFG = {
     # data
     'res': 224, 'stratify': True, 'seed': 1,
     # model
-    'arch': 'mlp',            # 'mlp' (deliveries 1-2) | 'cnn' (own CNN) | 'vgg16' | 'resnet50' | 'inception_v3' | 'mobilenet_v2'
+    'arch': 'mlp',            # 'mlp' (deliveries 1-2) | 'cnn' (own CNN) | 'vgg16' | 'vgg16_bn' | 'resnet50' | 'inception_v3' | 'mobilenet_v2'
     'norm': 'raw',            # 'raw' (pixels in [0, 255]) | 'scale' (Rescaling 1/255) | 'standardize' (per-channel train mean/std)
     'input_relu': False,      # the original Activation('relu') right after Flatten (ISS-001)
     'pool': 1,                # >1: AveragePooling2D(pool) right after the input scaling (res 32 + pool 2 = area to 16: EXP-027)
@@ -306,6 +306,8 @@ def build_model(cfg, data):
         x = layers.AveragePooling2D(cfg['pool'])(x)
     if cfg['arch'] == 'cnn':
         x = architectures.custom_cnn(x, cfg)
+    elif cfg['arch'] == 'vgg16_bn':
+        x = architectures.vgg16_bn(x, cfg)
     else:
         x = architectures.known(cfg['arch'], x, r // cfg['pool'] if cfg['pool'] > 1 else r)
     if cfg['head_dropout']:
