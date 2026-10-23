@@ -680,6 +680,33 @@ def d3_known():
                          merge_cfg(D3_FINAL112, arch=arch, seed=seed, optimizer={'lr': KNOWN_LR[arch]}))
 
 
+# ---------------------------------------------------------------- delivery 3 under val_accuracy (DEC-019)
+# The course evaluates with accuracy: the checkpoint, EarlyStopping and ReduceLROnPlateau follow val_accuracy from here
+# on, and decisions are taken on it. The post-hoc re-selection of delivery 3 by val_accuracy
+# (tools/reselect_by_accuracy.py) only changes the imbalance decision: logit adjustment, chosen for mean recall, is
+# -1.0 pp of accuracy below no treatment (EXP-034); every other decision (resolution, depth, batch, capacity, shifts,
+# lr of the known architectures) holds. So the recipe is rebuilt from EXP-032_bs128, the last base without treatment.
+D3A_B4_128 = merge_cfg(D3_B4_128, monitor='val_accuracy')
+D3A_IMBALANCE = {'over0.5': {'oversample': 0.5}, 'logitadj1': {'loss': 'logit_adjust', 'la_tau': 1.0}}
+
+
+def d3acc_32(seeds=SEEDS):
+    # EXP-040: EXP-032_bs128 with monitor val_accuracy (the only change). EXP-041: the two imbalance treatments that came
+    # out best on EXP-034 (oversampling 0.5 by accuracy, logit adjustment by mean recall) on EXP-040. EXP-042: rotations +
+    # shifts of +-2 px (the regulariser that won EXP-035) on EXP-040, run now because the post-hoc re-selection points to
+    # no treatment; if EXP-041 says otherwise, it is repeated on the winner.
+    for seed in seeds:
+        run(seeded('EXP-040_base', seed), 'EXP-040', 'd3acc', 'EXP-032_bs128, monitor val_accuracy', dict(D3A_B4_128, seed=seed))
+        for tag, ch in D3A_IMBALANCE.items():
+            run(seeded('EXP-041_%s' % tag, seed), 'EXP-041', 'd3acc', 'imbalance on EXP-040: %s' % tag,
+                dict(D3A_B4_128, seed=seed, **ch))
+        run(seeded('EXP-042_shift2', seed), 'EXP-042', 'd3acc', 'rot90 + shift2 on EXP-040', merge_cfg(D3A_B4_128, seed=seed, **D3_REG['shift2']))
+
+
+for _s in SEEDS:   # one SLURM job per seed: sbatch ... slurm/run.sbatch sweep.py d3acc_32_s1
+    globals()['d3acc_32_s%d' % _s] = lambda s=_s: d3acc_32([s])
+
+
 def magerit_ref():
     # CHG-029: EXP-035_shift2 (seed 1, run on WSL / RTX 4050) repeated unchanged on Magerit, to measure the drift that
     # the new GPU and software (numpy 2.5, Python 3.13) introduce before comparing new runs with the old ones.

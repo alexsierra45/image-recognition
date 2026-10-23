@@ -5,6 +5,7 @@ Outputs per run (id = '<EXP-###>_<variant>'):
   experiments/history/<id>.json        per-epoch history, config, per-class recall, confusion matrix
   experiments/models/<id>.keras        best checkpoint (not versioned)
 """
+import contextlib
 import copy
 import csv
 import json
@@ -404,6 +405,29 @@ class EpochLR(keras.callbacks.Callback):
         self.model.optimizer.learning_rate.assign(lr)
 
 
+@contextlib.contextmanager
+def csv_lock(timeout=600):
+    """Exclusive lock on experiments.csv across processes and nodes: mkdir is atomic on POSIX file systems (BeeGFS too),
+    unlike flock, which BeeGFS only honours cluster-wide if the server enables it. A lock older than `timeout` is stale."""
+    lock = CSV_PATH + '.lock'
+    while True:
+        try:
+            os.mkdir(lock)
+            break
+        except FileExistsError:
+            try:   # the holder may release it between mkdir and stat
+                if time.time() - os.path.getmtime(lock) > timeout:
+                    os.rmdir(lock)
+                    continue
+            except FileNotFoundError:
+                continue
+            time.sleep(0.2)
+    try:
+        yield
+    finally:
+        os.rmdir(lock)
+
+
 def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
     """Train one configuration, select the best epoch on validation (cfg['monitor']), log everything."""
     cfg = merge_cfg(DEFAULT_CFG, **cfg)
@@ -462,15 +486,18 @@ def run_experiment(run_id, exp_id, phase, change, cfg, notes='', verbose=0):
         json.dump({'id': run_id, 'exp_id': exp_id, 'phase': phase, 'change': change, 'config': cfg, 'history': hist,
                    'best_epoch': best + 1, 'val': val, 'train': {k: trn[k] for k in ('acc', 'mean_recall', 'recall', 'loss')},
                    'class_names': CLASS_NAMES}, ofs, indent=1)
-    rows = []
-    if os.path.exists(CSV_PATH):
-        with open(CSV_PATH, newline='') as ifs:
-            rows = [r for r in csv.DictReader(ifs) if r['id'] != run_id]   # re-running an id replaces its row
-    rows.append(row)
-    with open(CSV_PATH, 'w', newline='') as ofs:
-        w = csv.DictWriter(ofs, fieldnames=CSV_FIELDS)
-        w.writeheader()
-        w.writerows(rows)
+    with csv_lock():   # ISS-016: several SLURM jobs may finish at once; the read-modify-write must not interleave
+        rows = []
+        if os.path.exists(CSV_PATH):
+            with open(CSV_PATH, newline='') as ifs:
+                rows = [r for r in csv.DictReader(ifs) if r['id'] != run_id]   # re-running an id replaces its row
+        rows.append(row)
+        tmp = CSV_PATH + '.tmp'
+        with open(tmp, 'w', newline='') as ofs:
+            w = csv.DictWriter(ofs, fieldnames=CSV_FIELDS)
+            w.writeheader()
+            w.writerows(rows)
+        os.replace(tmp, CSV_PATH)
     print('%-28s %-40s params=%-9d ep=%2d/%2d train_acc=%.3f val_acc=%.3f mean_recall=%.3f min_rec=%.3f %.0fs'
           % (run_id, change[:40], row['params'], best + 1, len(vals), trn['acc'], val['acc'], val['mean_recall'],
              val['min_recall'], elapsed), flush=True)

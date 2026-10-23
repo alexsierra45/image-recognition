@@ -25,7 +25,7 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 | Mejor val accuracy / mean recall | **0,779 ± 0,007 / 0,821 ± 0,007** (EXP-035_shift2: CNN propia final, 3 semillas). InceptionV3 desde cero empata: 0,795 ± 0,002 / 0,825 ± 0,005 (EXP-039). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | Magerit validado (CHG-029: el run de referencia queda dentro del ruido, −0,34 pp). Entrega 3: decidir qué hacer con VGG16 tras el colapso de la semilla 3 (ISS-014: relanzar, plan B con BN o 2 semillas). Después, MixUp, comparación final (D3-8), notebook y documentos. IDEA-010 queda para la entrega 5 |
+| Próximo paso | **DEC-019: la referencia pasa a ser la val accuracy.** Primero, EXP-040..EXP-042 a 32 px. Después, la CNN propia a 112 px y VGG16/ResNet50/InceptionV3 con la receta nueva y 3 semillas (VGG16: plan B con BN si vuelve a colapsar, ISS-014). Magerit validado (CHG-029). Entrega 3: decidir qué hacer con VGG16 tras el colapso de la semilla 3 (ISS-014: relanzar, plan B con BN o 2 semillas). Después, MixUp, comparación final (D3-8), notebook y documentos. IDEA-010 queda para la entrega 5 |
 
 ## Índice de experimentos
 
@@ -73,6 +73,9 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 | EXP-037 | 2026-10-19 | D3-7 | Receta final de la CNN propia a 112 px (5 bloques, desplazamientos ±7 px, batch 64) | EXP-035_shift2 | 0,781 ± 0,018 | 0,814 ± 0,021 (empata con 32 px) | `EXP-037_cnn112*` | ejecutado |
 | EXP-038 | 2026-10-19 | D3-8 | Criba de lr de VGG16, ResNet50 e InceptionV3 desde cero a 112 px (1 semilla, ≤ 40 épocas) | EXP-037 | — | VGG16 1e-3: 0,761; ResNet50 3e-4: 0,824; InceptionV3 3e-4: 0,781 | `EXP-038_*` | ejecutado |
 | EXP-039 | 2026-10-19 | D3-8 | VGG16, ResNet50 e InceptionV3 desde cero, receta completa, 3 semillas | EXP-038 | 0,795 ± 0,002 (InceptionV3) | **0,825 ± 0,005** (InceptionV3; ResNet50 0,818, VGG16 0,758 con 2 semillas: ISS-014) | `EXP-039_*` | ejecutado (empate con la CNN propia) |
+| EXP-040 | 2026-10-23 | D3-acc | `monitor='val_accuracy'` (DEC-019) | EXP-032_bs128 | — | — | `EXP-040_base*` | pendiente |
+| EXP-041 | 2026-10-23 | D3-acc | Desbalance con criterio de accuracy: sobremuestreo 0,5 / logit adjustment | EXP-040 | — | — | `EXP-041_*` | pendiente |
+| EXP-042 | 2026-10-23 | D3-acc | Rotaciones + desplazamientos ±2 px | EXP-040 | — | — | `EXP-042_shift2*` | pendiente |
 
 ---
 
@@ -879,6 +882,22 @@ Las métricas de cada variante están en [experiments/experiments.csv](experimen
 
 ---
 
+### EXP-040: La CNN propia de EXP-032_bs128 con `monitor='val_accuracy'` (entrega 3, DEC-019)
+- **Fecha:** 2026-10-23 · **Etapa:** CNN (entrega 3) · **Base:** `EXP-032_bs128` · **Estado:** pendiente
+- **Hipótesis:** si el checkpoint, EarlyStopping y RLR siguen a la accuracy, la mejor época se elige por la métrica que se evalúa. Se espera una val acc ≥ 0,778 (la del reanálisis de la base) y algo menos de mean recall.
+- **Cambio:** `monitor`: `val_mean_recall` → `val_accuracy`. **Configuración:** 32 px, 4 bloques, batch 128, sin tratamiento del desbalance, rot90. 3 semillas.
+- **Fundamento:** DEC-019 [R8, §11.1].
+
+### EXP-041: Desbalance con el criterio de accuracy (entrega 3, DEC-019)
+- **Fecha:** 2026-10-23 · **Base:** EXP-040 · **Estado:** pendiente
+- **Hipótesis:** con accuracy, ningún tratamiento supera a la base. El sobremuestreo 0,5 empata (0,776 en el reanálisis) y el *logit adjustment* pierde ~1 pp, porque optimiza el error balanceado [R51].
+- **Cambio:** un tratamiento por variante: `oversample` 0,5 o `logit_adjust` τ 1. 3 semillas cada uno. **Éxito:** solo se adopta un tratamiento si mejora la val acc media por encima del ruido (σ ≈ 0,5 pp).
+
+### EXP-042: Desplazamientos ±2 px sobre la base sin tratamiento (entrega 3, DEC-019)
+- **Fecha:** 2026-10-23 · **Base:** EXP-040 · **Estado:** pendiente
+- **Hipótesis:** el regularizador que ganó EXP-035 (sobre *logit adjustment*: +0,4 pp de accuracy en el reanálisis) también ayuda sin tratamiento del desbalance. La invariancia a traslaciones pequeñas encaja con objetos centrados con un error de recorte de unos pocos píxeles (EXP-035).
+- **Cambio:** `augment`: rot90 → rot90 + shift2. 3 semillas. Se lanza en paralelo con EXP-041, porque el reanálisis apunta a la base sin tratamiento. Si EXP-041 elige un tratamiento, se repite sobre él.
+
 ## Registro de cambios (CHG)
 
 ### CHG-001: Infraestructura de la bitácora (2026-10-02)
@@ -1225,6 +1244,13 @@ No cambia el modelo ni el código de entrenamiento: cambia dónde y cómo se eje
   - **Conclusión:** como se esperaba [R20], el run no coincide bit a bit (otra trayectoria de entrenamiento), pero las métricas quedan dentro del ruido entre semillas (σ ≈ 0,7 pp en EXP-035). **Los runs de Magerit se pueden comparar con los de WSL** al nivel de varias semillas. Para comparaciones finas, conviene que la base y la variante corran en el mismo entorno.
   - **Tiempos:** 4,17 s/época frente a 5,17 en la RTX 4050, solo ×1,24 más rápido: a 32 px y batch 128 domina la sobrecarga por paso, no el cómputo (ver CHG-007). Construir la caché tardó unos 27 min (de 12:52 a 13:19), frente a 43 s en WSL. Leer los 18 746 TIF uno a uno desde BeeGFS es lento, pero solo pasa una vez: la caché queda en SCRATCH. **Riesgo:** si SCRATCH se purga, el siguiente run vuelve a tardar ~30 min más.
 
+### CHG-030: Reanálisis por val accuracy y fases nuevas de `sweep.py` (2026-10-23)
+- **`tools/reselect_by_accuracy.py [fase ...]`:** para cada run, toma la época con la `val_accuracy` máxima del historial y la compara con la que se eligió al entrenar. Agrega por variante (el id sin `_seedN`), con media ± desviación entre semillas. Escribe `experiments/reselect_by_accuracy.csv` (por variante) y `experiments/reselect_by_accuracy_runs.csv` (por run). Resultados en DEC-019.
+- **`sweep.py`:** `D3A_B4_128` es `D3_B4_128` con `monitor='val_accuracy'`, y `d3acc_32` lanza EXP-040..EXP-042. `d3acc_32_s1`, `_s2` y `_s3` lanzan una semilla cada una, para repartirlas en trabajos de SLURM distintos. Antes de lanzarlos se comprobó contra `experiments.csv` (configuraciones fusionadas con `DEFAULT_CFG`) que EXP-040 solo cambia `monitor` respecto a `EXP-032_bs128` y que EXP-042 solo cambia `augment` respecto a EXP-040.
+
+### CHG-031: Cerrojo para escribir `experiments.csv` desde varios trabajos (2026-10-23)
+Resuelve ISS-016. `experiment_utils.csv_lock()` crea `experiments.csv.lock` con `os.mkdir`, que es atómico en POSIX y también en BeeGFS. No se usa `flock` porque BeeGFS solo lo respeta entre nodos si el servidor lo activa. El cerrojo envuelve la lectura, la modificación y la escritura del CSV. La escritura va a `experiments.csv.tmp` y después se hace `os.replace`, así que el CSV nunca queda a medias. Un cerrojo con más de 10 min se considera abandonado. **Verificado:** con 8 procesos × 20 escrituras simultáneas sobre BeeGFS (`SCRATCH`) se obtienen 160 de 160 filas, dos veces. La primera versión perdía 20 filas: si el cerrojo se liberaba entre `mkdir` y `getmtime`, saltaba `FileNotFoundError` y el proceso moría. Se corrigió antes de usarla. No cambia ningún resultado.
+
 ---
 
 ## Incidencias (ISS)
@@ -1277,6 +1303,7 @@ EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlate
 - **Causa probable:** el mismo colapso que EXP-038 vio con lr 3e-4 y 3e-3: VGG16 sin BatchNorm solo entrena en una ventana estrecha de lr, y 1e-3 está en el borde de esa ventana, de modo que depende de la inicialización. Es el problema de entrenar VGG profundas desde cero sin normalización [R41], que BN resuelve [R6].
 - **Impacto:** VGG16 queda con 2 semillas válidas en EXP-039. Se cumple la condición que EXP-038 fijó para el plan B (añadir la variante con BN).
 - **Pendiente de decisión del usuario:** relanzar la semilla 3 (~1-1,5 h; no arregla la fragilidad), aplicar el plan B con BN, o dejar VGG16 con 2 semillas y el colapso documentado.
+- **Decisión del usuario (2026-10-23):** no relanzar la semilla 3 con el criterio antiguo. VGG16 se reentrena con 3 semillas y el criterio de DEC-019, junto con ResNet50 e InceptionV3. Si alguna semilla vuelve a colapsar, se aplica el plan B (VGG16 con BN).
 
 ### ISS-015: El entorno del proyecto no funcionaba en Magerit · resuelta (→ CHG-029)
 - **Fecha:** 2026-10-23. Al clonar el repositorio en Magerit:
@@ -1285,6 +1312,10 @@ EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlate
   - **El primer `pip install` falló** con `OSError: [Errno 28] No queda espacio en el dispositivo`: `/tmp` del nodo de acceso es un disco local de 8 GB con 1,2 GB libres. Se resolvió con `TMPDIR` en SCRATCH.
   - **El módulo `Python/3.12.3` no lleva RPATH:** su venv no arranca sin el módulo cargado (`libpython3.12.so.1.0: cannot open shared object file`), así que no sirve como kernel de VS Code. 3.13.5 sí lleva RPATH (`readelf -d`) y tiene TF 2.21.
 - **Efecto secundario:** la caché de pip llegó a 4,5 GB en `~/.cache/pip`, que cuenta en la cuota del grupo. Se vació con `pip cache purge`.
+
+### ISS-016: Varios trabajos pueden perder filas de `experiments.csv` · resuelta (→ CHG-031)
+- **Fecha:** 2026-10-23, detectada al leer el código antes de lanzar trabajos en paralelo en Magerit. `run_experiment` lee todo el CSV, añade la fila y lo reescribe. Si dos procesos lo hacen a la vez, la escritura del segundo borra la fila del primero. Hasta ahora no ocurría porque los runs eran secuenciales en una sola GPU. El historial (`history/<id>.json`) va en un archivo por run y no se ve afectado, así que una fila perdida se podría reconstruir.
+- **Riesgo parecido sin resolver:** `xview_data._build_cache` usa un temporal con nombre fijo (`<split>_<res>.npy.tmp.npy`). Dos trabajos que construyan la misma caché a la vez se pisarían. Por ahora se evita en la práctica: la caché de cada resolución se construye en un único trabajo antes de lanzar otros en paralelo (las de 32 y 224 ya existen).
 
 ---
 
@@ -1479,6 +1510,19 @@ El usuario aporta el enunciado de las cinco entregas: (1) ffNN: arquitectura, op
   - La optimización (lr y batch) va después, sobre la celda ganadora.
   - Anchura, tipo de reducción espacial y cabeza siguen en la fase de capacidad.
 - **Coste:** unas 11 h de GPU (18 runs nuevos, cada uno en su propio proceso).
+
+### DEC-019: La referencia de validación pasa a ser la accuracy, no el mean recall (2026-10-23)
+- **Qué se decide:** desde EXP-040, el checkpoint, EarlyStopping y ReduceLROnPlateau vigilan `val_accuracy` (`monitor='val_accuracy'`), y las decisiones entre variantes se toman con la val accuracy media de 3 semillas. El mean recall se sigue registrando como diagnóstico de las clases pequeñas.
+- **Por qué:** lo pide el curso, que evalúa con accuracy. La métrica que se optimiza al elegir modelos debe ser la del objetivo [R8, §11.1]. El mean recall equivale a 1 − error balanceado, y desde EXP-003 se eligió por el desbalance.
+- **Qué cambia (reanálisis sin reentrenar, CHG-030):** se tomó de nuevo la mejor época de cada run de la entrega 3, esta vez por `val_accuracy`, a partir del historial de `experiments/history/`. **Solo cambia una decisión: el tratamiento del desbalance** (EXP-034). Sin tratamiento, la base `EXP-032_bs128` da 0,778 ± 0,005 de accuracy. El *logit adjustment* da 0,768 ± 0,004 (−1,0 pp), el sobremuestreo 0,5 da 0,776 ± 0,001 (empata) y los pesos de clase dan 0,761-0,770. Era de esperar: el *logit adjustment* se diseñó para minimizar el error balanceado, no el error estándar [R51], así que a cambio del recall de las clases pequeñas sacrifica accuracy en las grandes. Las demás decisiones no cambian:
+  - resolución y profundidad (EXP-031: 112 px/5 bloques es lo mejor por ambas métricas; se mantiene 32 px/4 bloques por coste);
+  - batch 128 (EXP-032; los ganadores difieren, pero es un empate dentro del ruido);
+  - capacidad (EXP-033: `avgpool` empata con la base, 0,778 frente a 0,778);
+  - desplazamientos ±2 px (EXP-035, primeros por ambas métricas);
+  - lr de las arquitecturas conocidas (EXP-038);
+  - InceptionV3 > ResNet50 > VGG16 (EXP-039).
+- **Limitación:** el reanálisis es aproximado. EarlyStopping y ReduceLROnPlateau siguieron al recall, así que con `val_accuracy` un run podría parar en otra época o bajar la lr en otro momento. Por eso se reentrena desde la última base sin tratamiento: EXP-040 (solo cambia el monitor) y EXP-041/EXP-042 sobre ella.
+- **Alternativas descartadas:** reentrenar todo el plan (~50 h de GPU, cuando el reanálisis dice que casi nada cambia), y usar accuracy solo a partir de ahora (mezclaría criterios en la comparación final).
 
 ---
 
