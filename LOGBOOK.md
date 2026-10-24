@@ -25,7 +25,7 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 | Mejor val accuracy / mean recall | Con criterio de accuracy: **0,805 ± 0,003** / 0,809 (EXP-045, VGG16-BN); CNN propia 0,799 ± 0,002 / 0,805 (EXP-043). Con el criterio anterior de recall: InceptionV3 0,795 / 0,825 (EXP-039). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | **Comparación de la entrega 3 cerrada con criterio de accuracy** (EXP-040..EXP-045): las arquitecturas conocidas no superan a la CNN propia a 112 px por encima del ruido. Siguiente: pasar al notebook el modelo elegido y actualizar los documentos de la entrega 3 (DEC-019). Entrega 4: transfer learning con VGG16 (sin BN: no hay pesos de ImageNet para VGG16-BN), ResNet50 e InceptionV3 |
+| Próximo paso | **Comparación de la entrega 3 cerrada con criterio de accuracy** (EXP-040..EXP-045): las arquitecturas conocidas no superan a la CNN propia a 112 px por encima del ruido. El notebook ya entrena la CNN propia a 112 px (CHG-034; falta ejecutarlo y comprobar que reproduce EXP-043). Siguiente: actualizar los documentos de la entrega 3 (DEC-019). Entrega 4: transfer learning con VGG16 (sin BN: no hay pesos de ImageNet para VGG16-BN), ResNet50 e InceptionV3 |
 
 ## Índice de experimentos
 
@@ -1314,6 +1314,18 @@ Resuelve ISS-016. `experiment_utils.csv_lock()` crea `experiments.csv.lock` con 
 
 ### CHG-033: VGG16 con BatchNorm (`arch='vgg16_bn'`) (2026-10-23)
 `architectures.vgg16_bn`: las 13 convoluciones de la configuración D de VGG [R41], igual que `keras.applications.VGG16` (anchuras 64-128-256-512-512, 3×3 `same`, ReLU, inicialización Glorot, MaxPool 2×2 después de cada bloque). Añade BatchNormalization después de cada convolución y quita el sesgo de las convoluciones, porque la β de la BN lo sustituye. La cabeza es GAP, como en las demás arquitecturas. `build_model` la acepta como `arch='vgg16_bn'`, y `sweep.d3acc_vgg_bn` (`_s1`..`_s3`) lanza EXP-045. **Verificado:** las 13 convoluciones coinciden con las de VGG16 en filtros, kernel, padding e inicialización, y solo difieren en `use_bias`. Tiene 13 BN y 5 MaxPool, y 14,73 M de parámetros frente a 14,72 M.
+
+### CHG-034: El notebook entregable pasa a la CNN propia a 112 px (entrega 3) (2026-10-24)
+`xview_recognition.ipynb` mantiene su estructura, igual que en CHG-010: mismas secciones y celdas, en el mismo orden, y la única celda nueva es una tabla. Pasa de entrenar la ffNN de la entrega 2 (EXP-021) a la CNN propia de **EXP-043** (semilla 1), elegida por el usuario de entre los empatados de EXP-043..EXP-045: empata con las arquitecturas conocidas, es la más ligera (4,7 M de parámetros) y la más estable entre semillas.
+- **Caché:** `RES = 112`.
+- **Modelo:** `Rescaling → 5 × [2 × (Conv 3×3 sin sesgo, He → BN → LeakyReLU 0,3) → MaxPool] → GAP → Dense(13)`, escrito con capas de Keras, igual que `architectures.custom_cnn`. Lleva `keras.utils.set_random_seed(1)` justo antes de construir el modelo, como `run_experiment`.
+- **Optimizador:** Adam con lr 1,8e-3 (batch 64).
+- **Callbacks:** vigilan `val_accuracy` (DEC-019), y `EpochMetrics` valida en lotes de 128, como `eval_batch_size` en el barrido.
+- **Datos de entrenamiento:** batch 64, augmentation `rot90` + `shift7`.
+- **Tracking:** `EXP_ID = 'EXP-043'`; la mejor época se elige por `val_accuracy`, y `config.json` lo registra.
+- **Markdown:** se actualizan las celdas del modelo, los callbacks y los cambios de entrenamiento, con las referencias a EXP-029..EXP-045 y DEC-019.
+- **Resumen:** tres filas nuevas (3-1..3-3) en la tabla de progreso, comprobadas contra `experiments.csv`. Una celda nueva calcula desde `experiments.csv` la comparación con VGG16-BN, ResNet50, InceptionV3 y VGG16, sin cifras escritas a mano.
+- **Pendiente:** ejecutarlo de arriba abajo por SLURM y comprobar que reproduce `EXP-043_cnn112` (semilla 1, L40S: val acc 0,7968, mejor época 63 de 88). El test necesita `cache/test_112.npy`, que se construye en esa ejecución leyendo los 2 365 TIF de test.
 
 ---
 
