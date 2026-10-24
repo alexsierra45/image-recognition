@@ -1,0 +1,72 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n8.hpc.lan job=1345000 gres=3 commit=53ee77f start=2026-10-24T01:06:02+00:00
+cmd: python tools/run_notebook.py xview_recognition.ipynb --python .venv/bin/python
+name, memory.total [MiB], driver_version
+NVIDIA L40S, 46068 MiB, 545.23.08
+01:06:03 START /media/beegfs/home_nuevo/y404/y404034/image-recognition/xview_recognition.ipynb (34 cells) kernel=.venv/bin/python progress=/tmp/run_notebook_9v7oz6xs/xview_recognition.running.ipynb
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+01:06:04 cell 1 start: import tensorflow as tf
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792803967.984796 4106735 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1792803969.076295 4106735 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792803973.673762 4106735 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+01:06:19 cell 1 done in 15s
+01:06:19 cell 2 start: import uuid
+01:06:19 cell 2 done in 0s
+01:06:19 cell 3 start: categories = {0: 'Cargo plane', 1: 'Small car', 2: 'Bus', 3: 'Truck', 
+01:06:19 cell 3 done in 0s
+01:06:19 cell 4 start: import warnings
+01:06:20 cell 4 done in 0s
+01:06:20 cell 6 start: import json
+01:06:20 cell 6 done in 0s
+01:06:20 cell 7 start: import numpy as np
+01:06:20 cell 7 done in 0s
+01:06:20 cell 9 start: from sklearn.model_selection import train_test_split
+01:06:20 cell 9 done in 0s
+01:06:20 cell 10 start: from xview_data import load_cache
+01:06:20 cell 10 done in 0s
+01:06:20 cell 12 start: # Load architecture
+I0000 00:00:1792803980.540861 4106735 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 43626 MB memory:  -> device: 0, name: NVIDIA L40S, pci bus id: 0000:e1:00.0, compute capability: 8.9
+01:06:22 cell 12 done in 2s
+01:06:22 cell 13 start: from keras.optimizers import Adam
+01:06:22 cell 13 done in 0s
+01:06:22 cell 14 start: import os
+01:06:22 cell 14 done in 0s
+01:06:22 cell 16 start: from keras.callbacks import TerminateOnNaN, EarlyStopping, ReduceLROnP
+01:06:22 cell 16 done in 0s
+01:06:22 cell 18 start: from experiment_utils import CachedSequence
+01:06:22 cell 18 done in 0s
+01:06:22 cell 19 start: batch_size = 64
+01:06:22 cell 19 done in 0s
+01:06:22 cell 20 start: import numpy as np
+I0000 00:00:1792803983.142011 4106735 generator_dataset_op.cc:213] Memory patch applied: M_TRIM_THRESHOLD=128 kb was set.
+I0000 00:00:1792803988.468942 4106801 cuda_dnn.cc:461] Loaded cuDNN version 92700
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+01:26:23 cell 20 done in 1201s
+01:26:23 cell 22 start: import matplotlib.pyplot as plt
+01:26:23 cell 22 done in 0s
+01:26:23 cell 23 start: import numpy as np
+01:26:24 cell 23 done in 1s
+01:26:24 cell 24 start: from sklearn.metrics import confusion_matrix
+01:26:27 cell 24 done in 3s
+01:26:27 cell 25 start: import numpy as np
+01:26:27 cell 25 done in 0s
+01:26:27 cell 26 start: import csv
+01:26:27 cell 26 done in 0s
+01:26:27 cell 28 start: import pandas as pd
+01:26:27 cell 28 done in 0s
+01:26:27 cell 29 start: import pandas as pd
+01:26:27 cell 29 done in 0s
+01:26:27 cell 31 start: import os
+01:26:27 cell 31 done in 0s
+01:26:27 cell 32 start: import numpy as np
+01:29:46 cell 32 done in 199s
+01:29:46 cell 33 start: with open("prediction.json", "w") as outfile:
+01:29:46 cell 33 done in 0s
+01:29:48 DONE: outputs written to /media/beegfs/home_nuevo/y404/y404034/image-recognition/xview_recognition.ipynb
+end=2026-10-24T01:29:48+00:00 exit=0

@@ -25,7 +25,7 @@ Bitácora viva del notebook [xview_recognition.ipynb](xview_recognition.ipynb) (
 | Mejor val accuracy / mean recall | Con criterio de accuracy: **0,805 ± 0,003** / 0,809 (EXP-045, VGG16-BN); CNN propia 0,799 ± 0,002 / 0,805 (EXP-043). Con el criterio anterior de recall: InceptionV3 0,795 / 0,825 (EXP-039). Mejor ffNN: EXP-018, 0,635 / 0,651. Split estratificado, no comparable con EXP-000 |
 | Referencia | EXP-001 (baseline con el split nuevo): 0,389 / 0,282 · clase mayoritaria: 19,2 % de accuracy · azar: 7,7 % de mean recall |
 | Diagnóstico | Entrega 2: la regularización explícita tampoco ayuda con redes más anchas (EXP-024); desplazamientos y TTA no mejoran (EXP-025..EXP-027); label smoothing descartado (EXP-022) y promedio de semillas no concluyente (EXP-023, +0,6 pp); errores restantes en vehículos entre sí y Building como cajón de objetos pequeños. Ruido entre semillas σ ≈ 1–2 pp (EXP-009). Las mejoras grandes: resolución 16×16 (fase 2), desbalance (fase 7) y D4 (fase 8). La regularización clásica no ayuda (EXP-013). Límite: el sesgo del MLP sobre píxeles; los vehículos se confunden entre sí y Truck se queda en recall 0,28 |
-| Próximo paso | **Comparación de la entrega 3 cerrada con criterio de accuracy** (EXP-040..EXP-045): las arquitecturas conocidas no superan a la CNN propia a 112 px por encima del ruido. El notebook ya entrena la CNN propia a 112 px (CHG-034; falta ejecutarlo y comprobar que reproduce EXP-043). Siguiente: actualizar los documentos de la entrega 3 (DEC-019). Entrega 4: transfer learning con VGG16 (sin BN: no hay pesos de ImageNet para VGG16-BN), ResNet50 e InceptionV3 |
+| Próximo paso | **Comparación de la entrega 3 cerrada con criterio de accuracy** (EXP-040..EXP-045): las arquitecturas conocidas no superan a la CNN propia a 112 px por encima del ruido. El notebook entrena la CNN propia a 112 px y reproduce EXP-043 exactamente (CHG-034). Siguiente: actualizar los documentos de la entrega 3 (DEC-019). Entrega 4: transfer learning con VGG16 (sin BN: no hay pesos de ImageNet para VGG16-BN), ResNet50 e InceptionV3 |
 
 ## Índice de experimentos
 
@@ -1328,7 +1328,11 @@ Resuelve ISS-016. `experiment_utils.csv_lock()` crea `experiments.csv.lock` con 
 - **Primera ejecución** (trabajo `1344939`, L40S, `experiments/logs/EXP-043_nb-1344939.out`):
   - **El entrenamiento reproduce exactamente `EXP-043_cnn112`:** 88 épocas con la mejor en la 63, val acc 0,7968, mean recall 0,7994. El `history.csv` del run `EXP-043_20261024-002748` coincide época a época con el del barrido (diferencia máxima de val accuracy 6·10⁻¹⁷ y de loss 2·10⁻¹⁶, puro redondeo). Ha tardado 1 175 s, frente a 1 166.
   - **El trabajo falló después, en la celda de la tabla de progreso** (ISS-017: falta `jinja2`). El notebook no se sobrescribió (`run_notebook.py` solo escribe al terminar), así que sus salidas siguen siendo las de la ejecución interactiva del usuario (celdas 1-12). Ya se escribieron la fila de `runs.csv` y `experiments/runs/EXP-043_20261024-002748/`.
-  - **Pendiente:** relanzarlo con `jinja2` instalado para que el notebook guarde todas las salidas y `prediction.json`. El test construirá `cache/test_112.npy`.
+- **Segunda ejecución** (trabajo `1345000`, L40S, COMPLETED en 23 min, `experiments/logs/EXP-043_nb-1345000.out`):
+  - El notebook se ejecuta completo, sin errores en ninguna celda, y `run_notebook.py` escribe las salidas en `xview_recognition.ipynb`.
+  - Vuelve a reproducir `EXP-043_cnn112`: mejor época 63 de 88, val acc 0,7968, mean recall 0,7994. Es el run `EXP-043_20261024-010622`, última fila de EXP-043 en `runs.csv`.
+  - Construir `cache/test_224.npy` y `cache/test_112.npy` desde los 2 365 TIF de test tardó 199 s.
+  - `prediction.json` (no versionado) tiene las 2 365 predicciones de test. Las clases más predichas son Small car (494), Building (403) y Motorboat (342).
 
 ---
 
