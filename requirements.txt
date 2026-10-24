@@ -7,6 +7,7 @@ scikit-learn==1.7.2
 matplotlib==3.10.9
 pandas==2.3.3
 pyyaml
+jinja2==3.1.6        # pandas .style in the notebook's summary table (ISS-017)
 ipykernel
 nbclient==0.11.0
 nbformat

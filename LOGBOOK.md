@@ -1325,7 +1325,10 @@ Resuelve ISS-016. `experiment_utils.csv_lock()` crea `experiments.csv.lock` con 
 - **Tracking:** `EXP_ID = 'EXP-043'`; la mejor época se elige por `val_accuracy`, y `config.json` lo registra.
 - **Markdown:** se actualizan las celdas del modelo, los callbacks y los cambios de entrenamiento, con las referencias a EXP-029..EXP-045 y DEC-019.
 - **Resumen:** tres filas nuevas (3-1..3-3) en la tabla de progreso, comprobadas contra `experiments.csv`. Una celda nueva calcula desde `experiments.csv` la comparación con VGG16-BN, ResNet50, InceptionV3 y VGG16, sin cifras escritas a mano.
-- **Pendiente:** ejecutarlo de arriba abajo por SLURM y comprobar que reproduce `EXP-043_cnn112` (semilla 1, L40S: val acc 0,7968, mejor época 63 de 88). El test necesita `cache/test_112.npy`, que se construye en esa ejecución leyendo los 2 365 TIF de test.
+- **Primera ejecución** (trabajo `1344939`, L40S, `experiments/logs/EXP-043_nb-1344939.out`):
+  - **El entrenamiento reproduce exactamente `EXP-043_cnn112`:** 88 épocas con la mejor en la 63, val acc 0,7968, mean recall 0,7994. El `history.csv` del run `EXP-043_20261024-002748` coincide época a época con el del barrido (diferencia máxima de val accuracy 6·10⁻¹⁷ y de loss 2·10⁻¹⁶, puro redondeo). Ha tardado 1 175 s, frente a 1 166.
+  - **El trabajo falló después, en la celda de la tabla de progreso** (ISS-017: falta `jinja2`). El notebook no se sobrescribió (`run_notebook.py` solo escribe al terminar), así que sus salidas siguen siendo las de la ejecución interactiva del usuario (celdas 1-12). Ya se escribieron la fila de `runs.csv` y `experiments/runs/EXP-043_20261024-002748/`.
+  - **Pendiente:** relanzarlo con `jinja2` instalado para que el notebook guarde todas las salidas y `prediction.json`. El test construirá `cache/test_112.npy`.
 
 ---
 
@@ -1395,6 +1398,10 @@ EXP-021 cambió las paciencias de EarlyStopping (15 → 25) y de ReduceLROnPlate
 - **Fecha:** 2026-10-23, detectada al leer el código antes de lanzar trabajos en paralelo en Magerit. `run_experiment` lee todo el CSV, añade la fila y lo reescribe. Si dos procesos lo hacen a la vez, la escritura del segundo borra la fila del primero. Hasta ahora no ocurría porque los runs eran secuenciales en una sola GPU. El historial (`history/<id>.json`) va en un archivo por run y no se ve afectado, así que una fila perdida se podría reconstruir.
 - **Riesgo parecido, resuelto en CHG-032:** `xview_data._build_cache` usaba un temporal con nombre fijo (`<split>_<res>.npy.tmp.npy`). Dos trabajos que construyeran la misma caché a la vez (por ejemplo la de 112, en los 3 trabajos de EXP-043/EXP-044) se habrían pisado.
 - **Comprobado en uso:** los 3 trabajos paralelos de EXP-040..EXP-042 escribieron sus 12 filas sin pérdidas ni duplicados.
+
+### ISS-017: Faltaba `jinja2` en el `.venv` de Magerit · resuelta (→ `requirements.txt`)
+- **Fecha:** 2026-10-24. La celda de la tabla de progreso usa `progress.style.hide(axis='index')`, y el `.style` de pandas necesita `jinja2`, que es una dependencia opcional de pandas. En WSL estaba instalado como dependencia de otro paquete; en el `.venv` de CHG-029 no. Por eso el notebook falló en esa celda: `AttributeError: The '.style' accessor requires jinja2` (trabajo `1344939`).
+- **Resolución:** `jinja2==3.1.6` se instala en el `.venv` y se fija en `requirements.txt`. La celda que fallaba se ejecuta bien en el nodo de acceso (solo pandas). Ahora `requirements.txt` recoge todo lo que necesita el notebook.
 
 ---
 

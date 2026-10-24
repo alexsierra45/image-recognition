@@ -1,0 +1,83 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) apps/2021
+host=r2n8.hpc.lan job=1344939 gres=3 commit=5dfb5ee start=2026-10-24T00:27:28+00:00
+cmd: python tools/run_notebook.py xview_recognition.ipynb --python .venv/bin/python
+name, memory.total [MiB], driver_version
+NVIDIA L40S, 46068 MiB, 545.23.08
+00:27:29 START /media/beegfs/home_nuevo/y404/y404034/image-recognition/xview_recognition.ipynb (34 cells) kernel=.venv/bin/python progress=/tmp/run_notebook_4y_q9tvc/xview_recognition.running.ipynb
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+00:27:31 cell 1 start: import tensorflow as tf
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792801654.216922 4104131 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1792801655.070427 4104131 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1792801659.569364 4104131 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+00:27:45 cell 1 done in 14s
+00:27:45 cell 2 start: import uuid
+00:27:45 cell 2 done in 0s
+00:27:45 cell 3 start: categories = {0: 'Cargo plane', 1: 'Small car', 2: 'Bus', 3: 'Truck', 
+00:27:45 cell 3 done in 0s
+00:27:45 cell 4 start: import warnings
+00:27:45 cell 4 done in 0s
+00:27:45 cell 6 start: import json
+00:27:45 cell 6 done in 0s
+00:27:45 cell 7 start: import numpy as np
+00:27:45 cell 7 done in 0s
+00:27:45 cell 9 start: from sklearn.model_selection import train_test_split
+00:27:46 cell 9 done in 0s
+00:27:46 cell 10 start: from xview_data import load_cache
+00:27:46 cell 10 done in 0s
+00:27:46 cell 12 start: # Load architecture
+I0000 00:00:1792801666.139131 4104131 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 43626 MB memory:  -> device: 0, name: NVIDIA L40S, pci bus id: 0000:e1:00.0, compute capability: 8.9
+00:27:48 cell 12 done in 2s
+00:27:48 cell 13 start: from keras.optimizers import Adam
+00:27:48 cell 13 done in 0s
+00:27:48 cell 14 start: import os
+00:27:48 cell 14 done in 0s
+00:27:48 cell 16 start: from keras.callbacks import TerminateOnNaN, EarlyStopping, ReduceLROnP
+00:27:48 cell 16 done in 0s
+00:27:48 cell 18 start: from experiment_utils import CachedSequence
+00:27:48 cell 18 done in 0s
+00:27:48 cell 19 start: batch_size = 64
+00:27:48 cell 19 done in 0s
+00:27:48 cell 20 start: import numpy as np
+I0000 00:00:1792801668.724402 4104131 generator_dataset_op.cc:213] Memory patch applied: M_TRIM_THRESHOLD=128 kb was set.
+I0000 00:00:1792801673.958650 4104193 cuda_dnn.cc:461] Loaded cuDNN version 92700
+Could not load symbol cuStreamGetGreenCtx. Error: /lib64/libcuda.so.1: undefined symbol: cuStreamGetGreenCtx
+00:47:23 cell 20 done in 1175s
+00:47:23 cell 22 start: import matplotlib.pyplot as plt
+00:47:23 cell 22 done in 0s
+00:47:23 cell 23 start: import numpy as np
+00:47:23 cell 23 done in 1s
+00:47:23 cell 24 start: from sklearn.metrics import confusion_matrix
+00:47:26 cell 24 done in 3s
+00:47:26 cell 25 start: import numpy as np
+00:47:26 cell 25 done in 0s
+00:47:26 cell 26 start: import csv
+00:47:26 cell 26 done in 0s
+00:47:26 cell 28 start: import pandas as pd
+00:47:28 cell 28 FAILED after 2s: eegfs/home_nuevo/y404/y404034/image-recognition/.venv/lib/python3.13/site-packages/pandas/core/generic.py:6321[39m, in [36mNDFrame.__getattr__[39m[34m(self, name)[39m
+[32m   6317[39m             [38;5;28;01mand[39;00m name [38;5;28;01mnot[39;00m [38;5;28;01min[39;00m self._accessors
+[32m   6318[39m             [38;5;28;01mand[39;00m self._info_axis._can_hold_identifiers_and_holds_name(name)
+[32m   6319[39m         ):
+[32m   6320[39m             [38;5;28;01mreturn[39;00m self[name]
+[32m-> [39m[32m6321[39m         [38;5;28;01mreturn[39;00m object.__getattribute__(self, name)
+
+[36mFile [39m[32m/media/beegfs/home_nuevo/y404/y404034/image-recognition/.venv/lib/python3.13/site-packages/pandas/core/frame.py:1449[39m, in [36mDataFrame.style[39m[34m(self)[39m
+[32m   1445[39m         """
+[32m   1446[39m         [38;5;66;03m# Raise AttributeError so that inspect works even if jinja2 is not installed.[39;00m
+[32m   1447[39m         has_jinja2 = import_optional_dependency([33m"jinja2"[39m, errors=[33m"ignore"[39m)
+[32m   1448[39m         [38;5;28;01mif[39;00m [38;5;28;01mnot[39;00m has_jinja2:
+[32m-> [39m[32m1449[39m             [38;5;28;01mraise[39;00m AttributeError([33m"The '.style' accessor requires jinja2"[39m)
+[32m   1450[39m 
+[32m   1451[39m         [38;5;28;01mfrom[39;00m pandas.io.formats.style [38;5;28;01mimport[39;00m Styler
+[32m   1452[39m 
+
+[31mAttributeError[39m: The '.style' accessor requires jinja2
+
+00:47:31 ABORTED: notebook untouched; partial outputs in /tmp/run_notebook_4y_q9tvc/xview_recognition.running.ipynb
+srun: error: r2n8: task 0: Exited with exit code 1
+end=2026-10-24T00:47:31+00:00 exit=1
